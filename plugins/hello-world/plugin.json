@@ -1,0 +1,7 @@
+{
+    "name": "Hello World",
+    "version": "1.0.0",
+    "author": "Jules",
+    "description": "A simple plugin that displays a message. A great example for plugin development.",
+    "main_file": "init.php"
+}

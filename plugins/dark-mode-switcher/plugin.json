@@ -1,0 +1,7 @@
+{
+    "name": "Dark Mode Switcher",
+    "version": "1.0.0",
+    "author": "Jules",
+    "description": "Adds a button to the frontend to allow users to toggle between light and dark mode.",
+    "main_file": "init.php"
+}
