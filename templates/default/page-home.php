@@ -3,13 +3,17 @@
 <p>
     <?php
         echo "<b>" . t('test_db_connection', 'Database Connection Test:') . "</b><br>";
-        $prefix = DB_PREFIX;
-        $result = $mysqli->query("SELECT COUNT(*) as total_users FROM `{$prefix}users`");
-        if ($result) {
-            $row = $result->fetch_assoc();
-            echo sprintf(t('test_total_users', 'Total users found: %d'), $row['total_users']);
+        if (isset($mysqli)) {
+            $prefix = DB_PREFIX;
+            $result = $mysqli->query("SELECT COUNT(*) as total_users FROM `{$prefix}users`");
+            if ($result) {
+                $row = $result->fetch_assoc();
+                echo sprintf(t('test_total_users', 'Total users found: %d'), $row['total_users']);
+            } else {
+                echo t('test_db_query_failed', 'Database query failed.');
+            }
         } else {
-            echo t('test_db_query_failed', 'Database query failed.');
+            echo "Database connection not available.";
         }
     ?>
 </p>

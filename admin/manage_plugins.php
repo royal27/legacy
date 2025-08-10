@@ -1,12 +1,11 @@
 <?php
-// Admin Page: Manage Plugins
+define('DS', DIRECTORY_SEPARATOR);
 session_start();
 
-// --- Load core files and check user permissions ---
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/database.php';
-require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'config.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'database.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'functions.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'language.php';
 
 $is_logged_in = isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'founder';
 if (!$is_logged_in) {
@@ -14,11 +13,9 @@ if (!$is_logged_in) {
     exit;
 }
 
-// --- Plugin Management Logic ---
 $feedback_message = '';
 $prefix = DB_PREFIX;
 
-// Handle activation/deactivation
 if (isset($_GET['action']) && isset($_GET['plugin'])) {
     $action = $_GET['action'];
     $plugin_dir = basename($_GET['plugin']);
@@ -40,14 +37,12 @@ if (isset($_GET['action']) && isset($_GET['plugin'])) {
     exit;
 }
 
-
-// --- Discover Plugins ---
-$plugins_dir = __DIR__ . '/../plugins/';
+$plugins_dir = __DIR__ . DS . '..' . DS . 'plugins' . DS;
 $discovered_plugins = [];
 if (is_dir($plugins_dir)) {
     $plugin_folders = array_filter(glob($plugins_dir . '*'), 'is_dir');
     foreach ($plugin_folders as $folder) {
-        $manifest_file = $folder . '/plugin.json';
+        $manifest_file = $folder . DS . 'plugin.json';
         if (file_exists($manifest_file)) {
             $manifest_data = json_decode(file_get_contents($manifest_file), true);
             if ($manifest_data) {
@@ -58,29 +53,25 @@ if (is_dir($plugins_dir)) {
     }
 }
 
-// --- Get Plugin Statuses from DB ---
 $active_plugins_db = $mysqli->query("SELECT directory_name FROM `{$prefix}plugins` WHERE is_active = 1");
 $active_plugins = [];
 while($row = $active_plugins_db->fetch_assoc()) {
     $active_plugins[] = $row['directory_name'];
 }
 
-
-// --- Load the admin template ---
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . DS . 'includes' . DS . 'header.php';
 ?>
 
-<!-- Page content starts here -->
 <h1><?php echo t('manage_plugins_title', 'Manage Plugins'); ?></h1>
 <p><?php echo t('manage_plugins_description', 'Here you can activate and deactivate plugins for your site.'); ?></p>
 
 <?php if ($feedback_message): ?>
-    <p><strong><?php echo htmlspecialchars($feedback_message); ?></strong></p>
+    <p><strong><?php echo t($feedback_message); ?></strong></p>
 <?php endif; ?>
 
 <table style="width: 100%; border-collapse: collapse;">
     <thead>
-        <tr style="background: #eee;">
+        <tr style="background: #eee; color: #333;">
             <th style="padding: 10px; text-align: left;"><?php echo t('plugin_name_header', 'Plugin'); ?></th>
             <th style="padding: 10px; text-align: left;"><?php echo t('plugin_description_header', 'Description'); ?></th>
             <th style="padding: 10px; text-align: left;"><?php echo t('plugin_actions_header', 'Actions'); ?></th>
@@ -90,10 +81,10 @@ require_once __DIR__ . '/includes/header.php';
         <?php foreach ($discovered_plugins as $dir => $plugin): ?>
         <tr style="<?php echo in_array($dir, $active_plugins) ? 'background-color: #e7f7e7;' : ''; ?>">
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                <strong><?php echo htmlspecialchars($plugin['name']); ?></strong><br>
-                <small>v<?php echo htmlspecialchars($plugin['version']); ?> | By <?php echo htmlspecialchars($plugin['author']); ?></small>
+                <strong><?php echo t($plugin['name']); ?></strong><br>
+                <small>v<?php echo t($plugin['version']); ?> | By <?php echo t($plugin['author']); ?></small>
             </td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($plugin['description']); ?></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo t($plugin['description']); ?></td>
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">
                 <?php if (in_array($dir, $active_plugins)): ?>
                     <a href="?action=deactivate&plugin=<?php echo urlencode($dir); ?>"><?php echo t('plugin_action_deactivate', 'Deactivate'); ?></a>
@@ -106,7 +97,6 @@ require_once __DIR__ . '/includes/header.php';
     </tbody>
 </table>
 
-
 <?php
-require_once __DIR__ . '/includes/footer.php';
+require_once __DIR__ . DS . 'includes' . DS . 'footer.php';
 ?>

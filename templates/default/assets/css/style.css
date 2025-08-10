@@ -1,41 +1,29 @@
 /* --- Root Variables for Theming --- */
 :root {
-    /* Light Mode Palette */
     --gradient-light: linear-gradient(135deg, violet, blue, red);
     --primary-color-light: #4a00e0;
     --text-color-light: #333;
     --bg-color-light: #ffffff;
     --border-color-light: #ddd;
-
-    /* Dark Mode Palette */
     --gradient-dark: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     --primary-color-dark: #8e2de2;
     --text-color-dark: #f4f4f4;
     --bg-color-dark: #121212;
     --border-color-dark: #444;
-
-    /* Transitions */
     --transition-speed: 0.5s;
 }
 
 /* --- General Body Styling --- */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: var(--text-color-light);
+    margin: 0; padding: 0; color: var(--text-color-light);
     background-color: var(--bg-color-light);
     background-image: var(--gradient-light);
-    background-attachment: fixed;
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-attachment: fixed; background-size: cover; background-repeat: no-repeat;
     transition: opacity var(--transition-speed);
     opacity: 0; /* Initially hidden for fade-in */
 }
-
-body.fade-in {
-    opacity: 1;
-}
+body.fade-in { opacity: 1; }
 
 /* --- Dark Mode Styling --- */
 body.dark-mode {
@@ -52,81 +40,48 @@ header, footer {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 body.dark-mode header, body.dark-mode footer {
     background: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 }
-
 main {
-    max-width: 960px;
-    margin: 2rem auto;
-    padding: 2rem;
+    max-width: 960px; margin: 2rem auto; padding: 2rem;
     background: rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
-
-body.dark-mode main {
-    background: rgba(18, 18, 18, 0.8);
-}
+body.dark-mode main { background: rgba(18, 18, 18, 0.8); }
 
 /* --- Form Elements Styling --- */
 input, select, textarea, button {
-    font-family: inherit;
-    font-size: 1rem;
-    padding: 0.8rem;
-    border-radius: 5px;
-    border: 1px solid var(--border-color-light);
-    transition: all 0.3s;
-    margin-bottom: 1rem;
-    width: 100%;
-    box-sizing: border-box;
+    font-family: inherit; font-size: 1rem; padding: 0.8rem;
+    border-radius: 5px; border: 1px solid var(--border-color-light);
+    transition: all 0.3s; margin-bottom: 1rem;
+    width: 100%; box-sizing: border-box;
 }
-
 button, input[type="submit"] {
-    border: 1px solid transparent;
-    color: #fff;
-    cursor: pointer;
+    border: 1px solid transparent; color: #fff; cursor: pointer;
     background-image: var(--gradient-light);
     background-size: 200% auto;
 }
-
 button:hover, input[type="submit"]:hover {
     background-position: right center;
     box-shadow: 0 0 10px var(--primary-color-light);
 }
-
-
-/* Dark Mode for Form Elements */
 body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
     background-color: #2a2a2a;
     color: var(--text-color-dark);
     border-color: var(--border-color-dark);
 }
-
 body.dark-mode button, body.dark-mode input[type="submit"] {
     background-image: var(--gradient-dark);
     box-shadow: 0 0 10px var(--primary-color-dark);
 }
-
 body.dark-mode button:hover, body.dark-mode input[type="submit"]:hover {
     box-shadow: 0 0 15px var(--primary-color-dark);
 }
 
 /* --- Links and Navigation --- */
-a {
-    color: var(--primary-color-light);
-    text-decoration: none;
-}
-body.dark-mode a {
-    color: var(--primary-color-dark);
-}
-header nav a {
-    color: var(--text-color-light);
-    padding: 0.5rem 1rem;
-    font-weight: bold;
-}
-body.dark-mode header nav a {
-    color: var(--text-color-dark);
-}
+a { color: var(--primary-color-light); text-decoration: none; }
+body.dark-mode a { color: var(--primary-color-dark); }
+header nav a { color: var(--text-color-light); padding: 0.5rem 1rem; font-weight: bold; }
+body.dark-mode header nav a { color: var(--text-color-dark); }

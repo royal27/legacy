@@ -1,12 +1,11 @@
 <?php
-// Admin Page: Manage Languages
+define('DS', DIRECTORY_SEPARATOR);
 session_start();
 
-// --- Load core files and check user permissions ---
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/database.php';
-require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'config.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'database.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'functions.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'language.php';
 
 $is_logged_in = isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'founder';
 if (!$is_logged_in) {
@@ -14,12 +13,10 @@ if (!$is_logged_in) {
     exit;
 }
 
-// --- Page logic: Handle form submission for adding a new language ---
 $feedback_message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_language'])) {
     $lang_code = trim($_POST['lang_code']);
     $lang_name = trim($_POST['lang_name']);
-
     if (!empty($lang_code) && !empty($lang_name)) {
         $prefix = DB_PREFIX;
         $stmt = $mysqli->prepare("INSERT INTO `{$prefix}languages` (code, name) VALUES (?, ?)");
@@ -35,27 +32,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_language'])) {
     }
 }
 
-
-// --- Fetch all languages from the database ---
 $prefix = DB_PREFIX;
 $result = $mysqli->query("SELECT id, code, name, is_default FROM `{$prefix}languages` ORDER BY name ASC");
 $languages = $result->fetch_all(MYSQLI_ASSOC);
 
-
-// --- Load the admin template ---
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . DS . 'includes' . DS . 'header.php';
 ?>
 
-<!-- Page content starts here -->
 <h1><?php echo t('manage_languages_title', 'Manage Languages'); ?></h1>
 <p><?php echo t('manage_languages_description', 'Here you can view, add, and manage the languages for your site.'); ?></p>
 
 <?php if ($feedback_message): ?>
-    <p><strong><?php echo htmlspecialchars($feedback_message); ?></strong></p>
+    <p><strong><?php echo t($feedback_message); ?></strong></p>
 <?php endif; ?>
 
-<!-- Add New Language Form -->
-<div style="margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 5px;">
+<div style="margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 5px; color: #333;">
     <h3><?php echo t('add_new_language_title', 'Add New Language'); ?></h3>
     <form action="" method="post">
         <label for="lang_code"><?php echo t('lang_code_label', 'Language Code (e.g., fr)'); ?></label>
@@ -68,11 +59,9 @@ require_once __DIR__ . '/includes/header.php';
     </form>
 </div>
 
-
-<!-- List of Existing Languages -->
 <table style="width: 100%; border-collapse: collapse;">
     <thead>
-        <tr style="background: #eee;">
+        <tr style="background: #eee; color: #333;">
             <th style="padding: 10px; text-align: left;">ID</th>
             <th style="padding: 10px; text-align: left;"><?php echo t('table_header_lang_code', 'Code'); ?></th>
             <th style="padding: 10px; text-align: left;"><?php echo t('table_header_lang_name', 'Name'); ?></th>
@@ -83,13 +72,13 @@ require_once __DIR__ . '/includes/header.php';
     <tbody>
         <?php foreach ($languages as $lang): ?>
         <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($lang['id']); ?></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($lang['code']); ?></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($lang['name']); ?></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo t($lang['id']); ?></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo t($lang['code']); ?></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo t($lang['name']); ?></td>
             <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo $lang['is_default'] ? t('yes', 'Yes') : t('no', 'No'); ?></td>
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">
                 <a href="#"><?php echo t('action_edit', 'Edit'); ?></a> |
-                <a href="manage_translations.php?lang=<?php echo htmlspecialchars($lang['code']); ?>" style="color: blue;"><?php echo t('action_manage_translations', 'Translations'); ?></a> |
+                <a href="manage_translations.php?lang=<?php echo t($lang['code'], 'url'); ?>" style="color: blue;"><?php echo t('action_manage_translations', 'Translations'); ?></a> |
                 <a href="#" style="color: red;"><?php echo t('action_delete', 'Delete'); ?></a>
             </td>
         </tr>
@@ -98,5 +87,5 @@ require_once __DIR__ . '/includes/header.php';
 </table>
 
 <?php
-require_once __DIR__ . '/includes/footer.php';
+require_once __DIR__ . DS . 'includes' . DS . 'footer.php';
 ?>

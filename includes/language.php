@@ -1,24 +1,17 @@
 <?php
 // This file handles the multi-language system.
-
 if (!isset($mysqli)) {
     die("Database connection is not available for the language system.");
 }
 
-// Global array to hold all translation strings for the selected language.
 $translations = [];
 $current_language_code = 'en'; // Default fallback
 
-// 1. Determine the language to use.
-// Priority: User Preference (Session) > Cookie > Database Default
-
 if (isset($_SESSION['user_language'])) {
     $current_language_code = $_SESSION['user_language'];
-}
-elseif (isset($_COOKIE['language'])) {
+} elseif (isset($_COOKIE['language'])) {
     $current_language_code = $_COOKIE['language'];
-}
-else {
+} else {
     $prefix = DB_PREFIX;
     $sql = "SELECT code FROM `{$prefix}languages` WHERE is_default = 1 LIMIT 1";
     $result = $mysqli->query($sql);
@@ -28,10 +21,8 @@ else {
     }
 }
 
-// Store the determined language in the session for consistency.
 $_SESSION['current_language'] = $current_language_code;
 
-// 2. Fetch all translations for the determined language from the database.
 $prefix = DB_PREFIX;
 $stmt = $mysqli->prepare("SELECT translation_key, translation_value FROM `{$prefix}translations` WHERE lang_code = ?");
 $stmt->bind_param('s', $current_language_code);

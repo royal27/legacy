@@ -1,8 +1,7 @@
 <?php
-// Admin Login Processing Script
+define('DS', DIRECTORY_SEPARATOR);
 session_start();
 
-// --- Pre-flight checks ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit;
@@ -13,11 +12,9 @@ if (!isset($_POST['username']) || !isset($_POST['password'])) {
     exit;
 }
 
-// --- Core Includes ---
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'config.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'database.php';
 
-// --- Process Login ---
 $username = $_POST['username'];
 $password = $_POST['password'];
 $prefix = DB_PREFIX;

@@ -8,42 +8,29 @@ error_reporting(E_ALL);
  * Main entry point for the application.
  */
 
+// Use the correct directory separator for all paths
+define('DS', DIRECTORY_SEPARATOR);
+
 // Start a session for user authentication and other features.
 session_start();
 
 // Define the path to the configuration file.
-define('CONFIG_PATH', __DIR__ . '/includes/config.php');
+define('CONFIG_PATH', __DIR__ . DS . 'includes' . DS . 'config.php');
 
 // Check if the site is installed. If not, redirect to the installer.
 if (!file_exists(CONFIG_PATH)) {
-    header('Location: install/index.php');
+    header('Location: install' . DS . 'index.php');
     exit;
 }
 
 // --- Core Includes ---
-
-// 1. Load the configuration file with database credentials.
 require_once CONFIG_PATH;
-
-// 2. Establish the database connection.
-require_once __DIR__ . '/includes/database.php';
-
-// 3. Load core functions (like t()).
-require_once __DIR__ . '/includes/functions.php';
-
-// 4. Load the language system.
-require_once __DIR__ . '/includes/language.php';
-
-// 5. Load the template system.
-require_once __DIR__ . '/includes/template.php';
-
-// 6. Load the hook system.
-require_once __DIR__ . '/includes/hooks.php';
-
-// 7. Load active plugins.
-require_once __DIR__ . '/includes/plugin_loader.php';
-
-// 8. Handle the request using the router.
-require_once __DIR__ . '/includes/router.php';
+require_once __DIR__ . DS . 'includes' . DS . 'database.php';
+require_once __DIR__ . DS . 'includes' . DS . 'functions.php';
+require_once __DIR__ . DS . 'includes' . DS . 'language.php';
+require_once __DIR__ . DS . 'includes' . DS . 'template.php';
+require_once __DIR__ . DS . 'includes' . DS . 'hooks.php';
+require_once __DIR__ . DS . 'includes' . DS . 'plugin_loader.php';
+require_once __DIR__ . DS . 'includes' . DS . 'router.php';
 
 ?>

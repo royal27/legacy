@@ -1,12 +1,11 @@
 <?php
-// Admin Page: Manage Translations for a specific language
+define('DS', DIRECTORY_SEPARATOR);
 session_start();
 
-// --- Load core files and check user permissions ---
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/database.php';
-require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'config.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'database.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'functions.php';
+require_once __DIR__ . DS . '..' . DS . 'includes' . DS . 'language.php';
 
 $is_logged_in = isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'founder';
 if (!$is_logged_in) {
@@ -14,16 +13,13 @@ if (!$is_logged_in) {
     exit;
 }
 
-// --- Page logic ---
 $lang_code = isset($_GET['lang']) ? trim($_GET['lang']) : 'en';
 $feedback_message = '';
 
-// Handle form submission for updating existing translations
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_translations'])) {
     $translations_to_update = $_POST['translations'];
     $prefix = DB_PREFIX;
     $stmt = $mysqli->prepare("UPDATE `{$prefix}translations` SET translation_value = ? WHERE lang_code = ? AND translation_key = ?");
-
     foreach ($translations_to_update as $key => $value) {
         $stmt->bind_param('sss', $value, $lang_code, $key);
         $stmt->execute();
@@ -32,11 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_translations']
     $feedback_message = t('translations_update_success', 'Translations updated successfully!');
 }
 
-// Handle form submission for adding a new translation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_translation'])) {
     $new_key = trim($_POST['new_key']);
     $new_value = trim($_POST['new_value']);
-
     if (!empty($new_key) && !empty($new_value)) {
         $prefix = DB_PREFIX;
         $stmt = $mysqli->prepare("INSERT INTO `{$prefix}translations` (lang_code, translation_key, translation_value) VALUES (?, ?, ?)");
@@ -52,8 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_translation'])) {
     }
 }
 
-
-// Fetch all translations for the selected language
 $prefix = DB_PREFIX;
 $stmt = $mysqli->prepare("SELECT translation_key, translation_value FROM `{$prefix}translations` WHERE lang_code = ? ORDER BY translation_key ASC");
 $stmt->bind_param('s', $lang_code);
@@ -62,23 +54,20 @@ $result = $stmt->get_result();
 $translations = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-
-// --- Load the admin template ---
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . DS . 'includes' . DS . 'header.php';
 ?>
 
-<!-- Page content starts here -->
-<h1><?php echo sprintf(t('manage_translations_title', 'Manage Translations for "%s"'), htmlspecialchars(strtoupper($lang_code))); ?></h1>
+<h1><?php echo sprintf(t('manage_translations_title', 'Manage Translations for "%s"'), strtoupper($lang_code)); ?></h1>
 <p><a href="manage_languages.php"><?php echo t('back_to_languages_link', '&laquo; Back to Languages'); ?></a></p>
 
 <?php if ($feedback_message): ?>
-    <p><strong><?php echo htmlspecialchars($feedback_message); ?></strong></p>
+    <p><strong><?php echo t($feedback_message); ?></strong></p>
 <?php endif; ?>
 
 <form action="" method="post">
     <table style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr style="background: #eee;">
+            <tr style="background: #eee; color: #333;">
                 <th style="padding: 10px; text-align: left; width: 30%;"><?php echo t('table_header_trans_key', 'Translation Key'); ?></th>
                 <th style="padding: 10px; text-align: left;"><?php echo t('table_header_trans_value', 'Value'); ?></th>
             </tr>
@@ -87,7 +76,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php foreach ($translations as $trans): ?>
             <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                    <code><?php echo htmlspecialchars($trans['translation_key']); ?></code>
+                    <code><?php echo t($trans['translation_key']); ?></code>
                 </td>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd;">
                     <input type="text" name="translations[<?php echo htmlspecialchars($trans['translation_key']); ?>]" value="<?php echo htmlspecialchars($trans['translation_value']); ?>" style="width: 100%;">
@@ -101,8 +90,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <hr style="margin: 40px 0;">
 
-<!-- Add New Translation Form -->
-<div style="padding: 20px; background: #f9f9f9; border-radius: 5px;">
+<div style="padding: 20px; background: #f9f9f9; border-radius: 5px; color: #333;">
     <h3><?php echo t('add_new_translation_title', 'Add New Translation'); ?></h3>
     <form action="" method="post">
         <label for="new_key"><?php echo t('trans_key_label', 'Translation Key'); ?></label>
@@ -115,7 +103,6 @@ require_once __DIR__ . '/includes/header.php';
     </form>
 </div>
 
-
 <?php
-require_once __DIR__ . '/includes/footer.php';
+require_once __DIR__ . DS . 'includes' . DS . 'footer.php';
 ?>

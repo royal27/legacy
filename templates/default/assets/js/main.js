@@ -18,23 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            // Check if it's a valid, internal link and not a special link
-            if (href && !href.startsWith('#') && !href.startsWith('mailto:') && !this.target) {
+            if (href && !href.startsWith('#') && !href.startsWith('mailto:') && this.target !== '_blank') {
                 e.preventDefault();
-                document.body.classList.remove('fade-in'); // Start fade-out
+                document.body.classList.remove('fade-in');
 
                 setTimeout(() => {
                     window.location.href = href;
-                }, 500); // Must match CSS transition duration
+                }, 500); // Match CSS transition duration
             }
         });
     });
 
-    // --- AJAX Test Handler ---
+    // --- AJAX Test Handler (using Fetch API for no dependencies) ---
     const ajaxButton = document.getElementById('ajax-test-button');
     if (ajaxButton) {
         ajaxButton.addEventListener('click', function() {
-            // Using fetch API as jQuery might not be loaded
             fetch('includes/ajax_handler.php?action=get_server_time')
                 .then(response => response.json())
                 .then(data => {
@@ -51,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Handle browser back/forward buttons
 window.addEventListener('pageshow', function(event) {
     if (event.persisted) {
         document.body.classList.add('fade-in');

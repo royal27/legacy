@@ -3,7 +3,6 @@
 
 /**
  * The main translation function.
- * It accesses the global translations array loaded by the language system.
  *
  * @param string $key The key of the translation string.
  * @param string $default A default value to return if the key is not found.
@@ -11,12 +10,9 @@
  */
 function t($key, $default = '') {
     global $translations;
-
     if (isset($translations[$key])) {
-        return $translations[$key];
+        return htmlspecialchars($translations[$key], ENT_QUOTES, 'UTF-8');
     }
-
-    // If no specific default is provided, return the key itself.
-    return $default ?: $key;
+    return htmlspecialchars($default ?: $key, ENT_QUOTES, 'UTF-8');
 }
 ?>
