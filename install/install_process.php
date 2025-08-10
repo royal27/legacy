@@ -115,6 +115,14 @@ CREATE TABLE `{$db_prefix}link_translations` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `link_lang_unique` (`link_id`,`lang_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `{$db_prefix}plugins` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `directory_name` varchar(100) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `directory_name` (`directory_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
 
 // --- 3. Execute SQL ---

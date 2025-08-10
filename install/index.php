@@ -60,35 +60,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Installer</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; color: #333; line-height: 1.6; padding: 20px; }
-        .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1, h2 { text-align: center; color: #444; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+            background-color: #4a00e0;
+            background-image: linear-gradient(135deg, violet, blue, red);
+            background-attachment: fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
         .step { display: none; }
         .step.active { display: block; }
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="password"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
+        input[type="text"], input[type="password"], input[type="email"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        input::placeholder { color: #eee; }
+        select option { color: #333; }
         button {
             display: block;
             width: 100%;
             padding: 12px;
             border: none;
-            background: #5cb85c;
+            background-image: linear-gradient(135deg, #8e2de2, #4a00e0);
             color: white;
             font-size: 16px;
-            border-radius: 4px;
+            font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
+            transition: all 0.3s;
         }
-        button:hover { background: #4cae4c; }
-        .steps-nav { text-align: center; margin-bottom: 20px; }
-        .steps-nav span { padding: 10px 15px; background: #eee; border-radius: 5px; margin: 0 5px; }
-        .steps-nav span.active { background: #5cb85c; color: #fff; }
+        button:hover {
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+        .steps-nav { text-align: center; margin-bottom: 30px; }
+        .steps-nav span { padding: 10px 15px; background: rgba(0,0,0,0.2); border-radius: 5px; margin: 0 5px; }
+        .steps-nav span.active { background: #fff; color: #4a00e0; font-weight: bold; }
     </style>
 </head>
 <body>
