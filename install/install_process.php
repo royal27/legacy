@@ -42,9 +42,6 @@ define('DB_USER', '{$db_user}');
 define('DB_PASS', '{$db_pass}');
 define('DB_NAME', '{$db_name}');
 define('DB_PREFIX', '{$db_prefix}');
-
-// Other settings
-define('SITE_URL', 'http://' . \$_SERVER['HTTP_HOST']); // Adjust if using https
 ?>";
 
 $config_path = __DIR__ . '/../includes/config.php';
