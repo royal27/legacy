@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo t('site_title', 'My Awesome Website'); ?></title>
+
     <!-- Toastr CSS for notifications -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <!-- Main stylesheet for the template -->
     <link rel="stylesheet" href="<?php echo $active_template_path; ?>/assets/css/style.css">
 </head>

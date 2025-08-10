@@ -21,7 +21,7 @@ $prefix = DB_PREFIX;
 // Handle activation/deactivation
 if (isset($_GET['action']) && isset($_GET['plugin'])) {
     $action = $_GET['action'];
-    $plugin_dir = basename($_GET['plugin']); // Sanitize input
+    $plugin_dir = basename($_GET['plugin']);
 
     if ($action === 'activate') {
         $stmt = $mysqli->prepare("INSERT INTO `{$prefix}plugins` (directory_name, is_active) VALUES (?, 1) ON DUPLICATE KEY UPDATE is_active = 1");
@@ -36,7 +36,6 @@ if (isset($_GET['action']) && isset($_GET['plugin'])) {
         $stmt->close();
         $feedback_message = "Plugin '{$plugin_dir}' deactivated.";
     }
-    // Redirect to clean the URL
     header('Location: manage_plugins.php');
     exit;
 }

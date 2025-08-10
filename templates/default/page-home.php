@@ -2,7 +2,6 @@
 <p><?php echo t('home_welcome_message', 'This is the main content of the homepage. The template system is working!'); ?></p>
 <p>
     <?php
-        // This is just for testing the database connection and language system
         echo "<b>" . t('test_db_connection', 'Database Connection Test:') . "</b><br>";
         $prefix = DB_PREFIX;
         $result = $mysqli->query("SELECT COUNT(*) as total_users FROM `{$prefix}users`");

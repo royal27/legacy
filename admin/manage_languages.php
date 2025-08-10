@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_language'])) {
     $lang_name = trim($_POST['lang_name']);
 
     if (!empty($lang_code) && !empty($lang_name)) {
-        // Insert into the database
         $prefix = DB_PREFIX;
         $stmt = $mysqli->prepare("INSERT INTO `{$prefix}languages` (code, name) VALUES (?, ?)");
         $stmt->bind_param('ss', $lang_code, $lang_name);

@@ -5,8 +5,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Admin Panel Entry Point
-
-// The main application bootstrap should have already started the session.
 session_start();
 
 // Load essential files.
@@ -17,7 +15,7 @@ require_once __DIR__ . '/../includes/functions.php';
 // Check if the user is logged in and has an admin-level role.
 $is_logged_in = isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'founder';
 
-// The language system needs to be loaded after a potential login action,
+// The language system is loaded after a potential login action,
 // so the user's preferred language is immediately available.
 require_once __DIR__ . '/../includes/language.php';
 
@@ -36,13 +34,13 @@ if ($is_logged_in) {
     <h3><?php echo t('dashboard_quick_stats', 'Quick Stats'); ?></h3>
     <div class="quick-stats">
         <?php
-            // Example: Get total users
             $users_count = $mysqli->query("SELECT COUNT(*) as count FROM `".DB_PREFIX."users`")->fetch_assoc()['count'];
-            // Example: Get total languages
             $langs_count = $mysqli->query("SELECT COUNT(*) as count FROM `".DB_PREFIX."languages`")->fetch_assoc()['count'];
+            $plugins_count = $mysqli->query("SELECT COUNT(*) as count FROM `".DB_PREFIX."plugins` WHERE is_active = 1")->fetch_assoc()['count'];
         ?>
         <p><?php echo sprintf(t('dashboard_stat_users', 'Total Users: %d'), $users_count); ?></p>
         <p><?php echo sprintf(t('dashboard_stat_languages', 'Total Languages: %d'), $langs_count); ?></p>
+        <p><?php echo sprintf(t('dashboard_stat_plugins', 'Active Plugins: %d'), $plugins_count); ?></p>
     </div>
 
     <?php
@@ -51,16 +49,13 @@ if ($is_logged_in) {
 
 } else {
     // --- Login Form View ---
-
-    // Since the user is not logged in, we show a self-contained login page
-    // without the admin template.
     ?>
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <title><?php echo t('admin_login_title', 'Admin Login'); ?></title>
-        <link rel="stylesheet" href="<?php echo SITE_URL; ?>/templates/default/assets/css/style.css">
+        <link rel="stylesheet" href="../templates/default/assets/css/style.css">
         <style>
              body {
                 display: flex;
@@ -75,6 +70,7 @@ if ($is_logged_in) {
                 background: rgba(255,255,255,0.9);
                 border-radius: 10px;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                color: #333;
             }
         </style>
     </head>

@@ -15,7 +15,7 @@
     --border-color-dark: #444;
 
     /* Transitions */
-    --transition-speed: 0.3s;
+    --transition-speed: 0.5s;
 }
 
 /* --- General Body Styling --- */
@@ -26,25 +26,15 @@ body {
     color: var(--text-color-light);
     background-color: var(--bg-color-light);
     background-image: var(--gradient-light);
-    background-attachment: fixed; /* Gradient stays in place on scroll */
+    background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
-    transition: background-color var(--transition-speed), color var(--transition-speed), opacity var(--transition-speed);
-    opacity: 1; /* Initially visible */
-}
-
-/* --- Page Fade Transitions --- */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    transition: opacity var(--transition-speed);
+    opacity: 0; /* Initially hidden for fade-in */
 }
 
 body.fade-in {
-    animation: fadeIn 0.5s ease-in-out forwards;
-}
-
-body.fade-out {
-    opacity: 0;
+    opacity: 1;
 }
 
 /* --- Dark Mode Styling --- */
@@ -52,7 +42,7 @@ body.dark-mode {
     color: var(--text-color-dark);
     background-color: var(--bg-color-dark);
     background-image: var(--gradient-dark);
-    --border-color-light: var(--border-color-dark); /* Remap border for dark mode */
+    --border-color-light: var(--border-color-dark);
 }
 
 /* --- Layout & Containers --- */
@@ -88,7 +78,7 @@ input, select, textarea, button {
     padding: 0.8rem;
     border-radius: 5px;
     border: 1px solid var(--border-color-light);
-    transition: all var(--transition-speed);
+    transition: all 0.3s;
     margin-bottom: 1rem;
     width: 100%;
     box-sizing: border-box;
@@ -103,7 +93,7 @@ button, input[type="submit"] {
 }
 
 button:hover, input[type="submit"]:hover {
-    background-position: right center; /* change the direction of the change here */
+    background-position: right center;
     box-shadow: 0 0 10px var(--primary-color-light);
 }
 

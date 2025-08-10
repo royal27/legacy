@@ -6,7 +6,6 @@ session_start();
 $step = isset($_SESSION['step']) ? $_SESSION['step'] : 1;
 
 // --- Language Data (Temporary) ---
-// This will be replaced by the database language manager post-installation.
 $languages = [
     'en' => 'English',
     'ro' => 'Română',
@@ -19,34 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($languages[$selected_lang])) {
             $_SESSION['language'] = $selected_lang;
             $_SESSION['step'] = 2;
-            // Reload the page to show the next step
             header('Location: index.php');
             exit;
         }
     }
 
     if (isset($_POST['step2_submit'])) {
-        // Store database details in session
         $_SESSION['db_host'] = $_POST['db_host'];
         $_SESSION['db_user'] = $_POST['db_user'];
         $_SESSION['db_pass'] = $_POST['db_pass'];
         $_SESSION['db_name'] = $_POST['db_name'];
         $_SESSION['db_prefix'] = $_POST['db_prefix'];
-
-        // Move to the next step
         $_SESSION['step'] = 3;
         header('Location: index.php');
         exit;
     }
 
     if (isset($_POST['step3_submit'])) {
-        // Final step: process all data and install the application
         $_SESSION['founder_user'] = $_POST['founder_user'];
         $_SESSION['founder_email'] = $_POST['founder_email'];
         $_SESSION['founder_pass'] = $_POST['founder_pass'];
-
-        // Redirect to a new file to handle the actual installation logic
-        // This keeps this file cleaner.
         header('Location: install_process.php');
         exit;
     }
@@ -171,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="db_user">Database Username</label>
                     <input type="text" name="db_user" id="db_user" required>
                 </div>
-                <div class.form-group>
+                <div class="form-group">
                     <label for="db_pass">Database Password</label>
                     <input type="password" name="db_pass" id="db_pass">
                 </div>

@@ -14,11 +14,9 @@ $hooks = [];
 function add_action($hook_name, $function_to_call, $priority = 10) {
     global $hooks;
 
-    // Ensure the hook is an array
     if (!isset($hooks[$hook_name])) {
         $hooks[$hook_name] = [];
     }
-    // Ensure the priority is an array
     if (!isset($hooks[$hook_name][$priority])) {
         $hooks[$hook_name][$priority] = [];
     }
@@ -36,8 +34,7 @@ function do_action($hook_name, ...$args) {
     global $hooks;
 
     if (isset($hooks[$hook_name])) {
-        // Sort by priority
-        ksort($hooks[$hook_name]);
+        ksort($hooks[$hook_name]); // Sort by priority
 
         foreach ($hooks[$hook_name] as $priority_group) {
             foreach ($priority_group as $function_to_call) {
@@ -48,9 +45,4 @@ function do_action($hook_name, ...$args) {
         }
     }
 }
-
-/**
- * A simple filter hook system could be added here as well,
- * which would allow modifying data. For now, we only have actions.
- */
 ?>

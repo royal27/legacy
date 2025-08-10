@@ -85,21 +85,17 @@ session_destroy();
 // More robust function to recursively delete the install directory
 function delete_install_dir($dirPath) {
     if (!is_dir($dirPath)) {
-        throw new InvalidArgumentException("$dirPath must be a directory");
-    }
-    if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
-        $dirPath .= '/';
+        return;
     }
     $files = scandir($dirPath);
     foreach ($files as $file) {
-        if ($file == '.' || $file == '..') {
-            continue;
-        }
-        $path = $dirPath . $file;
-        if (is_dir($path)) {
-            delete_install_dir($path);
-        } else {
-            unlink($path);
+        if ($file !== '.' && $file !== '..') {
+            $path = $dirPath . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                delete_install_dir($path);
+            } else {
+                unlink($path);
+            }
         }
     }
     rmdir($dirPath);

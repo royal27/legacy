@@ -6,7 +6,7 @@ session_start();
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/language.php'; // To use t() function
+require_once __DIR__ . '/../includes/language.php';
 
 $is_logged_in = isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'founder';
 if (!$is_logged_in) {
@@ -15,7 +15,6 @@ if (!$is_logged_in) {
 }
 
 // --- Page logic ---
-// Get the language code from the URL, default to 'en' if not set
 $lang_code = isset($_GET['lang']) ? trim($_GET['lang']) : 'en';
 $feedback_message = '';
 

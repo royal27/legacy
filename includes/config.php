@@ -1,5 +1,6 @@
 <?php
 
-// This file will be populated by the installation script.
+// This file is created by the installer.
+// It contains database credentials and other core settings.
 
 ?>

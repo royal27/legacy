@@ -18,9 +18,8 @@ switch ($request_uri) {
         load_template_part('page-dashboard');
         break;
 
-    case '/admin':
-        load_template_part('page-admin');
-        break;
+    // The /admin route is handled by the .htaccess redirecting to /admin/
+    // So we don't need a case for it here.
 
     default:
         // Handle 404 Not Found
