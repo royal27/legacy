@@ -1,4 +1,9 @@
 <?php
+// Enable full error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Admin Panel Entry Point
 
 // The main application bootstrap should have already started the session.

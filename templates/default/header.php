@@ -7,7 +7,7 @@
     <!-- Toastr CSS for notifications -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <!-- Main stylesheet for the template -->
-    <link rel="stylesheet" href="/<?php echo $active_template_path; ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo $active_template_path; ?>/assets/css/style.css">
 </head>
 <body>
 
