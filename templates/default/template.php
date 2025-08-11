@@ -44,9 +44,42 @@
         <?php endif; ?>
     </main>
 
+    <?php if ($gallery_images->num_rows > 0): ?>
+    <section class="slideshow-container">
+        <div class="slideshow">
+            <?php while($img = $gallery_images->fetch_assoc()): ?>
+                <div class="slide">
+                    <img src="uploads/<?php echo htmlspecialchars($img['image_filename']); ?>" alt="Gallery image">
+                </div>
+            <?php endwhile; ?>
+        </div>
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+    </section>
+    <?php endif; ?>
+
     <footer>
         <p><?php echo htmlspecialchars($settings['footer_text']); ?></p>
     </footer>
 
+    <script>
+        let slideIndex = 1;
+        showSlides(slideIndex);
+
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+        }
+
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("slide");
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            slides[slideIndex-1].style.display = "block";
+        }
+    </script>
 </body>
 </html>

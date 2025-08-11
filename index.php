@@ -44,8 +44,11 @@ $stmt->bind_param("s", $lang);
 $stmt->execute();
 $menu_items = $stmt->get_result();
 
+// --- 6. Fetch Gallery Images ---
+$gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
 
-// --- 6. Load the Template ---
+
+// --- 7. Load the Template ---
 // The template file will have access to all variables defined above:
 // $conn, $settings, $active_template, $available_languages, $lang, $menu_items
 include $template_path;
