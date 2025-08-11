@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Settings</title>
+    <title><?php echo $lang_ui['site_settings']; ?></title>
     <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
@@ -91,28 +91,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <main>
                 <form action="settings.php" method="post" enctype="multipart/form-data">
                     <div class="input-group">
-                    <label for="logo_text">Logo Text (leave empty if using image)</label>
+                    <label for="logo_text"><?php echo $lang_ui['logo_text']; ?></label>
                     <input type="text" name="logo_text" id="logo_text" value="<?php echo htmlspecialchars($settings['logo_text']); ?>">
                 </div>
                 <div class="input-group">
-                    <label for="logo_image">Logo Image</label>
+                    <label for="logo_image"><?php echo $lang_ui['logo_image']; ?></label>
                     <input type="file" name="logo_image" id="logo_image">
                     <?php if (!empty($settings['logo_image'])): ?>
                         <p>Current logo: <img src="../uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="Current Logo" width="150"></p>
-                        <button type="submit" name="delete_logo_image" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the logo image?');">Delete Logo Image</button>
+                        <button type="submit" name="delete_logo_image" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the logo image?');"><?php echo $lang_ui['delete']; ?> Logo</button>
                     <?php endif; ?>
                 </div>
                 <div class="input-group">
-                    <label for="footer_text">Footer Text</label>
+                    <label for="footer_text"><?php echo $lang_ui['footer_text']; ?></label>
                     <input type="text" name="footer_text" id="footer_text" value="<?php echo htmlspecialchars($settings['footer_text']); ?>" required>
                 </div>
                 <hr>
                 <div class="input-group">
-                    <label>Enable User Invitations</label>
-                    <label><input type="radio" name="enable_invitations" value="1" <?php echo ($settings['enable_invitations'] == 1) ? 'checked' : ''; ?>> Yes</label>
-                    <label><input type="radio" name="enable_invitations" value="0" <?php echo ($settings['enable_invitations'] == 0) ? 'checked' : ''; ?>> No</label>
+                    <label><?php echo $lang_ui['enable_invitations']; ?></label>
+                    <label><input type="radio" name="enable_invitations" value="1" <?php echo ($settings['enable_invitations'] == 1) ? 'checked' : ''; ?>> <?php echo $lang_ui['yes']; ?></label>
+                    <label><input type="radio" name="enable_invitations" value="0" <?php echo ($settings['enable_invitations'] == 0) ? 'checked' : ''; ?>> <?php echo $lang_ui['no']; ?></label>
                 </div>
-                <button type="submit" name="save_settings">Save Settings</button>
+                <button type="submit" name="save_settings"><?php echo $lang_ui['save']; ?> Settings</button>
             </form>
             </main>
         </div>

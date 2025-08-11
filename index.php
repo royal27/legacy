@@ -31,16 +31,33 @@ while ($row = $languages_result->fetch_assoc()) {
 }
 $footer_pages = $conn->query("SELECT title, slug FROM pages WHERE show_in_footer = 1 ORDER BY title");
 
+// --- 4. Determine default language for content ---
+$default_lang = !empty($available_languages) ? $available_languages[0]['code'] : 'en';
+
 
 // --- ROUTING LOGIC ---
 
 // Route: /page/{slug}
 if ($path_parts[0] === 'page' && isset($path_parts[1])) {
     $slug = $path_parts[1];
-    $stmt = $conn->prepare("SELECT * FROM pages WHERE slug = ?");
-    $stmt->bind_param("s", $slug);
+
+    // Determine language for content
+    $content_lang = $default_lang;
+    if (isset($_GET['lang']) && in_array($_GET['lang'], array_column($available_languages, 'code'))) {
+        $content_lang = $_GET['lang'];
+    } elseif (isset($_COOKIE['language']) && in_array($_COOKIE['language'], array_column($available_languages, 'code'))) {
+        $content_lang = $_COOKIE['language'];
+    }
+
+    $sql = "SELECT p.id, p.slug, pt.title, pt.content
+            FROM pages p
+            JOIN page_translations pt ON p.id = pt.page_id
+            WHERE p.slug = ? AND pt.language_code = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $slug, $content_lang);
     $stmt->execute();
     $result = $stmt->get_result();
+
     if ($result->num_rows === 0) {
         http_response_code(404);
         echo "404 Page Not Found";

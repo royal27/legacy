@@ -5,43 +5,65 @@ $page_title = 'Manage Categories';
 $message = '';
 
 // Handle Add/Edit
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
-    $name = $_POST['name'];
-    if (isset($_POST['id']) && !empty($_POST['id'])) {
-        // Update
-        $id = $_POST['id'];
-        $stmt = $conn->prepare("UPDATE categories SET name = ? WHERE id = ?");
-        $stmt->bind_param("si", $name, $id);
-        $message = "Category updated successfully!";
-    } else {
-        // Add
-        $stmt = $conn->prepare("INSERT INTO categories (name) VALUES (?)");
-        $stmt->bind_param("s", $name);
-        $message = "Category added successfully!";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['translations'])) {
+    $translations = $_POST['translations'];
+
+    $conn->begin_transaction();
+    try {
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            // Update
+            $category_id = $_POST['id'];
+        } else {
+            // Insert new main category
+            $conn->query("INSERT INTO menu_categories (id) VALUES (NULL)");
+            $category_id = $conn->insert_id;
+        }
+
+        // Insert/Update translations
+        $stmt = $conn->prepare("INSERT INTO category_translations (category_id, language_code, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)");
+        foreach ($translations as $lang_code => $trans) {
+            $name = $trans['name'];
+            $stmt->bind_param("iss", $category_id, $lang_code, $name);
+            $stmt->execute();
+        }
+
+        $conn->commit();
+        $message = "Category saved successfully!";
+    } catch (Exception $e) {
+        $conn->rollback();
+        $message = "Error: " . $e->getMessage();
     }
-    $stmt->execute();
 }
 
 // Handle Delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $id = $_POST['delete_id'];
-    $stmt = $conn->prepare("DELETE FROM categories WHERE id = ?");
+    // The ON DELETE CASCADE constraint will handle deleting translations
+    $stmt = $conn->prepare("DELETE FROM menu_categories WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $message = "Category deleted successfully!";
 }
 
-// Fetch all categories
-$categories = $conn->query("SELECT * FROM categories ORDER BY name");
+// Fetch all categories with their names in the current admin language
+$sql = "SELECT mc.id, ct.name FROM menu_categories mc LEFT JOIN category_translations ct ON mc.id = ct.category_id AND ct.language_code = ? ORDER BY ct.name";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $admin_lang);
+$stmt->execute();
+$categories = $stmt->get_result();
 
 // Fetch category to edit if ID is in URL
 $category_to_edit = null;
+$existing_translations = [];
 if (isset($_GET['edit'])) {
     $edit_id = $_GET['edit'];
-    $stmt = $conn->prepare("SELECT * FROM categories WHERE id = ?");
+    $stmt = $conn->prepare("SELECT * FROM category_translations WHERE category_id = ?");
     $stmt->bind_param("i", $edit_id);
     $stmt->execute();
-    $category_to_edit = $stmt->get_result()->fetch_assoc();
+    $translations_result = $stmt->get_result();
+    while($row = $translations_result->fetch_assoc()) {
+        $existing_translations[$row['language_code']] = $row;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -63,14 +85,19 @@ if (isset($_GET['edit'])) {
                 <?php endif; ?>
 
                 <div class="card">
-                    <h3><?php echo $category_to_edit ? 'Edit Category' : 'Add New Category'; ?></h3>
+                    <h3><?php echo isset($_GET['edit']) ? 'Edit Category' : 'Add New Category'; ?></h3>
                     <form action="categories.php" method="post">
-                        <input type="hidden" name="id" value="<?php echo $category_to_edit['id'] ?? ''; ?>">
-                        <div class="input-group">
-                            <label for="name">Category Name</label>
-                            <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($category_to_edit['name'] ?? ''); ?>" required>
-                        </div>
-                        <button type="submit"><?php echo $category_to_edit ? 'Update Category' : 'Add Category'; ?></button>
+                        <input type="hidden" name="id" value="<?php echo $_GET['edit'] ?? ''; ?>">
+
+                        <?php mysqli_data_seek($available_languages, 0); ?>
+                        <?php while ($lang = $available_languages->fetch_assoc()): ?>
+                            <div class="input-group">
+                                <label for="translations[<?php echo $lang['code']; ?>][name]">Name (<?php echo htmlspecialchars($lang['name']); ?>)</label>
+                                <input type="text" name="translations[<?php echo $lang['code']; ?>][name]" value="<?php echo htmlspecialchars($existing_translations[$lang['code']]['name'] ?? ''); ?>" required>
+                            </div>
+                        <?php endwhile; ?>
+
+                        <button type="submit"><?php echo isset($_GET['edit']) ? 'Update Category' : 'Add Category'; ?></button>
                     </form>
                 </div>
 
@@ -79,14 +106,14 @@ if (isset($_GET['edit'])) {
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>Name (in <?php echo htmlspecialchars($admin_lang); ?>)</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php while ($cat = $categories->fetch_assoc()): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($cat['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($cat['name'] ?? '[No translation]'); ?></td>
                                     <td>
                                         <a href="categories.php?edit=<?php echo $cat['id']; ?>" class="btn btn-primary">Edit</a>
                                         <form action="categories.php" method="post" style="display:inline;" onsubmit="return confirm('Are you sure? Menu items in this category will become uncategorized.');">

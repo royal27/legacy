@@ -1,11 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
 $page_title = 'Manage Themes';
 
 $message = '';
@@ -27,14 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_themes'])) {
 }
 
 
-// Fetch current settings
-$settings_result = $conn->query("SELECT * FROM settings");
-$settings = [];
-while ($row = $settings_result->fetch_assoc()) {
-    $settings[$row['setting_key']] = $row['setting_value'];
-}
-$active_template = $settings['active_template'];
-$admin_theme = $settings['admin_theme'];
+// Fetch current settings for frontend template
+$settings_result = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'active_template'");
+$active_template = $settings_result->fetch_assoc()['setting_value'];
 
 
 // Scan for available frontend templates

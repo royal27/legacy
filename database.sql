@@ -24,11 +24,23 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categories`
+-- Table structure for table `menu_categories`
 --
 
-CREATE TABLE `categories` (
+CREATE TABLE `menu_categories` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_translations`
+--
+
+CREATE TABLE `category_translations` (
   `id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `language_code` varchar(10) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -63,10 +75,22 @@ CREATE TABLE `offers` (
 
 CREATE TABLE `pages` (
   `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
-  `content` text NOT NULL,
   `show_in_footer` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `page_translations`
+--
+
+CREATE TABLE `page_translations` (
+  `id` int(11) NOT NULL,
+  `page_id` int(11) NOT NULL,
+  `language_code` varchar(10) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -197,10 +221,17 @@ INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
 --
 
 --
--- Indexes for table `categories`
+-- Indexes for table `menu_categories`
 --
-ALTER TABLE `categories`
+ALTER TABLE `menu_categories`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `category_translations`
+--
+ALTER TABLE `category_translations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `category_id_language_code` (`category_id`,`language_code`);
 
 --
 -- Indexes for table `gallery`
@@ -220,6 +251,13 @@ ALTER TABLE `offers`
 ALTER TABLE `pages`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`);
+
+--
+-- Indexes for table `page_translations`
+--
+ALTER TABLE `page_translations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `page_id` (`page_id`);
 
 --
 -- Indexes for table `visitors`
@@ -275,9 +313,15 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `categories`
+-- AUTO_INCREMENT for table `menu_categories`
 --
-ALTER TABLE `categories`
+ALTER TABLE `menu_categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `category_translations`
+--
+ALTER TABLE `category_translations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -296,6 +340,12 @@ ALTER TABLE `offers`
 -- AUTO_INCREMENT for table `pages`
 --
 ALTER TABLE `pages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `page_translations`
+--
+ALTER TABLE `page_translations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -348,7 +398,19 @@ ALTER TABLE `users`
 -- Constraints for table `menus`
 --
 ALTER TABLE `menus`
-  ADD CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `menu_categories` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `page_translations`
+--
+ALTER TABLE `page_translations`
+  ADD CONSTRAINT `page_translations_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `category_translations`
+--
+ALTER TABLE `category_translations`
+  ADD CONSTRAINT `category_translations_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `menu_categories` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `menu_translations`

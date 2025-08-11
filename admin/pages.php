@@ -3,7 +3,14 @@ require_once 'admin_header_logic.php';
 $page_title = 'Manage Pages';
 
 // Fetch all pages
-$pages = $conn->query("SELECT id, title, slug, show_in_footer FROM pages ORDER BY title");
+$sql = "SELECT p.id, p.slug, p.show_in_footer, pt.title
+        FROM pages p
+        LEFT JOIN page_translations pt ON p.id = pt.page_id AND pt.language_code = ?
+        ORDER BY pt.title";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $admin_lang);
+$stmt->execute();
+$pages = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +30,7 @@ $pages = $conn->query("SELECT id, title, slug, show_in_footer FROM pages ORDER B
                 <table>
                     <thead>
                         <tr>
-                            <th>Title</th>
+                            <th>Title (in <?php echo htmlspecialchars($admin_lang); ?>)</th>
                             <th>Slug</th>
                             <th>In Footer?</th>
                             <th>Actions</th>

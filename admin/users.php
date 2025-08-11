@@ -64,17 +64,17 @@ $users = $conn->query("SELECT id, username, role, first_name, last_name FROM use
                 $invitations_enabled = $invitation_setting_result->fetch_assoc()['setting_value'] ?? '0';
                 ?>
 
-                <a href="user-add.php" class="btn btn-add">Add New User</a>
+                <a href="user-add.php" class="btn btn-add"><?php echo $lang_ui['add_new']; ?> User</a>
 
                 <?php if ($invitations_enabled == 1): ?>
                 <div class="card">
-                    <h3>Invite New User</h3>
+                    <h3><?php echo $lang_ui['invite_new_user']; ?></h3>
                     <form action="users.php" method="post" class="invite-form">
                         <div class="input-group">
-                            <label for="email">Email Address</label>
+                            <label for="email"><?php echo $lang_ui['email_address']; ?></label>
                             <input type="email" name="email" id="email" required>
                         </div>
-                        <button type="submit" name="invite_user">Send Invitation</button>
+                        <button type="submit" name="invite_user"><?php echo $lang_ui['send_invitation']; ?></button>
                     </form>
                 </div>
                 <?php endif; ?>
@@ -82,10 +82,10 @@ $users = $conn->query("SELECT id, username, role, first_name, last_name FROM use
                 <table>
                     <thead>
                         <tr>
-                            <th>Username</th>
-                            <th>Full Name</th>
-                            <th>Role</th>
-                            <th>Actions</th>
+                            <th><?php echo $lang_ui['username']; ?></th>
+                            <th><?php echo $lang_ui['full_name']; ?></th>
+                            <th><?php echo $lang_ui['role']; ?></th>
+                            <th><?php echo $lang_ui['actions']; ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -95,9 +95,9 @@ $users = $conn->query("SELECT id, username, role, first_name, last_name FROM use
                                 <td><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></td>
                                 <td><?php echo htmlspecialchars($user['role']); ?></td>
                                 <td>
-                                    <a href="user-edit.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">Edit</a>
+                                    <a href="user-edit.php?id=<?php echo $user['id']; ?>" class="btn btn-primary"><?php echo $lang_ui['edit']; ?></a>
                                     <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion ?>
-                                        <a href="user-delete.php?id=<?php echo $user['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                        <a href="user-delete.php?id=<?php echo $user['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');"><?php echo $lang_ui['delete']; ?></a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

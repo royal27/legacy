@@ -23,4 +23,13 @@ if (isset($_GET['set_admin_lang'])) {
     exit();
 }
 $admin_lang = $_SESSION['admin_lang'] ?? 'en'; // Default to English
+
+// Load UI language file
+$lang_file = __DIR__ . '/lang/' . $admin_lang . '.php';
+if (file_exists($lang_file)) {
+    require_once $lang_file;
+} else {
+    // Fallback to English if the language file doesn't exist
+    require_once __DIR__ . '/lang/en.php';
+}
 ?>
