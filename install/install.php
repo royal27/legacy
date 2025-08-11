@@ -183,6 +183,7 @@
           `target` varchar(20) NOT NULL DEFAULT '_self',
           `menu_location` varchar(50) NOT NULL DEFAULT 'main_nav',
           `sort_order` int(11) NOT NULL DEFAULT 0,
+          `permission_required` varchar(100) DEFAULT NULL,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -206,6 +207,7 @@
           `version` varchar(50) DEFAULT NULL,
           `is_active` tinyint(1) NOT NULL DEFAULT 0,
           `custom_link` varchar(255) DEFAULT NULL,
+          `permission_required` varchar(100) DEFAULT NULL,
           `installed_at` timestamp NOT NULL DEFAULT current_timestamp(),
           PRIMARY KEY (`id`),
           UNIQUE KEY `identifier` (`identifier`)

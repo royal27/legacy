@@ -32,8 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $plugin_id = (int)$_POST['plugin_id'];
         $name = trim($_POST['name']);
         $link = trim($_POST['custom_link']);
-        $stmt = $db->prepare("UPDATE plugins SET name = ?, custom_link = ? WHERE id = ?");
-        $stmt->bind_param('ssi', $name, $link, $plugin_id);
+        $permission = trim($_POST['permission_required']);
+        $stmt = $db->prepare("UPDATE plugins SET name = ?, custom_link = ?, permission_required = ? WHERE id = ?");
+        $stmt->bind_param('sssi', $name, $link, $permission, $plugin_id);
         $stmt->execute();
         $stmt->close();
         $message = 'Plugin details updated.';
@@ -106,7 +107,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
                     </div>
                 </td>
                 <td>
-                    <button class="btn btn-primary btn-sm edit-plugin-btn" data-id="<?php echo $plugin['id']; ?>" data-name="<?php echo htmlspecialchars($plugin['name']); ?>" data-link="<?php echo htmlspecialchars($plugin['custom_link'] ?? ''); ?>">Edit</button>
+                    <button class="btn btn-primary btn-sm edit-plugin-btn" data-id="<?php echo $plugin['id']; ?>" data-name="<?php echo htmlspecialchars($plugin['name']); ?>" data-link="<?php echo htmlspecialchars($plugin['custom_link'] ?? ''); ?>" data-permission="<?php echo htmlspecialchars($plugin['permission_required'] ?? ''); ?>">Edit</button>
                     <button class="btn btn-accent btn-sm delete-plugin-btn" data-id="<?php echo $plugin['id']; ?>">Delete</button>
                 </td>
             </tr>
@@ -132,6 +133,10 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
                 <label for="edit-plugin-link">Custom Link</label>
                 <input type="text" id="edit-plugin-link" name="custom_link">
             </div>
+            <div class="form-group">
+                <label for="edit-plugin-permission">Permission Required (Optional)</label>
+                <input type="text" id="edit-plugin-permission" name="permission_required">
+            </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     </div>
@@ -156,9 +161,11 @@ $(document).ready(function() {
         var id = $(this).data('id');
         var name = $(this).data('name');
         var link = $(this).data('link');
+        var permission = $(this).data('permission');
         $('#edit-plugin-id').val(id);
         $('#edit-plugin-name').val(name);
         $('#edit-plugin-link').val(link);
+        $('#edit-plugin-permission').val(permission);
         modal.show();
     });
     $('.close-btn').on('click', function() {

@@ -16,27 +16,34 @@ if ($user_id === 0) {
     redirect('index.php?page=users');
 }
 
+// Fetch user data before handling POST to have it available
+$user_res = $db->prepare("SELECT * FROM users WHERE id = ?");
+$user_res->bind_param('i', $user_id);
+$user_res->execute();
+$user = $user_res->get_result()->fetch_assoc();
+$user_res->close();
+
+if (!$user) {
+    redirect('index.php?page=users');
+}
+
 // --- Handle form submission for updating the user ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_user') {
     validate_csrf_token();
     $email = trim($_POST['email']);
-    // Keep role_id the same if it's not submitted (e.g. for super admin)
     $role_id = isset($_POST['role_id']) ? (int)$_POST['role_id'] : $user['role_id'];
     $is_validated = isset($_POST['is_validated']) ? 1 : 0;
-    $is_banned = isset($_POST['is_banned']) ? 1 : 0;
-    $is_muted = isset($_POST['is_muted']) ? 1 : 0;
     $password = $_POST['password'];
 
-    // Prevent changing role of user 1 or banning user 1
+    // Prevent changing role of user 1
     if ($user_id === 1) {
-        $role_id = 1; // Cannot change role of super admin
-        $is_banned = 0; // Cannot ban super admin
+        $role_id = 1;
     }
 
-    $sql = "UPDATE users SET email = ?, role_id = ?, is_validated = ?, is_banned = ?, is_muted = ?";
-    $params = ['siiii', $email, $role_id, $is_validated, $is_banned, $is_muted];
+    // NOTE: is_banned and is_muted are now handled by timed actions, so they are removed from this form handler.
+    $sql = "UPDATE users SET email = ?, role_id = ?, is_validated = ?";
+    $params = ['sii', $email, $role_id, $is_validated];
 
-    // Handle password change
     if (!empty($password)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $sql .= ", password = ?";
@@ -60,23 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     redirect('index.php?page=users');
 }
 
-
-// Fetch user data for the form
-$user_res = $db->prepare("SELECT * FROM users WHERE id = ?");
-$user_res->bind_param('i', $user_id);
-$user_res->execute();
-$user = $user_res->get_result()->fetch_assoc();
-
-if (!$user) {
-    redirect('index.php?page=users');
-}
-
 // Fetch all roles for the dropdown
 $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
 ?>
 
-<div class="content-block">
+<div class="content-block" id="edit-user-container" data-user-id="<?php echo $user_id; ?>">
     <a href="index.php?page=users">&larr; Back to User List</a>
     <h2>Edit User: <strong><?php echo htmlspecialchars($user['username']); ?></strong></h2>
 
@@ -84,23 +80,21 @@ $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_A
         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <input type="hidden" name="action" value="update_user">
 
+        <h4>Basic Information</h4>
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" disabled>
             <small>Username cannot be changed.</small>
         </div>
-
         <div class="form-group">
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
         </div>
-
         <div class="form-group">
             <label for="password">New Password</label>
             <input type="password" id="password" name="password">
             <small>Leave blank to keep the current password.</small>
         </div>
-
         <div class="form-group">
             <label for="role_id">Role</label>
             <select id="role_id" name="role_id" <?php if ($user['id'] === 1) echo 'disabled'; ?>>
@@ -114,66 +108,52 @@ $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_A
                 <small>The Super Admin role cannot be changed.</small>
             <?php endif; ?>
         </div>
-
-        <hr>
-        <h3>Status Flags</h3>
         <div class="form-group-checkbox">
             <label>
                 <input type="checkbox" name="is_validated" value="1" <?php echo $user['is_validated'] ? 'checked' : ''; ?>>
                 User is Validated
             </label>
-            <small>Un-checking this may prevent the user from logging in or accessing certain features.</small>
         </div>
-        <button type="submit" class="btn btn-primary">Save Basic Info</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
-</div>
+    <hr>
 
-<div class="content-block">
     <h3>Moderation Actions</h3>
-
-    <!-- Mute Action -->
     <div class="moderation-action">
         <strong>Mute Status:</strong> <?php echo is_user_muted($user) ? 'Muted until ' . ($user['muted_until'] ?? 'Forever') : 'Not Muted'; ?>
-        <form class="ajax-action-form" data-action="mute_user">
-            <input type="datetime-local" name="until_datetime">
-            <button type="submit" class="btn btn-secondary btn-sm">Mute Until</button>
+        <div class="ajax-action-form">
+            <input type="datetime-local" class="until-datetime">
+            <button type="button" class="btn btn-secondary btn-sm quick-action-btn" data-action="mute_until">Mute Until</button>
             <button type="button" class="btn btn-secondary btn-sm quick-action-btn" data-action="mute_indefinite">Mute Indefinitely</button>
             <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unmute">Unmute</button>
-        </form>
+        </div>
     </div>
-
-    <!-- Ban Action -->
     <div class="moderation-action">
-         <strong>Ban Status:</strong> <?php echo $user['is_banned'] ? 'Banned until ' . ($user['banned_until'] ?? 'Forever') : 'Not Banned'; ?>
-        <form class="ajax-action-form" data-action="ban_user">
-            <input type="datetime-local" name="until_datetime">
-            <button type="submit" class="btn btn-accent btn-sm">Ban Until</button>
+         <strong>Ban Status:</strong> <?php echo ($user['is_banned'] || ($user['banned_until'] && new DateTime($user['banned_until']) > new DateTime())) ? 'Banned until ' . ($user['banned_until'] ?? 'Forever') : 'Not Banned'; ?>
+        <div class="ajax-action-form">
+            <input type="datetime-local" class="until-datetime">
+            <button type="button" class="btn btn-accent btn-sm quick-action-btn" data-action="ban_until">Ban Until</button>
             <button type="button" class="btn btn-accent btn-sm quick-action-btn" data-action="ban_indefinite">Ban Indefinitely</button>
             <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unban">Unban</button>
-        </form>
+        </div>
     </div>
-
-     <!-- Suspend Action -->
     <div class="moderation-action">
-         <strong>Suspend Status:</strong> <?php echo $user['suspended_until'] ? 'Suspended until ' . $user['suspended_until'] : 'Not Suspended'; ?>
-        <form class="ajax-action-form" data-action="suspend_user">
-            <input type="datetime-local" name="until_datetime">
-            <button type="submit" class="btn btn-warning btn-sm">Suspend Until</button>
+         <strong>Suspend Status:</strong> <?php echo ($user['suspended_until'] && new DateTime($user['suspended_until']) > new DateTime()) ? 'Suspended until ' . $user['suspended_until'] : 'Not Suspended'; ?>
+        <div class="ajax-action-form">
+            <input type="datetime-local" class="until-datetime">
+            <button type="button" class="btn btn-warning btn-sm quick-action-btn" data-action="suspend_user">Suspend Until</button>
             <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unsuspend">Unsuspend</button>
-        </form>
+        </div>
     </div>
-
     <hr>
     <strong>Other Actions:</strong>
-        <button type="button" id="kick-user-btn" class="btn btn-accent" data-user-id="<?php echo $user_id; ?>" <?php if ($user['id'] === $_SESSION['user_id']) echo 'disabled'; ?>>Kick User (Force Logout)</button>
-    </form>
+    <button type="button" id="kick-user-btn" class="btn btn-accent quick-action-btn" data-action="kick_user" <?php if ($user['id'] === $_SESSION['user_id']) echo 'disabled'; ?>>Kick User (Force Logout)</button>
 </div>
 
 <style>
 .form-group-checkbox { margin-bottom: 15px; }
 .form-group-checkbox label { display: flex; align-items: center; }
 .form-group-checkbox input { margin-right: 10px; width: auto; }
-.form-group-checkbox small { display: block; margin-left: 28px; color: #6c757d; }
 .moderation-action { border: 1px solid #eee; padding: 15px; margin-top: 15px; border-radius: 5px; }
 .moderation-action .ajax-action-form { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
 .btn-warning { background-color: #ffc107; color: #212529; border-color: #ffc107; }
@@ -182,7 +162,6 @@ $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_A
 
 <script>
 $(document).ready(function() {
-    // --- Moderation Actions AJAX ---
     function handleModerationAction(userId, subAction, untilValue = null) {
         if (!confirm('Are you sure you want to perform this action?')) {
             return;
@@ -200,7 +179,6 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.status === 'success') {
                     toastr.success(response.message);
-                    // Reload the page to see status changes
                     setTimeout(function() { location.reload(); }, 1500);
                 } else {
                     toastr.error(response.message || 'An error occurred.');
@@ -212,49 +190,22 @@ $(document).ready(function() {
         });
     }
 
-    // Timed actions form submission
-    $('.ajax-action-form').on('submit', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var subAction = form.data('action');
-        var untilValue = form.find('input[name="until_datetime"]').val();
-        var userId = $('#kick-user-btn').data('user-id'); // A bit hacky, but gets the ID
-
-        handleModerationAction(userId, subAction, untilValue);
-    });
-
-    // Indefinite/remove actions button clicks
     $('.quick-action-btn').on('click', function() {
         var button = $(this);
         var subAction = button.data('action');
-        var userId = $('#kick-user-btn').data('user-id');
+        var userId = $('#edit-user-container').data('user-id');
+        var untilValue = null;
 
-        handleModerationAction(userId, subAction);
-    });
-
-
-    // --- Kick User ---
-    $('#kick-user-btn').on('click', function() {
-        if (!confirm('Are you sure you want to kick this user? They will be forcefully logged out.')) {
-            return;
-        }
-        var userId = $(this).data('user-id');
-        $.ajax({
-            url: 'ajax_handler.php',
-            type: 'POST',
-            dataType: 'json',
-            data: { action: 'kick_user', user_id: userId },
-            success: function(response) {
-                if (response.status === 'success') {
-                    toastr.success(response.message);
-                } else {
-                    toastr.error(response.message || 'An error occurred.');
-                }
-            },
-            error: function() {
-                toastr.error('An unexpected error occurred.');
+        // If the action requires a date, get it from the sibling input
+        if (subAction.includes('_until') || subAction === 'suspend_user') {
+            untilValue = button.siblings('.until-datetime').val();
+            if (!untilValue) {
+                toastr.error('Please select a date and time.');
+                return;
             }
-        });
+        }
+
+        handleModerationAction(userId, subAction, untilValue);
     });
 });
 </script>

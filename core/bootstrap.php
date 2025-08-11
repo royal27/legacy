@@ -131,6 +131,11 @@ load_language();
 $active_plugins_res = $db->query("SELECT * FROM plugins WHERE is_active = 1");
 if ($active_plugins_res) {
     while($plugin = $active_plugins_res->fetch_assoc()) {
+        // Check for required permission before loading
+        if (!empty($plugin['permission_required']) && !user_has_permission($plugin['permission_required'])) {
+            continue; // Skip this plugin if user lacks permission
+        }
+
         $plugin_dir = __DIR__ . '/../plugins/' . $plugin['identifier'];
         $manifest_path = $plugin_dir . '/plugin.json';
         if (file_exists($manifest_path)) {
@@ -242,10 +247,22 @@ function get_menu(string $location): array {
     global $db;
     $location = $db->real_escape_string($location);
     $result = $db->query("SELECT * FROM menu_items WHERE menu_location = '{$location}' ORDER BY sort_order ASC");
+
+    $menu_items = [];
     if ($result) {
-        return $result->fetch_all(MYSQLI_ASSOC);
+        while ($item = $result->fetch_assoc()) {
+            // Check for required permission
+            if (!empty($item['permission_required'])) {
+                if (user_has_permission($item['permission_required'])) {
+                    $menu_items[] = $item;
+                }
+            } else {
+                // No permission required, public item
+                $menu_items[] = $item;
+            }
+        }
     }
-    return [];
+    return $menu_items;
 }
 
 

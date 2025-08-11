@@ -4,7 +4,19 @@ if (!isset($db)) {
     return;
 }
 
-$active_plugins = $db->query("SELECT name, custom_link FROM plugins WHERE is_active = 1 AND custom_link IS NOT NULL AND custom_link != ''")->fetch_all(MYSQLI_ASSOC);
+$plugins_res = $db->query("SELECT * FROM plugins WHERE is_active = 1 AND custom_link IS NOT NULL AND custom_link != ''");
+$active_plugins = [];
+if ($plugins_res) {
+    while ($plugin = $plugins_res->fetch_assoc()) {
+        if (!empty($plugin['permission_required'])) {
+            if (user_has_permission($plugin['permission_required'])) {
+                $active_plugins[] = $plugin;
+            }
+        } else {
+            $active_plugins[] = $plugin;
+        }
+    }
+}
 
 if (!empty($active_plugins)):
 ?>
