@@ -121,7 +121,12 @@ $menu_items = $db->query("SELECT * FROM menu_items WHERE menu_location = '{$menu
                             <option value="_blank" <?php echo ($item['target'] == '_blank') ? 'selected' : ''; ?>>New Tab</option>
                         </select>
                         <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                        <button type="button" class="btn btn-accent btn-sm delete-item-btn">Delete</button>
+                    </form>
+                    <form action="index.php?page=menus&location=<?php echo $menu_location; ?>" method="post" style="display:inline-block; margin-left: 5px;">
+                        <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        <input type="hidden" name="action" value="delete_item">
+                        <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                        <button type="submit" class="btn btn-accent btn-sm" onclick="return confirm('Are you sure you want to delete this menu item?');">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -155,12 +160,6 @@ $menu_items = $db->query("SELECT * FROM menu_items WHERE menu_location = '{$menu
     </form>
 </div>
 
-<form id="delete-item-form" action="index.php?page=menus&location=<?php echo $menu_location; ?>" method="post" style="display:none;">
-    <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-    <input type="hidden" name="action" value="delete_item">
-    <input type="hidden" id="delete-item-id" name="id">
-</form>
-
 <script>
 $(document).ready(function() {
     // Make table rows sortable
@@ -182,15 +181,6 @@ $(document).ready(function() {
             });
         }
     }).disableSelection();
-
-    // Handle delete button click
-    $('.delete-item-btn').on('click', function() {
-        if (confirm('Are you sure you want to delete this menu item?')) {
-            var id = $(this).closest('tr').data('id');
-            $('#delete-item-id').val(id);
-            $('#delete-item-form').submit();
-        }
-    });
 });
 </script>
 

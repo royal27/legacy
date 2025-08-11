@@ -4,7 +4,7 @@ require_once 'core/bootstrap.php';
 
 // If user is already logged in, redirect to their profile
 if (is_logged_in()) {
-    redirect('profile.php?id=' . $_SESSION['user_id']);
+    redirect(SITE_URL . '/profile/' . $_SESSION['user_id']);
 }
 
 $errors = [];
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role_id'] = 2;
             load_user_permissions();
 
-            redirect('profile.php?id=' . $new_user_id);
+            redirect(SITE_URL . '/profile/' . $new_user_id);
         } else {
             $errors[] = 'An error occurred during registration. Please try again.';
         }

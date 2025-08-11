@@ -24,9 +24,9 @@ if (!defined('APP_LOADED')) {
     <div class="page-wrapper">
         <header class="main-header">
             <div class="logo">
-                <a href="index.php">
+                <a href="<?php echo SITE_URL; ?>">
                     <?php if ($settings['logo_type'] === 'image' && !empty($settings['logo_image'])): ?>
-                        <img src="uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="<?php echo htmlspecialchars($settings['site_title']); ?> Logo" class="logo-image">
+                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="<?php echo htmlspecialchars($settings['site_title']); ?> Logo" class="logo-image">
                     <?php else: ?>
                         <span class="logo-text"><?php echo htmlspecialchars($settings['logo_text']); ?></span>
                     <?php endif; ?>
@@ -37,9 +37,11 @@ if (!defined('APP_LOADED')) {
                     <?php
                     $main_menu_items = get_menu('main_nav');
                     foreach ($main_menu_items as $item):
+                        // Check if the URL is external or internal
+                        $url = (filter_var($item['url'], FILTER_VALIDATE_URL)) ? $item['url'] : SITE_URL . '/' . ltrim($item['url'], '/');
                     ?>
                         <li>
-                            <a href="<?php echo htmlspecialchars($item['url']); ?>" target="<?php echo htmlspecialchars($item['target']); ?>">
+                            <a href="<?php echo htmlspecialchars($url); ?>" target="<?php echo htmlspecialchars($item['target']); ?>">
                                 <?php echo htmlspecialchars($item['title']); ?>
                             </a>
                         </li>
@@ -48,13 +50,14 @@ if (!defined('APP_LOADED')) {
             </nav>
             <div class="user-nav">
                 <ul>
+                    <?php include __DIR__ . '/partials/language_switcher.php'; ?>
                     <?php if (is_logged_in()): ?>
-                        <li><a href="profile.php?id=<?php echo $_SESSION['user_id']; ?>">My Profile</a></li>
-                        <li><a href="edit-profile.php">Edit Profile</a></li>
-                        <li><a href="logout.php" class="btn btn-secondary btn-sm">Logout</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/profile/<?php echo $_SESSION['user_id']; ?>">My Profile</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/edit-profile">Edit Profile</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/logout" class="btn btn-secondary btn-sm">Logout</a></li>
                     <?php else: ?>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php" class="btn btn-primary btn-sm">Register</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/login">Login</a></li>
+                        <li><a href="<?php echo SITE_URL; ?>/register" class="btn btn-primary btn-sm">Register</a></li>
                     <?php endif; ?>
                 </ul>
             </div>

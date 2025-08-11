@@ -16,8 +16,9 @@ if (!defined('APP_LOADED')) {
                 <?php
                 $footer_menu_items = get_menu('footer_nav');
                 foreach ($footer_menu_items as $item):
+                    $url = (filter_var($item['url'], FILTER_VALIDATE_URL)) ? $item['url'] : SITE_URL . '/' . ltrim($item['url'], '/');
                 ?>
-                    <a href="<?php echo htmlspecialchars($item['url']); ?>" target="<?php echo htmlspecialchars($item['target']); ?>">
+                    <a href="<?php echo htmlspecialchars($url); ?>" target="<?php echo htmlspecialchars($item['target']); ?>">
                         <?php echo htmlspecialchars($item['title']); ?>
                     </a>
                 <?php endforeach; ?>

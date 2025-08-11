@@ -4,7 +4,7 @@ require_once 'core/bootstrap.php';
 
 // If user is already logged in, redirect to their profile
 if (is_logged_in()) {
-    redirect('profile.php?id=' . $_SESSION['user_id']);
+    redirect(SITE_URL . '/profile/' . $_SESSION['user_id']);
 }
 
 $error_message = '';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['role_id'] = $user['role_id'];
                 load_user_permissions(); // Load permissions on login
 
-                redirect('profile.php?id=' . $user['id']);
+                redirect(SITE_URL . '/profile/' . $user['id']);
             } else {
                 $error_message = 'Invalid username or password.';
             }

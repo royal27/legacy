@@ -9,7 +9,7 @@ require_once 'core/bootstrap.php';
 $user_id = (int)($_GET['id'] ?? 0);
 if ($user_id === 0) {
     // Redirect to homepage if no user ID is provided
-    redirect('index.php');
+    redirect(SITE_URL);
 }
 
 // Fetch user data
@@ -21,7 +21,7 @@ $stmt->close();
 
 // If user not found, redirect
 if (!$user) {
-    redirect('index.php');
+    redirect(SITE_URL);
 }
 
 $page_title = "Profile: " . htmlspecialchars($user['username']);

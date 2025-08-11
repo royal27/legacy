@@ -58,7 +58,7 @@ $pages = $db->query("SELECT * FROM pages ORDER BY title ASC")->fetch_all(MYSQLI_
             <?php foreach ($pages as $page): ?>
             <tr>
                 <td><?php echo $page['id']; ?></td>
-                <td><strong><a href="../page.php?slug=<?php echo htmlspecialchars($page['slug']); ?>" target="_blank"><?php echo htmlspecialchars($page['title']); ?></a></strong></td>
+                <td><strong><a href="<?php echo SITE_URL; ?>/page/<?php echo htmlspecialchars($page['slug']); ?>" target="_blank"><?php echo htmlspecialchars($page['title']); ?></a></strong></td>
                 <td><?php echo htmlspecialchars($page['slug']); ?></td>
                 <td><?php echo date('F j, Y', strtotime($page['created_at'])); ?></td>
                 <td>

@@ -4,7 +4,7 @@ require_once 'core/bootstrap.php';
 
 // Security: Must be logged in to edit profile
 if (!is_logged_in()) {
-    redirect('login.php'); // I should create a login page for the frontend
+    redirect(SITE_URL . '/login');
 }
 
 $user_id = $_SESSION['user_id'];

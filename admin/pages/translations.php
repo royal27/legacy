@@ -51,8 +51,8 @@ if (!$lang) {
     redirect('index.php?page=languages');
 }
 
-// Get all keys from the default language (ID 1) as the master list
-$master_keys_res = $db->query("SELECT lang_key FROM language_strings WHERE lang_id = 1 ORDER BY lang_key ASC");
+// Get all unique keys from the entire table to form a master list
+$master_keys_res = $db->query("SELECT DISTINCT lang_key FROM language_strings ORDER BY lang_key ASC");
 $master_keys = [];
 while($row = $master_keys_res->fetch_assoc()) {
     $master_keys[$row['lang_key']] = ''; // Use key as array key for easy lookup
