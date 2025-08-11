@@ -53,7 +53,7 @@ body {
     margin: 1rem;
     text-align: center;
     padding: 0.75rem;
-    background: linear-gradient(135deg, #c62828, #ffab00, #ffea00);
+    background: linear-gradient(135deg, #c62828 45%, #ffab00 85%, #ffea00 100%);
     color: #000;
     text-decoration: none;
     border-radius: 5px;

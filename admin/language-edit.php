@@ -1,11 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
+$page_title = 'Edit Language';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: languages.php");
@@ -62,18 +57,17 @@ if (!$language) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Language</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Edit Language</h2>
-        </header>
-        <main>
-            <div class="card">
-                <form action="language-edit.php?id=<?php echo $id; ?>" method="post">
-                    <div class="input-group">
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <div class="card">
+                    <form action="language-edit.php?id=<?php echo $id; ?>" method="post">
+                        <div class="input-group">
                         <label for="name">Language Name</label>
                         <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($language['name']); ?>" required>
                     </div>
@@ -84,7 +78,9 @@ if (!$language) {
                     <button type="submit" name="update_language">Update Language</button>
                 </form>
             </div>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>

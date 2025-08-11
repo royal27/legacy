@@ -1,12 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
-
+require_once 'admin_header_logic.php';
 $page_title = 'Manage Gallery';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -86,7 +79,7 @@ $gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Gallery</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
     <style>
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
         .gallery-item { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }

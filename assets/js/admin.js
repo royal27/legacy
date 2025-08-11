@@ -124,4 +124,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // BBCode helper button
+    const addLinkBtn = document.getElementById('add-link-btn');
+    if (addLinkBtn) {
+        addLinkBtn.addEventListener('click', function() {
+            const url = prompt("Enter the URL:", "https://");
+            if (url) {
+                const text = prompt("Enter the link text:", "");
+                const contentArea = document.getElementById('content');
+                const bbcode = `[url=${url}]${text || url}[/url]`;
+
+                // Insert at cursor position
+                const start = contentArea.selectionStart;
+                const end = contentArea.selectionEnd;
+                contentArea.value = contentArea.value.substring(0, start) + bbcode + contentArea.value.substring(end);
+                contentArea.focus();
+                contentArea.selectionEnd = start + bbcode.length;
+            }
+        });
+    }
 });

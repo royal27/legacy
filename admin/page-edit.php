@@ -1,11 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
 
 function create_slug($string) {
    $string = strtolower(trim($string));
@@ -60,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -80,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="input-group">
                         <label for="content">Content</label>
+                        <button type="button" id="add-link-btn" class="btn">Add Link</button>
                         <textarea name="content" id="content" rows="15"><?php echo htmlspecialchars($page['content']); ?></textarea>
                     </div>
                     <div class="input-group">
