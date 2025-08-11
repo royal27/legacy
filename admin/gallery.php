@@ -14,53 +14,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
 
     try {
-        // Handle image deletion
+        // Handle Deletion
         if (isset($_POST['delete_image'])) {
             $image_id = $_POST['image_id'];
-            $stmt_get = $conn->prepare("SELECT image_filename FROM gallery WHERE id = ?");
+            $stmt_get = $conn->prepare("SELECT media_type, media_path FROM gallery WHERE id = ?");
             $stmt_get->bind_param("i", $image_id);
             $stmt_get->execute();
             $result = $stmt_get->get_result();
             if ($row = $result->fetch_assoc()) {
-                $filename = $row['image_filename'];
-                $filepath = '../uploads/' . $filename;
                 $stmt_delete = $conn->prepare("DELETE FROM gallery WHERE id = ?");
                 $stmt_delete->bind_param("i", $image_id);
                 if ($stmt_delete->execute()) {
-                    if (file_exists($filepath)) {
-                        unlink($filepath);
+                    // Only delete file if it was an upload
+                    if (($row['media_type'] === 'image' || $row['media_type'] === 'video_upload') && file_exists('../uploads/' . $row['media_path'])) {
+                        unlink('../uploads/' . $row['media_path']);
                     }
-                    $response = ['status' => 'success', 'message' => 'Image deleted successfully.'];
+                    $response = ['status' => 'success', 'message' => 'Media deleted successfully.'];
                 } else {
-                    $response['message'] = 'Error deleting image from database.';
+                    $response['message'] = 'Error deleting from database.';
                 }
             }
         }
+        // Handle Upload / Embed
+        else {
+            $media_type = $_POST['media_type'];
+            $media_path = '';
 
-        // Handle image upload
-        if (isset($_FILES['gallery_image'])) {
-            $file = $_FILES['gallery_image'];
-            if ($file['error'] === UPLOAD_ERR_OK) {
-                $image_name = time() . '_' . basename($file['name']);
-                $target_dir = "../uploads/";
-                if (!is_dir($target_dir)) {
-                    mkdir($target_dir, 0777, true);
+            if ($media_type === 'video_embed') {
+                $media_path = $_POST['media_path'];
+                if (filter_var($media_path, FILTER_VALIDATE_URL) === FALSE) {
+                    throw new Exception('Invalid URL provided for video embed.');
                 }
-                $target_file = $target_dir . $image_name;
-
-                if (move_uploaded_file($file['tmp_name'], $target_file)) {
-                    $stmt = $conn->prepare("INSERT INTO gallery (image_filename) VALUES (?)");
-                    $stmt->bind_param("s", $image_name);
-                    if($stmt->execute()){
-                        $response = ['status' => 'success', 'message' => 'Image uploaded successfully!'];
-                    } else {
-                        $response['message'] = 'Error saving image to database.';
+            } else { // Handle file uploads for image and video
+                if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] === UPLOAD_ERR_OK) {
+                    $media_path = time() . '_' . basename($_FILES['media_file']['name']);
+                    $target_dir = "../uploads/";
+                    if (!is_dir($target_dir)) {
+                        mkdir($target_dir, 0777, true);
+                    }
+                    $target_file = $target_dir . $media_path;
+                    if (!move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
+                        throw new Exception('Failed to move uploaded file.');
                     }
                 } else {
-                    $response['message'] = 'Error uploading file.';
+                    throw new Exception('File upload error or no file selected.');
                 }
+            }
+
+            $stmt = $conn->prepare("INSERT INTO gallery (media_type, media_path) VALUES (?, ?)");
+            $stmt->bind_param("ss", $media_type, $media_path);
+            if($stmt->execute()){
+                $response = ['status' => 'success', 'message' => 'Media added successfully!'];
             } else {
-                $response['message'] = 'Error with uploaded file.';
+                throw new Exception('Failed to save to database.');
             }
         }
     } catch (Exception $e) {
@@ -100,31 +106,48 @@ $gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
                 <div id="ajax-message" class="message" style="display: none;"></div>
 
                 <div class="card">
-                    <h3>Upload New Image</h3>
+                    <h3>Upload New Media</h3>
                     <form action="gallery.php" method="post" enctype="multipart/form-data" class="gallery-upload-form">
-                    <div class="input-group">
-                        <label for="gallery_image">Select image</label>
-                        <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required>
-                    </div>
-                    <button type="submit">Upload Image</button>
-                </form>
-            </div>
+                        <div class="input-group">
+                            <label>Media Type</label>
+                            <label><input type="radio" name="media_type" value="image" checked> Image</label>
+                            <label><input type="radio" name="media_type" value="video_upload"> Upload Video</label>
+                            <label><input type="radio" name="media_type" value="video_embed"> Embed Video (URL)</label>
+                        </div>
+                        <div id="upload-field" class="input-group">
+                            <label for="media_file">Select File</label>
+                            <input type="file" name="media_file" id="media_file" accept="image/*,video/mp4">
+                        </div>
+                        <div id="embed-field" class="input-group" style="display: none;">
+                            <label for="media_path">Video URL (e.g., YouTube)</label>
+                            <input type="text" name="media_path" id="media_path">
+                        </div>
+                        <button type="submit">Upload Media</button>
+                    </form>
+                </div>
 
             <div class="card">
                 <h3>Gallery</h3>
                 <div class="gallery-grid">
                     <?php if ($gallery_images->num_rows > 0): ?>
-                        <?php while($img = $gallery_images->fetch_assoc()): ?>
+                        <?php while($item = $gallery_images->fetch_assoc()): ?>
                             <div class="gallery-item">
-                                <img src="../uploads/<?php echo htmlspecialchars($img['image_filename']); ?>" alt="Gallery Image">
-                                <form action="gallery.php" method="post" onsubmit="return confirm('Are you sure you want to delete this image?');">
-                                    <input type="hidden" name="image_id" value="<?php echo $img['id']; ?>">
+                                <?php if ($item['media_type'] === 'image'): ?>
+                                    <img src="../uploads/<?php echo htmlspecialchars($item['media_path']); ?>" alt="Gallery Image">
+                                <?php else: ?>
+                                    <div class="video-placeholder">
+                                        <strong><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $item['media_type']))); ?></strong>
+                                        <p><?php echo htmlspecialchars($item['media_path']); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                                <form action="gallery.php" method="post" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <input type="hidden" name="image_id" value="<?php echo $item['id']; ?>">
                                     <button type="submit" name="delete_image" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <p>No images in the gallery.</p>
+                        <p>No media in the gallery.</p>
                     <?php endif; ?>
                 </div>
             </div>

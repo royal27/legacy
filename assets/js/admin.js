@@ -105,4 +105,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // Gallery media type switcher
+    const mediaTypeRadios = document.querySelectorAll('input[name="media_type"]');
+    const uploadField = document.getElementById('upload-field');
+    const embedField = document.getElementById('embed-field');
+
+    if (mediaTypeRadios.length) {
+        mediaTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'video_embed') {
+                    uploadField.style.display = 'none';
+                    embedField.style.display = 'block';
+                } else {
+                    uploadField.style.display = 'block';
+                    embedField.style.display = 'none';
+                }
+            });
+        });
+    }
 });

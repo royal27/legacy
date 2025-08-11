@@ -56,14 +56,30 @@ if ($path_parts[0] === 'page' && isset($path_parts[1])) {
     }
 
     // Fetch Homepage-specific data
-    $menu_items_sql = "SELECT m.id, m.price, m.image, mt.name, mt.description
+    $categories_result = $conn->query("SELECT * FROM categories ORDER BY name");
+    $menu_by_category = [];
+    while ($cat = $categories_result->fetch_assoc()) {
+        $menu_by_category[$cat['name']] = [];
+    }
+
+    $menu_items_sql = "SELECT m.id, m.price, m.image, mt.name, mt.description, c.name as category_name
                        FROM menus m
                        JOIN menu_translations mt ON m.id = mt.menu_id
-                       WHERE mt.language_code = ?";
+                       LEFT JOIN categories c ON m.category_id = c.id
+                       WHERE mt.language_code = ?
+                       ORDER BY c.name, m.id";
     $stmt = $conn->prepare($menu_items_sql);
     $stmt->bind_param("s", $lang);
     $stmt->execute();
     $menu_items = $stmt->get_result();
+
+    while ($item = $menu_items->fetch_assoc()) {
+        $category_name = $item['category_name'] ?? 'Uncategorized';
+        if (!isset($menu_by_category[$category_name])) {
+            $menu_by_category[$category_name] = [];
+        }
+        $menu_by_category[$category_name][] = $item;
+    }
 
     $gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
     $offers = $conn->query("SELECT * FROM offers ORDER BY id DESC");

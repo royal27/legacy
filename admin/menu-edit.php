@@ -15,6 +15,8 @@ $id = $_GET['id'];
 
 // Fetch all languages
 $languages = $conn->query("SELECT * FROM languages ORDER BY name");
+// Fetch all categories
+$categories = $conn->query("SELECT * FROM categories ORDER BY name");
 
 // Fetch menu item
 $stmt_menu = $conn->prepare("SELECT * FROM menus WHERE id = ?");
@@ -39,6 +41,7 @@ while($row = $translations_result->fetch_assoc()) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = $_POST['price'];
+    $category_id = $_POST['category_id'];
     $translations_data = $_POST['translations'];
     $current_image = $_POST['current_image'];
 
@@ -65,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->begin_transaction();
     try {
         // Update menu table
-        $stmt_menu = $conn->prepare("UPDATE menus SET price = ?, image = ? WHERE id = ?");
-        $stmt_menu->bind_param("dsi", $price, $image, $id);
+        $stmt_menu = $conn->prepare("UPDATE menus SET category_id = ?, price = ?, image = ? WHERE id = ?");
+        $stmt_menu->bind_param("idsi", $category_id, $price, $image, $id);
         $stmt_menu->execute();
 
         // Update translations
@@ -125,6 +128,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <hr>
 
                 <h3>General Details</h3>
+                <div class="input-group">
+                    <label for="category_id">Category</label>
+                    <select name="category_id" id="category_id">
+                        <option value="">Uncategorized</option>
+                        <?php mysqli_data_seek($categories, 0); ?>
+                        <?php while($cat = $categories->fetch_assoc()): ?>
+                            <option value="<?php echo $cat['id']; ?>" <?php echo ($menu['category_id'] == $cat['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat['name']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
                 <div class="input-group">
                     <label for="price">Price</label>
                     <input type="number" name="price" id="price" step="0.01" value="<?php echo htmlspecialchars($menu['price']); ?>" required>

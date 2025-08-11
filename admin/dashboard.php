@@ -1,11 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
 $page_title = 'Dashboard';
 ?>
 <!DOCTYPE html>
@@ -14,7 +8,7 @@ $page_title = 'Dashboard';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
     <div class="admin-wrapper">

@@ -10,6 +10,8 @@ $page_title = 'Add Menu Item';
 
 // Fetch all languages
 $languages = $conn->query("SELECT * FROM languages ORDER BY name");
+// Fetch all categories
+$categories = $conn->query("SELECT * FROM categories ORDER BY name");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
@@ -17,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $price = $_POST['price'];
+        $category_id = $_POST['category_id'];
         $translations = $_POST['translations'];
         $image = '';
 
@@ -38,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conn->begin_transaction();
 
-        $stmt_menu = $conn->prepare("INSERT INTO menus (price, image) VALUES (?, ?)");
-        $stmt_menu->bind_param("ds", $price, $image);
+        $stmt_menu = $conn->prepare("INSERT INTO menus (category_id, price, image) VALUES (?, ?, ?)");
+        $stmt_menu->bind_param("ids", $category_id, $price, $image);
         $stmt_menu->execute();
         $menu_id = $stmt_menu->insert_id;
 
@@ -94,6 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <hr>
 
                 <h3>General Details</h3>
+                <div class="input-group">
+                    <label for="category_id">Category</label>
+                    <select name="category_id" id="category_id">
+                        <option value="">Uncategorized</option>
+                        <?php while($cat = $categories->fetch_assoc()): ?>
+                            <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
                 <div class="input-group">
                     <label for="price">Price</label>
                     <input type="number" name="price" id="price" step="0.01" required>
