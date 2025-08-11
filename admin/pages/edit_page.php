@@ -45,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         if ($stmt->execute()) {
-            $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Page saved successfully.'];
+            $page_url = SITE_URL . '/page/' . $slug;
+            $view_link = "<a href='{$page_url}' target='_blank'>View Page</a>";
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Page saved successfully. {$view_link}"];
             redirect('index.php?page=pages');
         } else {
             $message = 'Error saving page. The slug might already exist.';

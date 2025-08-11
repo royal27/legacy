@@ -3,6 +3,12 @@ if (!defined('ADMIN_AREA')) {
     http_response_code(403);
     die('Forbidden');
 }
+
+// Fetch stats for the dashboard
+$total_users = $db->query("SELECT COUNT(*) as count FROM users")->fetch_assoc()['count'];
+$active_plugins = $db->query("SELECT COUNT(*) as count FROM plugins WHERE is_active = 1")->fetch_assoc()['count'];
+$total_pages = $db->query("SELECT COUNT(*) as count FROM pages")->fetch_assoc()['count'];
+
 ?>
 <p>Welcome to the admin dashboard. From here you can manage the entire website.</p>
 
@@ -10,9 +16,9 @@ if (!defined('ADMIN_AREA')) {
     <div class="widget">
         <h3>Site Statistics</h3>
         <ul>
-            <li><strong>Total Users:</strong> [Data to be added]</li>
-            <li><strong>Active Plugins:</strong> [Data to be added]</li>
-            <li><strong>Footer Pages:</strong> [Data to be added]</li>
+            <li><strong>Total Users:</strong> <?php echo $total_users; ?></li>
+            <li><strong>Active Plugins:</strong> <?php echo $active_plugins; ?></li>
+            <li><strong>Total Pages:</strong> <?php echo $total_pages; ?></li>
         </ul>
     </div>
     <div class="widget">

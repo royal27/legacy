@@ -18,9 +18,10 @@ body {
     display: flex;
     flex-direction: column;
     position: fixed;
-    height: 100%;
+    height: 100vh; /* Use vh for full viewport height */
     left: 0;
     top: 0;
+    z-index: 100; /* Ensure it's on top */
 }
 
 .sidebar-header {

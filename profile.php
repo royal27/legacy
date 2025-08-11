@@ -1,6 +1,5 @@
 <?php
 // This is a public-facing page
-define('APP_LOADED', true);
 
 // Bootstrap the application to get DB connection, functions, etc.
 require_once 'core/bootstrap.php';

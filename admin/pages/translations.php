@@ -4,38 +4,39 @@ if (!defined('ADMIN_AREA')) {
     die('Forbidden');
 }
 
-// --- AJAX Handler ---
-// This part handles the POST request from the JavaScript
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-    header('Content-Type: application/json');
-    $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
+$message = '';
+$message_type = '';
 
+// --- Handle Form Submission for saving all translations ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_all_translations') {
+    validate_csrf_token();
     $lang_id = (int)($_POST['lang_id'] ?? 0);
-    $lang_key = trim($_POST['lang_key'] ?? '');
-    $lang_value = trim($_POST['lang_value'] ?? '');
+    $translations = $_POST['translations'] ?? [];
 
-    if ($lang_id > 0 && !empty($lang_key)) {
-        // Use INSERT ... ON DUPLICATE KEY UPDATE to handle both new and existing translations
-        $stmt = $db->prepare(
-            "INSERT INTO language_strings (lang_id, lang_key, lang_value)
-             VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE lang_value = VALUES(lang_value)"
-        );
-        $stmt->bind_param('iss', $lang_id, $lang_key, $lang_value);
-
-        if ($stmt->execute()) {
-            $response['status'] = 'success';
-            $response['message'] = 'Translation saved!';
-        } else {
-            $response['message'] = 'Database error: ' . $stmt->error;
+    if ($lang_id > 0) {
+        $db->begin_transaction();
+        try {
+            $stmt = $db->prepare(
+                "INSERT INTO language_strings (lang_id, lang_key, lang_value)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE lang_value = VALUES(lang_value)"
+            );
+            foreach($translations as $key => $value) {
+                $key = trim($key);
+                $value = trim($value);
+                $stmt->bind_param('iss', $lang_id, $key, $value);
+                $stmt->execute();
+            }
+            $stmt->close();
+            $db->commit();
+            $message = 'All translations have been saved.';
+            $message_type = 'success';
+        } catch (mysqli_sql_exception $exception) {
+            $db->rollback();
+            $message = 'Error saving translations: ' . $exception->getMessage();
+            $message_type = 'error';
         }
-        $stmt->close();
-    } else {
-        $response['message'] = 'Invalid data received.';
     }
-
-    echo json_encode($response);
-    exit;
 }
 
 
@@ -77,7 +78,9 @@ $display_data = array_merge($master_keys, $translations);
 </div>
 
 <div class="content-block">
-    <form id="translations-form">
+    <form id="translations-form" method="post" action="index.php?page=translations&lang_id=<?php echo $lang_id; ?>">
+        <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+        <input type="hidden" name="action" value="save_all_translations">
         <input type="hidden" name="lang_id" value="<?php echo $lang_id; ?>">
         <?php foreach ($display_data as $key => $value): ?>
             <div class="form-group translation-row">
@@ -91,64 +94,11 @@ $display_data = array_merge($master_keys, $translations);
                 ><?php echo htmlspecialchars($value); ?></textarea>
             </div>
         <?php endforeach; ?>
+        <button type="submit" class="btn btn-primary">Save All Translations</button>
     </form>
 </div>
 
 <style>
 .translation-row { margin-bottom: 20px; }
 .translation-row label { font-weight: bold; display: block; margin-bottom: 5px; font-family: monospace; color: var(--color-accent); }
-.translation-input {
-    border-color: #ccc;
-}
-.translation-input:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
-}
 </style>
-
-<script>
-$(document).ready(function() {
-    $('.translation-input').on('blur', function() {
-        var textarea = $(this);
-        var lang_id = $('#translations-form input[name="lang_id"]').val();
-        var lang_key = textarea.data('key');
-        var lang_value = textarea.val();
-
-        // Add a visual cue that something is happening
-        textarea.css('border-color', 'orange');
-
-        $.ajax({
-            url: 'index.php?page=translations', // Post to the same page
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                lang_id: lang_id,
-                lang_key: lang_key,
-                lang_value: lang_value
-            },
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    toastr.success(response.message);
-                    textarea.css('border-color', '#28a745'); // Green for success
-                } else {
-                    toastr.error(response.message || 'An error occurred.');
-                    textarea.css('border-color', '#dc3545'); // Red for error
-                }
-            },
-            error: function() {
-                toastr.error('An unexpected error occurred. Please check the console.');
-                textarea.css('border-color', '#dc3545');
-            },
-            complete: function() {
-                // Optional: remove color after a delay
-                setTimeout(function() {
-                    textarea.css('border-color', '#ccc');
-                }, 2000);
-            }
-        });
-    });
-});
-</script>

@@ -37,7 +37,7 @@ if (count($active_languages) > 1):
     border-radius: 3px;
     font-weight: bold;
 }
-.lang-dropdown {
+.language-switcher > .lang-dropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -51,7 +51,7 @@ if (count($active_languages) > 1):
     z-index: 100;
     min-width: 120px;
 }
-.language-switcher:hover .lang-dropdown {
+.language-switcher:hover > .lang-dropdown {
     display: block;
 }
 .lang-dropdown li a {

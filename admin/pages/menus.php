@@ -167,7 +167,7 @@ $(document).ready(function() {
         update: function(event, ui) {
             var order = $(this).sortable('toArray', { attribute: 'data-id' });
             $.ajax({
-                url: 'index.php?page=menus',
+                url: window.location.href, // Post to the current URL
                 type: 'POST',
                 dataType: 'json',
                 data: { action: 'update_order', order: order },

@@ -1,5 +1,4 @@
 <?php
-define('APP_LOADED', true);
 require_once 'core/bootstrap.php';
 
 // Security: Must be logged in to edit profile
