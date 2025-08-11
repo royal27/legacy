@@ -71,10 +71,9 @@
         <?php else: ?>
             <p style="text-align: center; padding: 2rem;">No menu items available in this language.</p>
         <?php endif; ?>
-    </main>
 
-    <?php if ($gallery_images->num_rows > 0): ?>
-    <section class="slideshow-container">
+        <?php if ($gallery_images->num_rows > 0): ?>
+        <section class="slideshow-container">
         <div class="slideshow">
             <?php mysqli_data_seek($gallery_images, 0); ?>
             <?php while($item = $gallery_images->fetch_assoc()): ?>
@@ -99,6 +98,7 @@
         <a class="next" onclick="plusSlides(1)">&#10095;</a>
     </section>
     <?php endif; ?>
+    </main>
 
     <footer>
         <div class="footer-links">

@@ -1,6 +1,11 @@
 <?php
 require_once 'admin_header_logic.php';
 $page_title = 'Dashboard';
+
+// Fetch visitor stats
+$today = date('Y-m-d');
+$visitors_today_result = $conn->query("SELECT COUNT(DISTINCT ip_address) as count FROM visitors WHERE visit_date = '{$today}'");
+$visitors_today = $visitors_today_result->fetch_assoc()['count'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,6 +23,11 @@ $page_title = 'Dashboard';
             <main>
                 <p>Welcome to the admin panel, <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>! Please select a section from the sidebar to get started.</p>
                 <p>Your role is: <strong><?php echo htmlspecialchars($_SESSION['user_role']); ?></strong></p>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h3>Site Statistics</h3>
+                    <p><strong>Unique Visitors Today:</strong> <?php echo $visitors_today; ?></p>
+                </div>
             </main>
         </div>
     </div>

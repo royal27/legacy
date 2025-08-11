@@ -3,6 +3,14 @@
 require_once 'includes/connect.php';
 require_once 'includes/functions.php';
 
+// --- Visitor Logging ---
+$ip_address = $_SERVER['REMOTE_ADDR'];
+$visit_date = date('Y-m-d');
+$stmt_visitor = $conn->prepare("INSERT IGNORE INTO visitors (ip_address, visit_date) VALUES (?, ?)");
+$stmt_visitor->bind_param("ss", $ip_address, $visit_date);
+$stmt_visitor->execute();
+
+
 // --- 1. Fetch Settings (needed for all pages) ---
 $settings_result = $conn->query("SELECT * FROM settings");
 $settings = [];

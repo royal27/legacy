@@ -14,20 +14,25 @@ body {
     background: #333;
     color: #fff;
     height: 100vh;
-    padding: 1rem;
     position: fixed;
     transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
     text-align: center;
     color: #fff;
     margin-bottom: 2rem;
+    padding: 1rem;
+    flex-shrink: 0;
 }
 
 .sidebar ul {
     list-style: none;
-    padding: 0;
+    padding: 0 1rem;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .sidebar ul li a {
@@ -44,10 +49,8 @@ body {
 }
 
 .logout-btn {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
+    flex-shrink: 0;
+    margin: 1rem;
     text-align: center;
     padding: 0.75rem;
     background: linear-gradient(to right, #8A2387, #E94057, #F27121);

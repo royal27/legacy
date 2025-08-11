@@ -72,6 +72,18 @@ CREATE TABLE `pages` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `visitors`
+--
+
+CREATE TABLE `visitors` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `visit_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `languages`
 --
 
@@ -195,6 +207,13 @@ ALTER TABLE `pages`
   ADD UNIQUE KEY `slug` (`slug`);
 
 --
+-- Indexes for table `visitors`
+--
+ALTER TABLE `visitors`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ip_address_visit_date` (`ip_address`,`visit_date`);
+
+--
 -- Indexes for table `languages`
 --
 ALTER TABLE `languages`
@@ -255,6 +274,12 @@ ALTER TABLE `offers`
 -- AUTO_INCREMENT for table `pages`
 --
 ALTER TABLE `pages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `visitors`
+--
+ALTER TABLE `visitors`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
