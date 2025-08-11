@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($id)) { // Update
             $stmt = $conn->prepare("UPDATE pages SET slug = ?, show_in_footer = ? WHERE id = ?");
             $stmt->bind_param("sii", $slug, $show_in_footer, $id);
+            $stmt->execute();
             $page_id = $id;
         } else { // Insert
             $stmt = $conn->prepare("INSERT INTO pages (slug, show_in_footer) VALUES (?, ?)");
@@ -52,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $page_id = $conn->insert_id;
         }
-        $stmt->execute();
 
         // Insert/Update translations
         $stmt_trans = $conn->prepare("INSERT INTO page_translations (page_id, language_code, title, content) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content)");

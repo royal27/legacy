@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['invite_user'])) {
                 $body = "Please click the following link to register: " . $registration_link;
                 $headers = "From: no-reply@" . $host;
 
+                // --- Email Sending Note ---
+                // The standard PHP mail() function is highly dependent on server configuration (php.ini).
+                // It often fails on local development environments like XAMPP without proper setup of a mail server (e.g., Sendmail or an SMTP server).
+                // For a production environment, it is highly recommended to use a dedicated email sending library like PHPMailer or Symfony Mailer,
+                // which allows you to configure SMTP settings (host, username, password, port) directly in your code.
+                // The error "Failed to connect to mailserver at 'localhost' port 25" is typical for an unconfigured local server.
                 if (mail($email, $subject, $body, $headers)) {
                     $message = "Invitation sent successfully to {$email}.";
                 } else {

@@ -16,7 +16,11 @@ $id = $_GET['id'];
 // Fetch all languages
 $languages = $conn->query("SELECT * FROM languages ORDER BY name");
 // Fetch all categories
-$categories = $conn->query("SELECT * FROM categories ORDER BY name");
+$sql_categories = "SELECT mc.id, ct.name FROM menu_categories mc JOIN category_translations ct ON mc.id = ct.category_id WHERE ct.language_code = ? ORDER BY ct.name";
+$stmt_categories = $conn->prepare($sql_categories);
+$stmt_categories->bind_param("s", $admin_lang);
+$stmt_categories->execute();
+$categories = $stmt_categories->get_result();
 
 // Fetch menu item
 $stmt_menu = $conn->prepare("SELECT * FROM menus WHERE id = ?");

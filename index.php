@@ -81,20 +81,26 @@ if ($path_parts[0] === 'page' && isset($path_parts[1])) {
     }
 
     // Fetch Homepage-specific data
-    $categories_result = $conn->query("SELECT * FROM categories ORDER BY name");
+    $categories_sql = "SELECT mc.id, ct.name as category_name FROM menu_categories mc JOIN category_translations ct ON mc.id = ct.category_id WHERE ct.language_code = ? ORDER BY ct.name";
+    $stmt_categories = $conn->prepare($categories_sql);
+    $stmt_categories->bind_param("s", $lang);
+    $stmt_categories->execute();
+    $categories_result = $stmt_categories->get_result();
+
     $menu_by_category = [];
     while ($cat = $categories_result->fetch_assoc()) {
-        $menu_by_category[$cat['name']] = [];
+        $menu_by_category[$cat['category_name']] = [];
     }
 
-    $menu_items_sql = "SELECT m.id, m.price, m.image, mt.name, mt.description, c.name as category_name
+    $menu_items_sql = "SELECT m.id, m.price, m.image, mt.name, mt.description, ct.name as category_name
                        FROM menus m
                        JOIN menu_translations mt ON m.id = mt.menu_id
-                       LEFT JOIN categories c ON m.category_id = c.id
+                       LEFT JOIN menu_categories mc ON m.category_id = mc.id
+                       LEFT JOIN category_translations ct ON mc.id = ct.category_id AND ct.language_code = ?
                        WHERE mt.language_code = ?
-                       ORDER BY c.name, m.id";
+                       ORDER BY ct.name, m.id";
     $stmt = $conn->prepare($menu_items_sql);
-    $stmt->bind_param("s", $lang);
+    $stmt->bind_param("ss", $lang, $lang);
     $stmt->execute();
     $menu_items = $stmt->get_result();
 
