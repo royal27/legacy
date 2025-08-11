@@ -3,6 +3,9 @@ body {
     background-color: #f4f4f4;
     color: #333;
     margin: 0;
+}
+
+.admin-wrapper {
     display: flex;
 }
 
@@ -13,6 +16,7 @@ body {
     height: 100vh;
     padding: 1rem;
     position: fixed;
+    transition: transform 0.3s ease;
 }
 
 .sidebar h2 {
@@ -56,6 +60,30 @@ body {
     margin-left: 250px;
     padding: 2rem;
     width: calc(100% - 250px);
+}
+
+header {
+    background-color: #fff;
+    padding: 0 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    height: 60px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.menu-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    margin-right: 1rem;
 }
 
 header h2 {
@@ -142,4 +170,24 @@ form button {
     color: #fff;
     background: #337ab7;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .menu-toggle-btn {
+        display: block;
+    }
+
+    .admin-wrapper.sidebar-closed .sidebar {
+        transform: translateX(0);
+    }
 }

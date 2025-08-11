@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
 }
 require_once '../includes/connect.php';
 require_once '../includes/functions.php';
+$page_title = 'Site Settings';
 
 // Fetch current settings
 $settings = [];
@@ -15,57 +16,61 @@ while ($row = $result->fetch_assoc()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Update logo text
-    if (isset($_POST['logo_text'])) {
-        $logo_text = $_POST['logo_text'];
-        $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'logo_text'");
-        $stmt->bind_param("s", $logo_text);
-        $stmt->execute();
-    }
+    $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
 
-    // Update footer text
-    if (isset($_POST['footer_text'])) {
-        $footer_text = $_POST['footer_text'];
-        $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'footer_text'");
-        $stmt->bind_param("s", $footer_text);
-        $stmt->execute();
-    }
-
-    // Handle logo upload
-    if (isset($_FILES['logo_image']) && $_FILES['logo_image']['error'] === UPLOAD_ERR_OK) {
-        $image_name = basename($_FILES['logo_image']['name']);
-        $target_dir = "../uploads/";
-        // Ensure the upload directory exists
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
+    try {
+        // Update logo text
+        if (isset($_POST['logo_text'])) {
+            $logo_text = $_POST['logo_text'];
+            $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'logo_text'");
+            $stmt->bind_param("s", $logo_text);
+            $stmt->execute();
         }
-        $target_file = $target_dir . $image_name;
-        if (move_uploaded_file($_FILES['logo_image']['tmp_name'], $target_file)) {
-            // Delete old logo if it exists
+
+        // Update footer text
+        if (isset($_POST['footer_text'])) {
+            $footer_text = $_POST['footer_text'];
+            $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'footer_text'");
+            $stmt->bind_param("s", $footer_text);
+            $stmt->execute();
+        }
+
+        // Handle logo upload
+        if (isset($_FILES['logo_image']) && $_FILES['logo_image']['error'] === UPLOAD_ERR_OK) {
+            $image_name = time() . '_' . basename($_FILES['logo_image']['name']);
+            $target_dir = "../uploads/";
+            if (!is_dir($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            $target_file = $target_dir . $image_name;
+            if (move_uploaded_file($_FILES['logo_image']['tmp_name'], $target_file)) {
+                if (!empty($settings['logo_image']) && file_exists($target_dir . $settings['logo_image'])) {
+                    unlink($target_dir . $settings['logo_image']);
+                }
+                $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'logo_image'");
+                $stmt->bind_param("s", $image_name);
+                $stmt->execute();
+            }
+        }
+
+        // Handle deleting the logo
+        if (isset($_POST['delete_logo_image'])) {
+            $target_dir = "../uploads/";
             if (!empty($settings['logo_image']) && file_exists($target_dir . $settings['logo_image'])) {
                 unlink($target_dir . $settings['logo_image']);
             }
-            $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'logo_image'");
-            $stmt->bind_param("s", $image_name);
+            $stmt = $conn->prepare("UPDATE settings SET setting_value = '' WHERE setting_key = 'logo_image'");
             $stmt->execute();
         }
+
+        $response = ['status' => 'success', 'message' => 'Settings saved successfully!'];
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
     }
 
-    // Handle deleting the logo
-    if (isset($_POST['delete_logo_image'])) {
-        $target_dir = "../uploads/";
-        if (!empty($settings['logo_image']) && file_exists($target_dir . $settings['logo_image'])) {
-            unlink($target_dir . $settings['logo_image']);
-        }
-        $stmt = $conn->prepare("UPDATE settings SET setting_value = '' WHERE setting_key = 'logo_image'");
-        $stmt->execute();
-    }
-
-    // Refresh settings
-    $result = $conn->query("SELECT * FROM settings");
-    while ($row = $result->fetch_assoc()) {
-        $settings[$row['setting_key']] = $row['setting_value'];
-    }
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -77,14 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Site Settings</h2>
-        </header>
-        <main>
-            <form action="settings.php" method="post" enctype="multipart/form-data">
-                <div class="input-group">
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <form action="settings.php" method="post" enctype="multipart/form-data">
+                    <div class="input-group">
                     <label for="logo_text">Logo Text (leave empty if using image)</label>
                     <input type="text" name="logo_text" id="logo_text" value="<?php echo htmlspecialchars($settings['logo_text']); ?>">
                 </div>
@@ -102,7 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <button type="submit" name="save_settings">Save Settings</button>
             </form>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>

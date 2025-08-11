@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
 }
 require_once '../includes/connect.php';
 require_once '../includes/functions.php';
+$page_title = 'Manage Languages';
 
 // Handle Add Language
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_language'])) {
@@ -30,14 +31,13 @@ $languages = $conn->query("SELECT * FROM languages ORDER BY name");
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Manage Languages</h2>
-        </header>
-        <main>
-            <div class="card">
-                <h3>Add New Language</h3>
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <div class="card">
+                    <h3>Add New Language</h3>
                 <form action="languages.php" method="post">
                     <div class="input-group">
                         <label for="name">Language Name (e.g., English)</label>
@@ -74,7 +74,9 @@ $languages = $conn->query("SELECT * FROM languages ORDER BY name");
                     </tbody>
                 </table>
             </div>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>

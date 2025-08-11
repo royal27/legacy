@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($settings['logo_text'] ?? 'Restaurant Menu'); ?></title>
-    <link rel="stylesheet" href="templates/default/style.css">
+    <link rel="stylesheet" href="/templates/default/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -12,15 +12,17 @@
 <body>
     <header>
         <div class="logo">
+            <a href="/" style="text-decoration:none; color:white;">
             <?php if (!empty($settings['logo_image'])): ?>
-                <img src="uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="Logo">
+                <img src="/uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="Logo">
             <?php else: ?>
                 <h1><?php echo htmlspecialchars($settings['logo_text']); ?></h1>
             <?php endif; ?>
+            </a>
         </div>
         <nav class="language-switcher">
             <form>
-                <select name="lang" onchange="window.location.href = '?lang=' + this.value;">
+                <select name="lang" onchange="window.location.href = '/?lang=' + this.value;">
                     <?php foreach ($available_languages as $language): ?>
                         <option value="<?php echo $language['code']; ?>" <?php echo ($lang === $language['code']) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($language['name']); ?>
@@ -31,11 +33,25 @@
         </nav>
     </header>
 
+    <?php if ($offers->num_rows > 0): ?>
+    <div class="offer-ticker">
+        <div class="offer-text">
+            <?php
+                $offer_texts = [];
+                while($offer = $offers->fetch_assoc()) {
+                    $offer_texts[] = htmlspecialchars($offer['offer_text']);
+                }
+                echo implode(' *** ', $offer_texts);
+            ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <main class="menu-grid">
         <?php if ($menu_items->num_rows > 0): ?>
             <?php while($item = $menu_items->fetch_assoc()): ?>
                 <div class="menu-item">
-                    <img src="uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                    <img src="/uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                     <div class="menu-item-content">
                         <h2><?php echo htmlspecialchars($item['name']); ?></h2>
                         <p><?php echo htmlspecialchars($item['description']); ?></p>
@@ -53,7 +69,7 @@
         <div class="slideshow">
             <?php while($img = $gallery_images->fetch_assoc()): ?>
                 <div class="slide">
-                    <img src="uploads/<?php echo htmlspecialchars($img['image_filename']); ?>" alt="Gallery image">
+                    <img src="/uploads/<?php echo htmlspecialchars($img['image_filename']); ?>" alt="Gallery image">
                 </div>
             <?php endwhile; ?>
         </div>
@@ -63,6 +79,13 @@
     <?php endif; ?>
 
     <footer>
+        <div class="footer-links">
+            <?php if ($footer_pages->num_rows > 0): ?>
+                <?php while($page = $footer_pages->fetch_assoc()): ?>
+                    <a href="/page/<?php echo htmlspecialchars($page['slug']); ?>"><?php echo htmlspecialchars($page['title']); ?></a>
+                <?php endwhile; ?>
+            <?php endif; ?>
+        </div>
         <p><?php echo htmlspecialchars($settings['footer_text']); ?></p>
     </footer>
 

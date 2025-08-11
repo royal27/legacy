@@ -8,6 +8,7 @@ require_once '../includes/connect.php';
 require_once '../includes/functions.php';
 
 $role = $_SESSION['user_role'];
+$page_title = 'Manage Menus';
 
 // Fetch menus with their English translations
 $sql = "SELECT m.id, m.price, m.image, mt.name, mt.description
@@ -25,14 +26,13 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Manage Menus</h2>
-        </header>
-        <main>
-            <?php if ($role === 'owner'): ?>
-                <a href="menu-add.php" class="btn btn-add">Add New Menu</a>
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <?php if ($role === 'owner'): ?>
+                    <a href="menu-add.php" class="btn btn-add">Add New Menu</a>
             <?php endif; ?>
             <table>
                 <thead>
@@ -69,8 +69,10 @@ $result = $conn->query($sql);
                     <?php endif; ?>
                 </tbody>
             </table>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>
 <?php

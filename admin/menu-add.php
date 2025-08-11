@@ -6,41 +6,43 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
 }
 require_once '../includes/connect.php';
 require_once '../includes/functions.php';
+$page_title = 'Add Menu Item';
 
 // Fetch all languages
 $languages = $conn->query("SELECT * FROM languages ORDER BY name");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $price = $_POST['price'];
-    $translations = $_POST['translations'];
-
-    // Image upload
-    $image = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $image_name = time() . '_' . basename($_FILES['image']['name']);
-        $target_dir = "../uploads/";
-        // Ensure the upload directory exists
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        $target_file = $target_dir . $image_name;
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-            $image = $image_name;
-        } else {
-            die("Error uploading image.");
-        }
-    }
-
-    $conn->begin_transaction();
+    header('Content-Type: application/json');
+    $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
 
     try {
-        // Insert into menus table
+        $price = $_POST['price'];
+        $translations = $_POST['translations'];
+        $image = '';
+
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $image_name = time() . '_' . basename($_FILES['image']['name']);
+            $target_dir = "../uploads/";
+            if (!is_dir($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            $target_file = $target_dir . $image_name;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                $image = $image_name;
+            } else {
+                throw new Exception('Error uploading image.');
+            }
+        } else {
+            throw new Exception('Image is required.');
+        }
+
+        $conn->begin_transaction();
+
         $stmt_menu = $conn->prepare("INSERT INTO menus (price, image) VALUES (?, ?)");
         $stmt_menu->bind_param("ds", $price, $image);
         $stmt_menu->execute();
         $menu_id = $stmt_menu->insert_id;
 
-        // Insert translations
         $stmt_trans = $conn->prepare("INSERT INTO menu_translations (menu_id, language_code, name, description) VALUES (?, ?, ?, ?)");
         foreach ($translations as $lang_code => $trans) {
             $name = $trans['name'];
@@ -50,12 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $conn->commit();
-        header("Location: menus.php");
-        exit();
+        $response = ['status' => 'success', 'message' => 'Menu item added successfully!'];
     } catch (Exception $e) {
         $conn->rollback();
-        die("Error: " . $e->getMessage());
+        $response['message'] = $e->getMessage();
     }
+
+    echo json_encode($response);
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -67,16 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Add Menu Item</h2>
-        </header>
-        <main>
-            <form action="menu-add.php" method="post" enctype="multipart/form-data">
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <div id="ajax-message"></div>
+                <form action="menu-add.php" method="post" enctype="multipart/form-data" id="add-menu-form">
 
-                <?php while ($lang = $languages->fetch_assoc()): ?>
-                    <h3><?php echo htmlspecialchars($lang['name']); ?></h3>
+                    <?php while ($lang = $languages->fetch_assoc()): ?>
+                        <h3><?php echo htmlspecialchars($lang['name']); ?></h3>
                     <div class="input-group">
                         <label for="translations[<?php echo $lang['code']; ?>][name]">Name</label>
                         <input type="text" name="translations[<?php echo $lang['code']; ?>][name]" required>
@@ -100,7 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <button type="submit">Add Menu Item</button>
             </form>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>

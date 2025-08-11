@@ -7,63 +7,68 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
 require_once '../includes/connect.php';
 require_once '../includes/functions.php';
 
-$message = '';
+$page_title = 'Manage Gallery';
 
-// Handle image deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
-    $image_id = $_POST['image_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
 
-    // First, get the filename to delete the file
-    $stmt_get = $conn->prepare("SELECT image_filename FROM gallery WHERE id = ?");
-    $stmt_get->bind_param("i", $image_id);
-    $stmt_get->execute();
-    $result = $stmt_get->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $filename = $row['image_filename'];
-        $filepath = '../uploads/' . $filename;
-
-        // Then, delete the record from the database
-        $stmt_delete = $conn->prepare("DELETE FROM gallery WHERE id = ?");
-        $stmt_delete->bind_param("i", $image_id);
-        if ($stmt_delete->execute()) {
-            // Finally, delete the file
-            if (file_exists($filepath)) {
-                unlink($filepath);
+    try {
+        // Handle image deletion
+        if (isset($_POST['delete_image'])) {
+            $image_id = $_POST['image_id'];
+            $stmt_get = $conn->prepare("SELECT image_filename FROM gallery WHERE id = ?");
+            $stmt_get->bind_param("i", $image_id);
+            $stmt_get->execute();
+            $result = $stmt_get->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $filename = $row['image_filename'];
+                $filepath = '../uploads/' . $filename;
+                $stmt_delete = $conn->prepare("DELETE FROM gallery WHERE id = ?");
+                $stmt_delete->bind_param("i", $image_id);
+                if ($stmt_delete->execute()) {
+                    if (file_exists($filepath)) {
+                        unlink($filepath);
+                    }
+                    $response = ['status' => 'success', 'message' => 'Image deleted successfully.'];
+                } else {
+                    $response['message'] = 'Error deleting image from database.';
+                }
             }
-            $message = "Image deleted successfully.";
-        } else {
-            $message = "Error deleting image from database.";
         }
-    }
-}
 
+        // Handle image upload
+        if (isset($_FILES['gallery_image'])) {
+            $file = $_FILES['gallery_image'];
+            if ($file['error'] === UPLOAD_ERR_OK) {
+                $image_name = time() . '_' . basename($file['name']);
+                $target_dir = "../uploads/";
+                if (!is_dir($target_dir)) {
+                    mkdir($target_dir, 0777, true);
+                }
+                $target_file = $target_dir . $image_name;
 
-// Handle image upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['gallery_image'])) {
-    $file = $_FILES['gallery_image'];
-    if ($file['error'] === UPLOAD_ERR_OK) {
-        $image_name = time() . '_' . basename($file['name']);
-        $target_dir = "../uploads/";
-        // Ensure the upload directory exists
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        $target_file = $target_dir . $image_name;
-
-        if (move_uploaded_file($file['tmp_name'], $target_file)) {
-            $stmt = $conn->prepare("INSERT INTO gallery (image_filename) VALUES (?)");
-            $stmt->bind_param("s", $image_name);
-            if($stmt->execute()){
-                $message = "Image uploaded successfully!";
+                if (move_uploaded_file($file['tmp_name'], $target_file)) {
+                    $stmt = $conn->prepare("INSERT INTO gallery (image_filename) VALUES (?)");
+                    $stmt->bind_param("s", $image_name);
+                    if($stmt->execute()){
+                        $response = ['status' => 'success', 'message' => 'Image uploaded successfully!'];
+                    } else {
+                        $response['message'] = 'Error saving image to database.';
+                    }
+                } else {
+                    $response['message'] = 'Error uploading file.';
+                }
             } else {
-                $message = "Error saving image to database.";
+                $response['message'] = 'Error with uploaded file.';
             }
-        } else {
-            $message = "Error uploading file.";
         }
-    } else {
-        $message = "Error with uploaded file.";
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
     }
+
+    echo json_encode($response);
+    exit();
 }
 
 // Fetch all gallery images
@@ -81,22 +86,22 @@ $gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
         .gallery-item { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
         .gallery-item img { max-width: 100%; height: auto; }
         .gallery-item form { margin-top: 0.5rem; }
+        .message { padding: 1rem; margin-bottom: 1rem; border-radius: 5px; }
+        .message.success { background-color: #d4edda; color: #155724; }
+        .message.error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <header>
-            <h2>Manage Gallery</h2>
-        </header>
-        <main>
-            <?php if ($message): ?>
-                <p class="message"><?php echo $message; ?></p>
-            <?php endif; ?>
+    <div class="admin-wrapper">
+        <?php include 'sidebar.php'; ?>
+        <div class="main-content">
+            <?php include 'header.php'; ?>
+            <main>
+                <div id="ajax-message" class="message" style="display: none;"></div>
 
-            <div class="card">
-                <h3>Upload New Image</h3>
-                <form action="gallery.php" method="post" enctype="multipart/form-data">
+                <div class="card">
+                    <h3>Upload New Image</h3>
+                    <form action="gallery.php" method="post" enctype="multipart/form-data" class="gallery-upload-form">
                     <div class="input-group">
                         <label for="gallery_image">Select image</label>
                         <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required>
@@ -123,7 +128,9 @@ $gallery_images = $conn->query("SELECT * FROM gallery ORDER BY id DESC");
                     <?php endif; ?>
                 </div>
             </div>
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="../assets/js/admin.js"></script>
 </body>
 </html>
