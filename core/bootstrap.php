@@ -231,12 +231,10 @@ function generate_csrf_token() {
 }
 
 function validate_csrf_token() {
-    if (!isset($_POST['_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['_token'])) {
+    if (!isset($_POST['_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['_token'])) {
         // Token is invalid or missing
         die('CSRF validation failed.');
     }
-    // Invalidate the token after use to prevent replay attacks
-    unset($_SESSION['csrf_token']);
 }
 
 // Generate a token for every GET request page load

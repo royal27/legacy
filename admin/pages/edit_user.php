@@ -20,7 +20,8 @@ if ($user_id === 0) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_user') {
     validate_csrf_token();
     $email = trim($_POST['email']);
-    $role_id = (int)$_POST['role_id'];
+    // Keep role_id the same if it's not submitted (e.g. for super admin)
+    $role_id = isset($_POST['role_id']) ? (int)$_POST['role_id'] : $user['role_id'];
     $is_validated = isset($_POST['is_validated']) ? 1 : 0;
     $is_banned = isset($_POST['is_banned']) ? 1 : 0;
     $is_muted = isset($_POST['is_muted']) ? 1 : 0;
@@ -33,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     $sql = "UPDATE users SET email = ?, role_id = ?, is_validated = ?, is_banned = ?, is_muted = ?";
-    $params = ['siiiii', $email, $role_id, $is_validated, $is_banned, $is_muted];
+    $params = ['siiii', $email, $role_id, $is_validated, $is_banned, $is_muted];
 
     // Handle password change
     if (!empty($password)) {
