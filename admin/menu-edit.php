@@ -47,6 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $image_name = time() . '_' . basename($_FILES['image']['name']);
         $target_dir = "../uploads/";
+        // Ensure the upload directory exists
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
         $target_file = $target_dir . $image_name;
         if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
             $image = $image_name;

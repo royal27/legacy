@@ -19,11 +19,15 @@
             <?php endif; ?>
         </div>
         <nav class="language-switcher">
-            <?php foreach ($available_languages as $language): ?>
-                <a href="?lang=<?php echo $language['code']; ?>" class="<?php echo ($lang === $language['code']) ? 'active' : ''; ?>">
-                    <?php echo htmlspecialchars($language['name']); ?>
-                </a>
-            <?php endforeach; ?>
+            <form>
+                <select name="lang" onchange="window.location.href = '?lang=' + this.value;">
+                    <?php foreach ($available_languages as $language): ?>
+                        <option value="<?php echo $language['code']; ?>" <?php echo ($lang === $language['code']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($language['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
         </nav>
     </header>
 
@@ -81,5 +85,36 @@
             slides[slideIndex-1].style.display = "block";
         }
     </script>
+    <script>
+        // Lightbox script
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var modal = document.getElementById("lightbox-modal");
+            var modalImg = document.getElementById("lightbox-image");
+            var images = document.querySelectorAll(".slide img");
+            images.forEach(img => {
+                img.onclick = function(){
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                }
+            });
+
+            var span = document.getElementsByClassName("close-modal")[0];
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.style.display = "none";
+                }
+            }
+        });
+    </script>
+
+    <!-- The Lightbox Modal -->
+    <div id="lightbox-modal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="lightbox-image">
+    </div>
 </body>
 </html>

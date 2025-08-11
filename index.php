@@ -26,12 +26,15 @@ while ($row = $languages_result->fetch_assoc()) {
 }
 
 // --- 4. Determine Current Language ---
-$lang = 'en'; // Default language
-if (!empty($available_languages)) {
-    $lang = $available_languages[0]['code']; // Default to the first available language
-}
+$default_lang = !empty($available_languages) ? $available_languages[0]['code'] : 'en';
+$lang = $default_lang;
+
+// Priority: 1. GET parameter, 2. Cookie, 3. Default
 if (isset($_GET['lang']) && in_array($_GET['lang'], array_column($available_languages, 'code'))) {
     $lang = $_GET['lang'];
+    setcookie('language', $lang, time() + (86400 * 30), "/"); // Set cookie for 30 days
+} elseif (isset($_COOKIE['language']) && in_array($_COOKIE['language'], array_column($available_languages, 'code'))) {
+    $lang = $_COOKIE['language'];
 }
 
 // --- 5. Fetch Menu Items for the current language ---

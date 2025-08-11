@@ -44,6 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['gallery_image'])) {
     if ($file['error'] === UPLOAD_ERR_OK) {
         $image_name = time() . '_' . basename($file['name']);
         $target_dir = "../uploads/";
+        // Ensure the upload directory exists
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
         $target_file = $target_dir . $image_name;
 
         if (move_uploaded_file($file['tmp_name'], $target_file)) {

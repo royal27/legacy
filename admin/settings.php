@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['logo_image']) && $_FILES['logo_image']['error'] === UPLOAD_ERR_OK) {
         $image_name = basename($_FILES['logo_image']['name']);
         $target_dir = "../uploads/";
+        // Ensure the upload directory exists
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
         $target_file = $target_dir . $image_name;
         if (move_uploaded_file($_FILES['logo_image']['tmp_name'], $target_file)) {
             // Delete old logo if it exists
@@ -45,6 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("s", $image_name);
             $stmt->execute();
         }
+    }
+
+    // Handle deleting the logo
+    if (isset($_POST['delete_logo_image'])) {
+        $target_dir = "../uploads/";
+        if (!empty($settings['logo_image']) && file_exists($target_dir . $settings['logo_image'])) {
+            unlink($target_dir . $settings['logo_image']);
+        }
+        $stmt = $conn->prepare("UPDATE settings SET setting_value = '' WHERE setting_key = 'logo_image'");
+        $stmt->execute();
     }
 
     // Refresh settings
@@ -79,13 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="file" name="logo_image" id="logo_image">
                     <?php if (!empty($settings['logo_image'])): ?>
                         <p>Current logo: <img src="../uploads/<?php echo htmlspecialchars($settings['logo_image']); ?>" alt="Current Logo" width="150"></p>
+                        <button type="submit" name="delete_logo_image" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the logo image?');">Delete Logo Image</button>
                     <?php endif; ?>
                 </div>
                 <div class="input-group">
                     <label for="footer_text">Footer Text</label>
                     <input type="text" name="footer_text" id="footer_text" value="<?php echo htmlspecialchars($settings['footer_text']); ?>" required>
                 </div>
-                <button type="submit">Save Settings</button>
+                <button type="submit" name="save_settings">Save Settings</button>
             </form>
         </main>
     </div>
