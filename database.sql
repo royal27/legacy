@@ -84,6 +84,19 @@ CREATE TABLE `visitors` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_invitations`
+--
+
+CREATE TABLE `user_invitations` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `languages`
 --
 
@@ -150,7 +163,8 @@ INSERT INTO `settings` (`id`, `setting_key`, `setting_value`) VALUES
 (2, 'logo_image', ''),
 (3, 'footer_text', '© 2024 My Restaurant'),
 (4, 'active_template', 'default'),
-(5, 'admin_theme', 'default.css');
+(5, 'admin_theme', 'default.css'),
+(6, 'enable_invitations', '0');
 
 -- --------------------------------------------------------
 
@@ -161,6 +175,7 @@ INSERT INTO `settings` (`id`, `setting_key`, `setting_value`) VALUES
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('owner','waiter') NOT NULL,
   `first_name` varchar(50) DEFAULT NULL,
@@ -212,6 +227,13 @@ ALTER TABLE `pages`
 ALTER TABLE `visitors`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `ip_address_visit_date` (`ip_address`,`visit_date`);
+
+--
+-- Indexes for table `user_invitations`
+--
+ALTER TABLE `user_invitations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`);
 
 --
 -- Indexes for table `languages`
@@ -283,6 +305,12 @@ ALTER TABLE `visitors`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `user_invitations`
+--
+ALTER TABLE `user_invitations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `languages`
 --
 ALTER TABLE `languages`
@@ -304,7 +332,7 @@ ALTER TABLE `menu_translations`
 -- AUTO_INCREMENT for `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for `users`

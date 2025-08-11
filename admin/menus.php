@@ -3,12 +3,15 @@ require_once 'admin_header_logic.php';
 $role = $_SESSION['user_role'];
 $page_title = 'Manage Menus';
 
-// Fetch menus with their English translations
+// Fetch menus with their translations for the selected admin language
 $sql = "SELECT m.id, m.price, m.image, mt.name, mt.description
         FROM menus m
-        JOIN menu_translations mt ON m.id = mt.menu_id
-        WHERE mt.language_code = 'en'";
-$result = $conn->query($sql);
+        LEFT JOIN menu_translations mt ON m.id = mt.menu_id AND mt.language_code = ?
+        ORDER BY m.id DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $admin_lang);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,10 +33,10 @@ $result = $conn->query($sql);
             <table>
                 <thead>
                     <tr>
-                        <th>Name (English)</th>
+                        <th>Name (<?php echo htmlspecialchars($admin_lang); ?>)</th>
                         <th>Price</th>
                         <th>Image</th>
-                        <th>Description (English)</th>
+                        <th>Description (<?php echo htmlspecialchars($admin_lang); ?>)</th>
                         <?php if ($role === 'owner'): ?>
                             <th>Actions</th>
                         <?php endif; ?>

@@ -29,6 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
         }
 
+        // Update invitations setting
+        if (isset($_POST['enable_invitations'])) {
+            $enable_invitations = $_POST['enable_invitations'];
+            $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'enable_invitations'");
+            $stmt->bind_param("s", $enable_invitations);
+            $stmt->execute();
+        }
+
         // Handle logo upload
         if (isset($_FILES['logo_image']) && $_FILES['logo_image']['error'] === UPLOAD_ERR_OK) {
             $image_name = time() . '_' . basename($_FILES['logo_image']['name']);
@@ -97,6 +105,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="input-group">
                     <label for="footer_text">Footer Text</label>
                     <input type="text" name="footer_text" id="footer_text" value="<?php echo htmlspecialchars($settings['footer_text']); ?>" required>
+                </div>
+                <hr>
+                <div class="input-group">
+                    <label>Enable User Invitations</label>
+                    <label><input type="radio" name="enable_invitations" value="1" <?php echo ($settings['enable_invitations'] == 1) ? 'checked' : ''; ?>> Yes</label>
+                    <label><input type="radio" name="enable_invitations" value="0" <?php echo ($settings['enable_invitations'] == 0) ? 'checked' : ''; ?>> No</label>
                 </div>
                 <button type="submit" name="save_settings">Save Settings</button>
             </form>

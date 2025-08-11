@@ -80,6 +80,14 @@ header {
     width: 100%;
 }
 
+.admin-lang-switcher {
+    margin-left: auto;
+}
+
+.admin-lang-switcher select {
+    padding: 5px;
+}
+
 .menu-toggle-btn {
     background: none;
     border: none;
