@@ -88,6 +88,64 @@ switch ($action) {
         }
         break;
 
+    case 'moderate_user':
+        $user_id = (int)($_POST['user_id'] ?? 0);
+        $sub_action = $_POST['sub_action'] ?? '';
+        $until = $_POST['until'] ?? null;
+
+        if ($user_id > 0 && !empty($sub_action)) {
+            $sql = '';
+            $params = [];
+
+            switch ($sub_action) {
+                case 'mute_until':
+                    $sql = "UPDATE users SET is_muted = 1, muted_until = ? WHERE id = ?";
+                    $params = ['si', $until, $user_id];
+                    break;
+                case 'mute_indefinite':
+                    $sql = "UPDATE users SET is_muted = 1, muted_until = NULL WHERE id = ?";
+                    $params = ['i', $user_id];
+                    break;
+                case 'unmute':
+                    $sql = "UPDATE users SET is_muted = 0, muted_until = NULL WHERE id = ?";
+                    $params = ['i', $user_id];
+                    break;
+                case 'ban_until':
+                    $sql = "UPDATE users SET is_banned = 1, banned_until = ? WHERE id = ?";
+                    $params = ['si', $until, $user_id];
+                    break;
+                case 'ban_indefinite':
+                     $sql = "UPDATE users SET is_banned = 1, banned_until = NULL WHERE id = ?";
+                    $params = ['i', $user_id];
+                    break;
+                case 'unban':
+                    $sql = "UPDATE users SET is_banned = 0, banned_until = NULL WHERE id = ?";
+                    $params = ['i', $user_id];
+                    break;
+                case 'suspend_user':
+                     $sql = "UPDATE users SET suspended_until = ? WHERE id = ?";
+                    $params = ['si', $until, $user_id];
+                    break;
+                case 'unsuspend':
+                    $sql = "UPDATE users SET suspended_until = NULL WHERE id = ?";
+                    $params = ['i', $user_id];
+                    break;
+            }
+
+            if (!empty($sql)) {
+                $stmt = $db->prepare($sql);
+                $stmt->bind_param(...$params);
+                if ($stmt->execute()) {
+                    $response = ['status' => 'success', 'message' => 'User updated successfully.'];
+                } else {
+                    $response = ['status' => 'error', 'message' => 'Database error.'];
+                }
+            } else {
+                 $response = ['status' => 'error', 'message' => 'Invalid moderation action.'];
+            }
+        }
+        break;
+
     case 'install_theme':
         if (isset($_FILES['theme_zip_file'])) {
             $file = $_FILES['theme_zip_file'];

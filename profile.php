@@ -35,6 +35,18 @@ include 'templates/header.php';
         <div class="profile-info">
             <h1><?php echo htmlspecialchars($user['username']); ?></h1>
             <span class="role-badge"><?php echo htmlspecialchars($user['role_name']); ?></span>
+            <div class="status-badges">
+                <?php if ($user['is_banned']): ?>
+                    <span class="status-badge error">Banned</span>
+                <?php elseif (!$user['is_validated']): ?>
+                    <span class="status-badge warning">Not Validated</span>
+                <?php else: ?>
+                     <span class="status-badge success">Active</span>
+                <?php endif; ?>
+                <?php if ($user['is_muted']): ?>
+                    <span class="status-badge info">Muted</span>
+                <?php endif; ?>
+            </div>
             <p>Member since: <?php echo date('F j, Y', strtotime($user['created_at'])); ?></p>
             <div class="points-badge">
                 <strong><?php echo $user['points']; ?></strong> Points
@@ -64,9 +76,15 @@ include 'templates/header.php';
 .profile-header { display: flex; gap: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
 .profile-avatar img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--color-primary); }
 .profile-info h1 { margin: 0; }
-.role-badge { background: var(--color-secondary); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.9em; }
+.role-badge { background: var(--color-secondary); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.9em; display: inline-block; }
 .points-badge { background: #ffc107; color: #333; padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 10px; }
 .admin-moderation-panel { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-top: 20px; border-radius: 5px; }
+.status-badges { margin-top: 10px; display: flex; gap: 5px; }
+.status-badge { padding: 3px 8px; border-radius: 10px; color: white; font-size: 0.8em; }
+.status-badge.success { background-color: #28a745; }
+.status-badge.warning { background-color: #ffc107; color: #333; }
+.status-badge.error { background-color: var(--color-accent); }
+.status-badge.info { background-color: #17a2b8; }
 </style>
 
 <?php

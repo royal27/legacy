@@ -124,23 +124,47 @@ $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_A
             </label>
             <small>Un-checking this may prevent the user from logging in or accessing certain features.</small>
         </div>
-         <div class="form-group-checkbox">
-            <label>
-                <input type="checkbox" name="is_muted" value="1" <?php echo $user['is_muted'] ? 'checked' : ''; ?>>
-                Mute User
-            </label>
-            <small>A muted user cannot post in chats or forums (feature to be implemented by plugins).</small>
-        </div>
-        <div class="form-group-checkbox">
-            <label>
-                <input type="checkbox" name="is_banned" value="1" <?php echo $user['is_banned'] ? 'checked' : ''; ?> <?php if ($user['id'] === 1) echo 'disabled'; ?>>
-                Ban User
-            </label>
-            <small>A banned user cannot log in. The Super Admin cannot be banned.</small>
-        </div>
+        <button type="submit" class="btn btn-primary">Save Basic Info</button>
+    </form>
+</div>
 
-        <br>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+<div class="content-block">
+    <h3>Moderation Actions</h3>
+
+    <!-- Mute Action -->
+    <div class="moderation-action">
+        <strong>Mute Status:</strong> <?php echo is_user_muted($user) ? 'Muted until ' . ($user['muted_until'] ?? 'Forever') : 'Not Muted'; ?>
+        <form class="ajax-action-form" data-action="mute_user">
+            <input type="datetime-local" name="until_datetime">
+            <button type="submit" class="btn btn-secondary btn-sm">Mute Until</button>
+            <button type="button" class="btn btn-secondary btn-sm quick-action-btn" data-action="mute_indefinite">Mute Indefinitely</button>
+            <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unmute">Unmute</button>
+        </form>
+    </div>
+
+    <!-- Ban Action -->
+    <div class="moderation-action">
+         <strong>Ban Status:</strong> <?php echo $user['is_banned'] ? 'Banned until ' . ($user['banned_until'] ?? 'Forever') : 'Not Banned'; ?>
+        <form class="ajax-action-form" data-action="ban_user">
+            <input type="datetime-local" name="until_datetime">
+            <button type="submit" class="btn btn-accent btn-sm">Ban Until</button>
+            <button type="button" class="btn btn-accent btn-sm quick-action-btn" data-action="ban_indefinite">Ban Indefinitely</button>
+            <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unban">Unban</button>
+        </form>
+    </div>
+
+     <!-- Suspend Action -->
+    <div class="moderation-action">
+         <strong>Suspend Status:</strong> <?php echo $user['suspended_until'] ? 'Suspended until ' . $user['suspended_until'] : 'Not Suspended'; ?>
+        <form class="ajax-action-form" data-action="suspend_user">
+            <input type="datetime-local" name="until_datetime">
+            <button type="submit" class="btn btn-warning btn-sm">Suspend Until</button>
+            <button type="button" class="btn btn-info btn-sm quick-action-btn" data-action="unsuspend">Unsuspend</button>
+        </form>
+    </div>
+
+    <hr>
+    <strong>Other Actions:</strong>
         <button type="button" id="kick-user-btn" class="btn btn-accent" data-user-id="<?php echo $user_id; ?>" <?php if ($user['id'] === $_SESSION['user_id']) echo 'disabled'; ?>>Kick User (Force Logout)</button>
     </form>
 </div>
@@ -150,10 +174,66 @@ $roles = $db->query("SELECT * FROM roles ORDER BY name ASC")->fetch_all(MYSQLI_A
 .form-group-checkbox label { display: flex; align-items: center; }
 .form-group-checkbox input { margin-right: 10px; width: auto; }
 .form-group-checkbox small { display: block; margin-left: 28px; color: #6c757d; }
+.moderation-action { border: 1px solid #eee; padding: 15px; margin-top: 15px; border-radius: 5px; }
+.moderation-action .ajax-action-form { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
+.btn-warning { background-color: #ffc107; color: #212529; border-color: #ffc107; }
+.btn-info { background-color: #17a2b8; color: white; border-color: #17a2b8; }
 </style>
 
 <script>
 $(document).ready(function() {
+    // --- Moderation Actions AJAX ---
+    function handleModerationAction(userId, subAction, untilValue = null) {
+        if (!confirm('Are you sure you want to perform this action?')) {
+            return;
+        }
+        $.ajax({
+            url: 'ajax_handler.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'moderate_user',
+                user_id: userId,
+                sub_action: subAction,
+                until: untilValue
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message);
+                    // Reload the page to see status changes
+                    setTimeout(function() { location.reload(); }, 1500);
+                } else {
+                    toastr.error(response.message || 'An error occurred.');
+                }
+            },
+            error: function() {
+                toastr.error('An unexpected error occurred.');
+            }
+        });
+    }
+
+    // Timed actions form submission
+    $('.ajax-action-form').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var subAction = form.data('action');
+        var untilValue = form.find('input[name="until_datetime"]').val();
+        var userId = $('#kick-user-btn').data('user-id'); // A bit hacky, but gets the ID
+
+        handleModerationAction(userId, subAction, untilValue);
+    });
+
+    // Indefinite/remove actions button clicks
+    $('.quick-action-btn').on('click', function() {
+        var button = $(this);
+        var subAction = button.data('action');
+        var userId = $('#kick-user-btn').data('user-id');
+
+        handleModerationAction(userId, subAction);
+    });
+
+
+    // --- Kick User ---
     $('#kick-user-btn').on('click', function() {
         if (!confirm('Are you sure you want to kick this user? They will be forcefully logged out.')) {
             return;

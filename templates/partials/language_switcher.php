@@ -10,7 +10,7 @@ if (count($active_languages) > 1):
 ?>
 <div class="language-switcher">
     <div class="current-lang">
-        <span><?php echo strtoupper($current_lang_code); ?></span>
+        <span><?php echo strtoupper($current_lang_code); ?></span> &#9662;
     </div>
     <ul class="lang-dropdown">
         <?php foreach ($active_languages as $lang): ?>
@@ -36,9 +36,10 @@ if (count($active_languages) > 1):
     padding: 5px 10px;
     border-radius: 3px;
     font-weight: bold;
+    user-select: none; /* Prevent text selection */
 }
-.language-switcher > .lang-dropdown {
-    display: none;
+.lang-dropdown {
+    display: none; /* Hidden by default */
     position: absolute;
     top: 100%;
     right: 0;
@@ -51,8 +52,8 @@ if (count($active_languages) > 1):
     z-index: 100;
     min-width: 120px;
 }
-.language-switcher:hover > .lang-dropdown {
-    display: block;
+.lang-dropdown.show {
+    display: block; /* Shown with JS */
 }
 .lang-dropdown li a {
     display: block;
@@ -71,3 +72,19 @@ if (count($active_languages) > 1):
     color: white !important;
 }
 </style>
+
+<script>
+$(document).ready(function() {
+    $('.language-switcher .current-lang').on('click', function(e) {
+        e.stopPropagation(); // Prevent click from bubbling up to the document
+        $('.lang-dropdown').toggleClass('show');
+    });
+
+    // Close the dropdown if the user clicks outside of it
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.language-switcher').length) {
+            $('.lang-dropdown').removeClass('show');
+        }
+    });
+});
+</script>

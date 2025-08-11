@@ -13,6 +13,9 @@ $success_message = '';
 if (isset($_GET['kicked'])) {
     $error_message = 'You have been logged out by an administrator.';
 }
+if (isset($_GET['banned'])) {
+    $error_message = 'This account has been banned.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();

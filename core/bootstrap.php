@@ -86,22 +86,35 @@ if ($active_theme !== 'default' && is_dir(__DIR__ . '/../themes/' . $active_them
 // --- Session & Auth Check ---
 if (is_logged_in()) {
     $user_id_check = (int)$_SESSION['user_id'];
-    $stmt = $db->prepare("SELECT force_logout FROM users WHERE id = ? LIMIT 1");
+    $stmt = $db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
     $stmt->bind_param('i', $user_id_check);
     $stmt->execute();
     $user_check_res = $stmt->get_result();
 
     if ($user_check_res && $user_check_res->num_rows > 0) {
         $user_check = $user_check_res->fetch_assoc();
-        if ($user_check['force_logout'] == 1) {
-            // Reset the flag
-            $stmt_update = $db->prepare("UPDATE users SET force_logout = 0 WHERE id = ?");
-            $stmt_update->bind_param('i', $user_id_check);
-            $stmt_update->execute();
 
-            // Destroy session and redirect
+        // Check if user has been kicked
+        if ($user_check['force_logout'] == 1) {
+            $db->query("UPDATE users SET force_logout = 0 WHERE id = {$user_id_check}");
             session_destroy();
-            redirect('login.php?kicked=1');
+            redirect(SITE_URL . '/login?kicked=1');
+        }
+
+        $now = new DateTime();
+
+        // Check if user has been banned
+        $banned_until = $user_check['banned_until'] ? new DateTime($user_check['banned_until']) : null;
+        if ($user_check['is_banned'] == 1 || ($banned_until && $banned_until > $now)) {
+            session_destroy();
+            redirect(SITE_URL . '/login?banned=1');
+        }
+
+        // Check if user is suspended
+        $suspended_until = $user_check['suspended_until'] ? new DateTime($user_check['suspended_until']) : null;
+        if ($suspended_until && $suspended_until > $now) {
+            http_response_code(403);
+            die('Your account is currently suspended until ' . $suspended_until->format('Y-m-d H:i:s'));
         }
     }
     $stmt->close();
@@ -211,6 +224,20 @@ function redirect($url) {
  * @param string $location The menu location identifier.
  * @return array An array of menu items.
  */
+function is_user_muted(array $user): bool {
+    if ($user['is_muted'] == 1) {
+        // Check if there's a timed mute
+        if ($user['muted_until']) {
+            $now = new DateTime();
+            $muted_until = new DateTime($user['muted_until']);
+            return $muted_until > $now;
+        }
+        // If no time limit, it's a permanent mute
+        return true;
+    }
+    return false;
+}
+
 function get_menu(string $location): array {
     global $db;
     $location = $db->real_escape_string($location);

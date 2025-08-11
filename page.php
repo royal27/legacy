@@ -1,5 +1,4 @@
 <?php
-define('APP_LOADED', true);
 require_once 'core/bootstrap.php';
 
 // Get slug from URL
