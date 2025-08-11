@@ -120,7 +120,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
-(1, 'owner', '$2y$10$H.p6dZJkzq8mC5W4fS2j7eT9/yU/N.j6C/i.E/O/2.gS/B8C2s.aG', 'owner', '2024-05-24 21:22:15');
+(1, 'owner', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'owner', '2024-05-24 21:22:15');
 
 --
 -- Indexes for dumped tables
