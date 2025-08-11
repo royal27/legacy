@@ -29,10 +29,23 @@ $available_languages = [];
 while ($row = $languages_result->fetch_assoc()) {
     $available_languages[] = $row;
 }
-$footer_pages = $conn->query("SELECT title, slug FROM pages WHERE show_in_footer = 1 ORDER BY title");
 
 // --- 4. Determine default language for content ---
 $default_lang = !empty($available_languages) ? $available_languages[0]['code'] : 'en';
+
+// Determine current language for this request
+$lang = $default_lang;
+if (isset($_GET['lang']) && in_array($_GET['lang'], array_column($available_languages, 'code'))) {
+    $lang = $_GET['lang'];
+} elseif (isset($_COOKIE['language']) && in_array($_COOKIE['language'], array_column($available_languages, 'code'))) {
+    $lang = $_COOKIE['language'];
+}
+
+$footer_pages_sql = "SELECT p.slug, pt.title FROM pages p JOIN page_translations pt ON p.id = pt.page_id WHERE p.show_in_footer = 1 AND pt.language_code = ? ORDER BY pt.title";
+$stmt_footer = $conn->prepare($footer_pages_sql);
+$stmt_footer->bind_param("s", $lang);
+$stmt_footer->execute();
+$footer_pages = $stmt_footer->get_result();
 
 
 // --- ROUTING LOGIC ---
@@ -70,14 +83,9 @@ if ($path_parts[0] === 'page' && isset($path_parts[1])) {
 
 // Route: / (Homepage)
 } else if (empty($path_parts[0])) {
-    // Determine Current Language
-    $default_lang = !empty($available_languages) ? $available_languages[0]['code'] : 'en';
-    $lang = $default_lang;
-    if (isset($_GET['lang']) && in_array($_GET['lang'], array_column($available_languages, 'code'))) {
-        $lang = $_GET['lang'];
+    // Set cookie if lang is passed in URL
+    if (isset($_GET['lang'])) {
         setcookie('language', $lang, time() + (86400 * 30), "/");
-    } elseif (isset($_COOKIE['language']) && in_array($_COOKIE['language'], array_column($available_languages, 'code'))) {
-        $lang = $_COOKIE['language'];
     }
 
     // Fetch Homepage-specific data
