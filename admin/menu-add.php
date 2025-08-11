@@ -1,11 +1,9 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: menus.php");
+require_once 'admin_header_logic.php';
+if ($_SESSION['user_role'] !== 'owner') {
+    header("Location: dashboard.php");
     exit();
 }
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
 $page_title = 'Add Menu Item';
 
 // Fetch all languages
@@ -71,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Menu Item</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
     <div class="admin-wrapper">

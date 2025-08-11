@@ -80,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php include 'sidebar.php'; ?>
         <div class="main-content">
             <?php include 'header.php'; ?>
-            <?php include 'offer_ticker_partial.php'; ?>
             <main>
                 <form action="settings.php" method="post" enctype="multipart/form-data">
                     <div class="input-group">
