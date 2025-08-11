@@ -39,7 +39,9 @@ if (count($active_languages) > 1):
     user-select: none; /* Prevent text selection */
 }
 .lang-dropdown {
-    display: none; /* Hidden by default */
+    visibility: hidden; /* Hidden by default */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
     position: absolute;
     top: 100%;
     right: 0;
@@ -53,7 +55,8 @@ if (count($active_languages) > 1):
     min-width: 120px;
 }
 .lang-dropdown.show {
-    display: block; /* Shown with JS */
+    visibility: visible;
+    opacity: 1;
 }
 .lang-dropdown li a {
     display: block;

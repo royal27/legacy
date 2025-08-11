@@ -74,6 +74,11 @@ switch ($route) {
         include 'language.php';
         break;
 
+    case 'profile-ajax':
+        // This acts as the endpoint for profile AJAX calls, e.g., avatar upload
+        include 'profile_ajax_handler.php';
+        break;
+
     default:
         http_response_code(404);
         $page_title = "404 Not Found";

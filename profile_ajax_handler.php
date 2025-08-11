@@ -1,6 +1,5 @@
 <?php
-define('APP_LOADED', true);
-require_once __DIR__ . '/core/bootstrap.php';
+// This file is now included by the main router, so bootstrap is already loaded.
 
 // Set header to JSON
 header('Content-Type: application/json');

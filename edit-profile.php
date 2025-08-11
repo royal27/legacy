@@ -126,7 +126,7 @@ $(document).ready(function() {
         var progressBar = $('.progress-bar');
 
         $.ajax({
-            url: 'profile_ajax_handler.php',
+            url: '<?php echo SITE_URL; ?>/profile-ajax',
             type: 'POST',
             dataType: 'json',
             cache: false,
