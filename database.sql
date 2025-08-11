@@ -87,7 +87,8 @@ CREATE TABLE `settings` (
 INSERT INTO `settings` (`id`, `setting_key`, `setting_value`) VALUES
 (1, 'logo_text', 'My Restaurant'),
 (2, 'logo_image', ''),
-(3, 'footer_text', '© 2024 My Restaurant');
+(3, 'footer_text', '© 2024 My Restaurant'),
+(4, 'active_template', 'default');
 
 -- --------------------------------------------------------
 
@@ -174,7 +175,7 @@ ALTER TABLE `menu_translations`
 -- AUTO_INCREMENT for `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for `users`
