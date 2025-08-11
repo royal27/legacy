@@ -18,6 +18,7 @@ $users = $conn->query("SELECT id, username, role, first_name, last_name FROM use
         <?php include 'sidebar.php'; ?>
         <div class="main-content">
             <?php include 'header.php'; ?>
+            <?php include 'offer_ticker_partial.php'; ?>
             <main>
                 <a href="user-add.php" class="btn btn-add">Add New User</a>
                 <table>

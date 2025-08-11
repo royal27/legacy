@@ -1,11 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
 $page_title = 'Edit User';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -56,7 +50,7 @@ if (!$user) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
     <div class="admin-wrapper">

@@ -20,6 +20,7 @@ $visitors_today = $visitors_today_result->fetch_assoc()['count'];
         <?php include 'sidebar.php'; ?>
         <div class="main-content">
             <?php include 'header.php'; ?>
+            <?php include 'offer_ticker_partial.php'; ?>
             <main>
                 <p>Welcome to the admin panel, <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>! Please select a section from the sidebar to get started.</p>
                 <p>Your role is: <strong><?php echo htmlspecialchars($_SESSION['user_role']); ?></strong></p>

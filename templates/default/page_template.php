@@ -28,7 +28,7 @@
     <main class="page-content" style="padding: 2rem; max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 10px;">
         <h2><?php echo htmlspecialchars($page['title']); ?></h2>
         <div>
-            <?php echo nl2br(htmlspecialchars($page['content'])); ?>
+            <?php echo nl2br(parse_bbcode($page['content'])); ?>
         </div>
     </main>
 

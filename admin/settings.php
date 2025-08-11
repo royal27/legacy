@@ -1,11 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'owner') {
-    header("Location: dashboard.php");
-    exit();
-}
-require_once '../includes/connect.php';
-require_once '../includes/functions.php';
+require_once 'admin_header_logic.php';
 $page_title = 'Site Settings';
 
 // Fetch current settings
@@ -79,13 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Settings</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin_themes/<?php echo $admin_theme; ?>">
 </head>
 <body>
     <div class="admin-wrapper">
         <?php include 'sidebar.php'; ?>
         <div class="main-content">
             <?php include 'header.php'; ?>
+            <?php include 'offer_ticker_partial.php'; ?>
             <main>
                 <form action="settings.php" method="post" enctype="multipart/form-data">
                     <div class="input-group">
