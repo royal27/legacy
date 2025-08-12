@@ -61,6 +61,7 @@ $active_theme = $settings['active_theme'] ?? 'default';
     <h2>Install New Theme</h2>
     <p>Upload a theme in .zip format. The zip file must contain a <strong>theme.json</strong> manifest file.</p>
     <form id="upload-theme-form" method="post" action="" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <div class="form-group">
             <label for="theme_zip_file">Theme .zip file</label>
             <input type="file" id="theme_zip_file" name="theme_zip_file" accept=".zip" required>
@@ -129,11 +130,6 @@ $active_theme = $settings['active_theme'] ?? 'default';
 </style>
 
 <script>
-    // Make the CSRF token available to all JS on this page
-    window.csrf_token = '<?php echo $_SESSION['csrf_token']; ?>';
-</script>
-
-<script>
 $(document).ready(function() {
     console.log("Themes page JS loaded.");
     // --- Delete Theme Logic ---
@@ -177,7 +173,6 @@ $(document).ready(function() {
 
         var formData = new FormData(this);
         formData.append('action', 'install_theme');
-        formData.append('_token', window.csrf_token);
 
         var progressBarContainer = $('.progress-bar-container');
         var progressBar = $('.progress-bar');

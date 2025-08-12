@@ -56,6 +56,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
     <h2>Install New Plugin</h2>
     <p>Upload a plugin in .zip format. The zip file must contain a <strong>plugin.json</strong> manifest file.</p>
     <form id="upload-plugin-form" method="post" action="" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <div class="form-group">
             <label for="plugin_zip_file">Plugin .zip file</label>
             <input type="file" id="plugin_zip_file" name="plugin_zip_file" accept=".zip" required>
@@ -154,11 +155,6 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 </style>
 
 <script>
-    // Make the CSRF token available to all JS on this page
-    window.csrf_token = '<?php echo $_SESSION['csrf_token']; ?>';
-</script>
-
-<script>
 $(document).ready(function() {
     console.log("Plugins page JS loaded.");
 
@@ -233,7 +229,6 @@ $(document).ready(function() {
 
         var formData = new FormData(this);
         formData.append('action', 'install_plugin');
-        formData.append('_token', window.csrf_token);
 
         var progressBarContainer = $('.progress-bar-container');
         var progressBar = $('.progress-bar');

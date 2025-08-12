@@ -275,12 +275,9 @@ function generate_csrf_token() {
 }
 
 function validate_csrf_token() {
-    $posted_token = $_POST['_token'] ?? 'not_set';
-    $session_token = $_SESSION['csrf_token'] ?? 'not_set';
-
-    if ($posted_token === 'not_set' || $session_token === 'not_set' || !hash_equals($session_token, $posted_token)) {
-        // Token is invalid or missing, provide a detailed debug message.
-        die("CSRF validation failed. TOKEN_SENT: [{$posted_token}] --- TOKEN_EXPECTED: [{$session_token}]");
+    if (!isset($_POST['_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['_token'])) {
+        // Token is invalid or missing
+        die('CSRF validation failed.');
     }
 }
 
