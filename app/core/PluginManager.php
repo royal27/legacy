@@ -16,7 +16,7 @@ class PluginManager {
 
         if ($active_plugins) {
             foreach ($active_plugins as $plugin) {
-                $plugin_file = '../app/plugins/' . $plugin['folder_name'] . '/' . $plugin['folder_name'] . '.php';
+                $plugin_file = __DIR__ . '/../plugins/' . $plugin['folder_name'] . '/' . $plugin['folder_name'] . '.php';
                 if (file_exists($plugin_file)) {
                     require_once $plugin_file;
                 }
@@ -30,7 +30,7 @@ class PluginManager {
      */
     public static function get_all_plugins() {
         $plugins = [];
-        $plugins_dir = '../app/plugins/';
+        $plugins_dir = __DIR__ . '/../plugins/';
         $plugin_folders = array_filter(scandir($plugins_dir), function ($item) use ($plugins_dir) {
             return is_dir($plugins_dir . $item) && !in_array($item, ['.', '..']);
         });

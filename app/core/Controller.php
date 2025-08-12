@@ -8,7 +8,7 @@ class Controller {
     // Load model
     public function model($model) {
         // Require model file
-        require_once '../app/models/' . $model . '.php';
+        require_once __DIR__ . '/../models/' . $model . '.php';
         // Instantiate model
         return new $model();
     }
@@ -18,9 +18,9 @@ class Controller {
         // Get the active template from our global App class
         $active_template = App::$template;
 
-        $view_file = '../app/views/' . $view . '.php';
-        $header_file = '../templates/' . $active_template . '/header.php';
-        $footer_file = '../templates/' . $active_template . '/footer.php';
+        $view_file = __DIR__ . '/../views/' . $view . '.php';
+        $header_file = __DIR__ . '/../../templates/' . $active_template . '/header.php';
+        $footer_file = __DIR__ . '/../../templates/' . $active_template . '/footer.php';
 
         // Check if all necessary files exist
         if (!file_exists($view_file)) {

@@ -9,12 +9,13 @@ class Router {
         $url = $this->getUrl();
 
         // Look for controller in controllers folder
-        if (isset($url[0]) && file_exists('../app/controllers/' . ucwords($url[0]) . '.php')) {
+        $controller_path = __DIR__ . '/../controllers/' . ucwords($url[0] ?? '') . '.php';
+        if (isset($url[0]) && file_exists($controller_path)) {
             $this->controller = ucwords($url[0]);
             unset($url[0]);
         }
 
-        require_once '../app/controllers/' . $this->controller . '.php';
+        require_once __DIR__ . '/../controllers/' . $this->controller . '.php';
 
         // Instantiate controller class
         $this->controller = new $this->controller;
