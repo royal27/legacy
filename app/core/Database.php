@@ -51,6 +51,7 @@ class Database {
         $this->execute($params);
         $result = $this->stmt->get_result();
         $this->stmt->close();
+        $this->stmt = null;
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -59,6 +60,7 @@ class Database {
         $this->execute($params);
         $result = $this->stmt->get_result();
         $this->stmt->close();
+        $this->stmt = null;
         return $result->fetch_assoc();
     }
 
