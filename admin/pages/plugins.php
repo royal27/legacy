@@ -155,6 +155,8 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 
 <script>
 $(document).ready(function() {
+    console.log("Plugins page JS loaded.");
+
     // --- Modal Logic ---
     var modal = $('#edit-plugin-modal');
     $('.edit-plugin-btn').on('click', function() {
@@ -206,7 +208,8 @@ $(document).ready(function() {
                     toastr.error(response.message || 'An error occurred.');
                 }
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Delete plugin AJAX error:", textStatus, errorThrown);
                 toastr.error('An unexpected error occurred.');
             }
         });
@@ -214,13 +217,22 @@ $(document).ready(function() {
 
     // --- Install Plugin Logic ---
     $('#upload-plugin-form').on('submit', function(e) {
+        console.log("Upload form submitted.");
         e.preventDefault();
+
+        var fileInput = $('#plugin_zip_file')[0];
+        if (!fileInput.files || fileInput.files.length === 0) {
+            toastr.error("Please select a file to upload.");
+            return;
+        }
+
         var formData = new FormData(this);
         formData.append('action', 'install_plugin');
 
         var progressBarContainer = $('.progress-bar-container');
         var progressBar = $('.progress-bar');
 
+        console.log("Sending AJAX request to install plugin...");
         $.ajax({
             url: 'ajax_handler.php',
             type: 'POST',
@@ -232,6 +244,7 @@ $(document).ready(function() {
             xhr: function() {
                 var xhr = new window.XMLHttpRequest();
                 progressBarContainer.show();
+                progressBar.width('0%').text('0%');
                 xhr.upload.addEventListener('progress', function(evt) {
                     if (evt.lengthComputable) {
                         var percentComplete = parseInt((evt.loaded / evt.total) * 100);
@@ -242,6 +255,7 @@ $(document).ready(function() {
                 return xhr;
             },
             success: function(response) {
+                console.log("Install plugin AJAX success:", response);
                 progressBarContainer.hide();
                 if (response.status === 'success') {
                     toastr.success(response.message);
@@ -249,12 +263,13 @@ $(document).ready(function() {
                         location.reload();
                     }, 2000);
                 } else {
-                    toastr.error(response.message || 'An error occurred.');
+                    toastr.error(response.message || 'An error occurred during installation.');
                 }
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Install plugin AJAX error:", textStatus, errorThrown);
                 progressBarContainer.hide();
-                toastr.error('An unexpected error occurred during upload.');
+                toastr.error('An unexpected error occurred during upload. Check console for details.');
             }
         });
     });
