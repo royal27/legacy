@@ -100,10 +100,29 @@ switch ($route) {
         break;
 
     default:
+        // --- Plugin Route Handling ---
+        // Check if the route matches an active plugin's custom link
+        $plugin_route = '/' . $route;
+        $stmt = $db->prepare("SELECT * FROM plugins WHERE custom_link = ? AND is_active = 1");
+        $stmt->bind_param('s', $plugin_route);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            $plugin = $result->fetch_assoc();
+            $plugin_page_path = __DIR__ . '/plugins/' . $plugin['identifier'] . '/public_page.php';
+
+            if (file_exists($plugin_page_path)) {
+                $stmt->close();
+                include_once $plugin_page_path;
+                exit(); // Stop further execution
+            }
+        }
+        $stmt->close();
+
+        // If no plugin route was found, show 404
         http_response_code(404);
         $page_title = "404 Not Found";
-        // You can create a dedicated 404 template
-        // For now, we'll just show a simple message
         include 'templates/header.php';
         echo '<div class="container message-box error"><h1>404 - Page Not Found</h1><p>The page you are looking for does not exist.</p></div>';
         include 'templates/footer.php';
