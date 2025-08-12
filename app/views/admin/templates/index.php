@@ -1,5 +1,18 @@
-<h1 class="gradient-text"><?php echo htmlspecialchars($data['title']); ?></h1>
-<p>Here you can manage the site's appearance by activating a template. New templates can be added by uploading their folder to the `/templates` directory.</p>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div>
+        <h1 class="gradient-text" style="margin: 0;"><?php echo htmlspecialchars($data['title']); ?></h1>
+        <p style="margin: 0;">Here you can manage the site's appearance by activating a template.</p>
+    </div>
+</div>
+
+<div class="admin-card" style="margin-bottom: 2rem;">
+    <h2>Upload New Template</h2>
+    <p>Upload a .zip file containing the template folder.</p>
+    <form action="/admin/templates/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="template_zip" accept=".zip" required>
+        <button type="submit" class="btn">Upload</button>
+    </form>
+</div>
 
 <div class="templates-grid">
     <?php foreach ($data['templates'] as $template): ?>
@@ -28,5 +41,14 @@
         padding: 1rem;
         border-radius: 5px;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .admin-card {
+        background: var(--bg-surface);
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
     }
 </style>

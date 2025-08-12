@@ -1,0 +1,160 @@
+/* --- Chat-Style Theme Base --- */
+/* This file inherits all styles from vibrant.css and then adds its own layout. */
+@import url('vibrant.css');
+
+:root {
+    --gradient-bg: linear-gradient(-45deg, #8a2be2, #228b22, #4169e1, #dc143c);
+}
+
+body {
+    background: var(--gradient-bg);
+    background-size: 400% 400%;
+    animation: gradient-animation 15s ease infinite;
+    display: flex;
+}
+
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.sidebar {
+    width: 250px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.sidebar-nav a {
+    display: block;
+    color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.sidebar-nav a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.main-content-wrapper {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+}
+
+.chat-header {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    color: #fff;
+}
+
+.main-content {
+    padding: 2rem;
+}
+
+/* We will hide the default header and footer in this template */
+.main-header, .main-footer {
+    display: none;
+}
+
+/* Override other elements for the gradient theme */
+.main-content h1, .main-content p {
+    color: #fff;
+}
+
+.main-content .admin-card, .main-content .template-card, .main-content table {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.main-content input, .main-content select, .main-content textarea {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+.main-content input:focus, .main-content select:focus, .main-content textarea:focus {
+    border-color: var(--color-extra);
+}
+
+/* Custom Scrollbar with gradient */
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-bg);
+  background-size: 400% 400%;
+  animation: gradient-animation 15s ease infinite;
+  border-radius: 6px;
+}
+
+/* --- Profile Dropdown --- */
+.chat-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.profile-area {
+    position: relative;
+}
+.profile-trigger {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+.profile-trigger .arrow-down {
+    font-size: 0.7rem;
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 150%;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    min-width: 180px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+.profile-dropdown.active {
+    display: block;
+}
+.profile-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+.profile-dropdown a:hover {
+    background-color: var(--bg-main);
+}
+.profile-dropdown hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 5px 0;
+}

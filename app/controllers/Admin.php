@@ -200,6 +200,36 @@ class Admin extends Controller {
 
         $templateModel = $this->model('Template');
 
+        // Handle Upload
+        if ($action === 'upload' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_FILES['template_zip']) && $_FILES['template_zip']['error'] == 0) {
+                $target_file = __DIR__ . '/../uploads/' . basename($_FILES['template_zip']['name']);
+
+                // Basic validation
+                if ($_FILES['template_zip']['type'] == 'application/zip') {
+                    if (move_uploaded_file($_FILES['template_zip']['tmp_name'], $target_file)) {
+                        $zip = new ZipArchive;
+                        if ($zip->open($target_file) === TRUE) {
+                            $zip->extractTo(__DIR__ . '/../../templates/');
+                            $zip->close();
+                            Session::flash('success', 'Template uploaded and extracted successfully.');
+                            unlink($target_file); // Clean up
+                        } else {
+                            Session::flash('error', 'Failed to open the zip file.');
+                        }
+                    } else {
+                        Session::flash('error', 'Failed to move uploaded file.');
+                    }
+                } else {
+                    Session::flash('error', 'Invalid file type. Only .zip files are allowed.');
+                }
+            } else {
+                Session::flash('error', 'File upload error.');
+            }
+            header('Location: /admin/templates');
+            exit;
+        }
+
         // Sync filesystem templates with DB before any action
         $templateModel->sync_templates();
 
@@ -225,6 +255,34 @@ class Admin extends Controller {
         if (!Auth::check('admin.plugins.manage')) {
             Session::flash('error', 'You do not have permission to manage plugins.');
             header('Location: /admin');
+            exit;
+        }
+
+        if ($action === 'upload' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_FILES['plugin_zip']) && $_FILES['plugin_zip']['error'] == 0) {
+                $target_file = __DIR__ . '/../uploads/' . basename($_FILES['plugin_zip']['name']);
+
+                if ($_FILES['plugin_zip']['type'] == 'application/zip') {
+                    if (move_uploaded_file($_FILES['plugin_zip']['tmp_name'], $target_file)) {
+                        $zip = new ZipArchive;
+                        if ($zip->open($target_file) === TRUE) {
+                            $zip->extractTo(__DIR__ . '/../plugins/');
+                            $zip->close();
+                            Session::flash('success', 'Plugin uploaded and extracted successfully.');
+                            unlink($target_file);
+                        } else {
+                            Session::flash('error', 'Failed to open the zip file.');
+                        }
+                    } else {
+                        Session::flash('error', 'Failed to move uploaded file.');
+                    }
+                } else {
+                    Session::flash('error', 'Invalid file type. Only .zip files are allowed.');
+                }
+            } else {
+                Session::flash('error', 'File upload error.');
+            }
+            header('Location: /admin/plugins');
             exit;
         }
 

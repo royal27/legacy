@@ -1,5 +1,18 @@
-<h1 class="gradient-text"><?php echo htmlspecialchars($data['title']); ?></h1>
-<p>Here you can manage plugins. New plugins can be added by uploading their folder to the `/app/plugins` directory.</p>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div>
+        <h1 class="gradient-text" style="margin: 0;"><?php echo htmlspecialchars($data['title']); ?></h1>
+        <p style="margin: 0;">Here you can manage plugins for the site.</p>
+    </div>
+</div>
+
+<div class="admin-card" style="margin-bottom: 2rem;">
+    <h2>Upload New Plugin</h2>
+    <p>Upload a .zip file containing the plugin folder.</p>
+    <form action="/admin/plugins/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="plugin_zip" accept=".zip" required>
+        <button type="submit" class="btn">Upload</button>
+    </form>
+</div>
 
 <table style="width: 100%; border-collapse: collapse;">
     <thead>
