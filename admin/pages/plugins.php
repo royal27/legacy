@@ -156,8 +156,9 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 
 <script>
 $(document).ready(function() {
-    console.log("Plugins page JS loaded.");
+    console.log("Plugins page JS loaded. Uploader script is isolated for debugging.");
 
+    /*
     // --- Modal Logic ---
     var modal = $('#edit-plugin-modal');
     $('.edit-plugin-btn').on('click', function() {
@@ -215,6 +216,7 @@ $(document).ready(function() {
             }
         });
     });
+    */
 
     // --- Install Plugin Logic ---
     $('#upload-plugin-form').on('submit', function(e) {

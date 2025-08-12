@@ -131,7 +131,8 @@ $active_theme = $settings['active_theme'] ?? 'default';
 
 <script>
 $(document).ready(function() {
-    console.log("Themes page JS loaded.");
+    console.log("Themes page JS loaded. Uploader script is isolated for debugging.");
+    /*
     // --- Delete Theme Logic ---
     $('.delete-theme-btn').on('click', function() {
         if (!confirm('Are you sure you want to delete this theme? This action cannot be undone.')) {
@@ -159,6 +160,7 @@ $(document).ready(function() {
             }
         });
     });
+    */
 
     // --- Install Theme Logic ---
     $('#upload-theme-form').on('submit', function(e) {
