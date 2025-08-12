@@ -34,10 +34,30 @@ $route = $uri_parts[0] ?: 'home';
 
 switch ($route) {
     case 'home':
-        $page_title = trans('welcome_message');
-        include 'templates/header.php';
-        include 'templates/home.php';
-        include 'templates/footer.php';
+        $homepage_setting = $settings['homepage_display'] ?? 'default';
+        if (strpos($homepage_setting, 'page-') === 0) {
+            // A static page is set as the homepage
+            $page_id = (int)str_replace('page-', '', $homepage_setting);
+            $page_stmt = $db->prepare("SELECT slug FROM pages WHERE id = ?");
+            $page_stmt->bind_param('i', $page_id);
+            $page_stmt->execute();
+            $page_res = $page_stmt->get_result();
+            if ($page_res->num_rows > 0) {
+                $_GET['slug'] = $page_res->fetch_assoc()['slug'];
+                include 'page.php';
+            } else {
+                // Fallback to default if page not found
+                include 'templates/header.php';
+                include 'templates/home.php';
+                include 'templates/footer.php';
+            }
+        } else {
+            // Default homepage behavior
+            $page_title = trans('welcome_message');
+            include 'templates/header.php';
+            include 'templates/home.php';
+            include 'templates/footer.php';
+        }
         break;
 
     case 'login':

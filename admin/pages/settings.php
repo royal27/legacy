@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'site_title',
         'logo_type',
         'logo_text',
-        'footer_text'
+        'footer_text',
+        'homepage_display'
     ];
 
     $db->begin_transaction();
@@ -48,6 +49,9 @@ while($row = $settings_res->fetch_assoc()) {
     $settings[$row['name']] = $row['value'];
 }
 
+// Fetch pages for the homepage dropdown
+$pages = $db->query("SELECT id, title, slug FROM pages ORDER BY title ASC")->fetch_all(MYSQLI_ASSOC);
+
 ?>
 
 <?php if ($message): ?>
@@ -68,6 +72,25 @@ while($row = $settings_res->fetch_assoc()) {
         <div class="form-group">
             <label for="footer_text">Footer Text (accepts basic HTML)</label>
             <textarea id="footer_text" name="footer_text" rows="4"><?php echo htmlspecialchars($settings['footer_text'] ?? ''); ?></textarea>
+        </div>
+
+        <hr>
+
+        <h2>Homepage Settings</h2>
+        <div class="form-group">
+            <label for="homepage_display">Display on Homepage</label>
+            <select id="homepage_display" name="homepage_display">
+                <option value="default" <?php echo (($settings['homepage_display'] ?? 'default') === 'default') ? 'selected' : ''; ?>>Default Homepage</option>
+                <optgroup label="Pages">
+                    <?php foreach ($pages as $page): ?>
+                        <option value="page-<?php echo $page['id']; ?>" <?php echo (($settings['homepage_display'] ?? '') === 'page-'.$page['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($page['title']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </optgroup>
+                <!-- Plugin pages can be added here later -->
+            </select>
+            <small>Choose what to show on the front page.</small>
         </div>
 
         <hr>
