@@ -19,6 +19,9 @@ if (!defined('APP_LOADED')) {
 
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="<?php echo $settings['theme_url']; ?>/css/style.css">
+
+    <!-- jQuery (required for plugins and other scripts) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
     <div class="page-wrapper">
