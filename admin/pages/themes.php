@@ -18,53 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
     $action = $_POST['action'] ?? '';
 
-    // --- Handle Theme Install ---
-    if ($action === 'install_theme') {
-        if (!class_exists('ZipArchive')) {
-            $message = 'Error: The ZipArchive class is not found. Please enable the Zip PHP extension on your server.';
-            $message_type = 'error';
-        } elseif (isset($_FILES['theme_zip_file']) && $_FILES['theme_zip_file']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['theme_zip_file'];
-            if (pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {
-                $message = 'Invalid file type. Only .zip files are allowed.';
-                $message_type = 'error';
-            } else {
-                $zip = new ZipArchive;
-                if ($zip->open($file['tmp_name']) === TRUE) {
-                    $manifest_json = $zip->getFromName('theme.json');
-                    if (!$manifest_json) {
-                        $message = 'theme.json not found.';
-                        $message_type = 'error';
-                    } else {
-                        $manifest = json_decode($manifest_json, true);
-                        if (empty($manifest['name'])) {
-                            $message = 'Invalid theme.json.';
-                            $message_type = 'error';
-                        } else {
-                            $theme_folder = sanitize_folder_name($manifest['name']);
-                            $theme_dir = __DIR__ . '/../../themes/' . $theme_folder;
-                            if (is_dir($theme_dir)) {
-                                $message = 'A theme with this name already exists.';
-                                $message_type = 'error';
-                            } else {
-                                $zip->extractTo($theme_dir);
-                                $message = 'Theme installed successfully!';
-                                $message_type = 'success';
-                            }
-                        }
-                    }
-                    $zip->close();
-                } else {
-                    $message = 'Failed to open zip archive.';
-                    $message_type = 'error';
-                }
-            }
-        } else {
-            $message = 'No theme file was uploaded or an upload error occurred.';
-            $message_type = 'error';
-        }
-    }
-
     // Activate Theme
     if ($action === 'activate_theme') {
         $theme_folder = basename($_POST['theme_folder']); // Sanitize input
@@ -110,12 +63,14 @@ $active_theme = $settings['active_theme'] ?? 'default';
 <div class="content-block">
     <h2>Install New Theme</h2>
     <p>Upload a theme in .zip format. The zip file must contain a <strong>theme.json</strong> manifest file.</p>
-    <form action="index.php?page=themes" method="post" enctype="multipart/form-data">
+    <form id="upload-theme-form" method="post" action="" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-        <input type="hidden" name="action" value="install_theme">
         <div class="form-group">
             <label for="theme_zip_file">Theme .zip file</label>
             <input type="file" id="theme_zip_file" name="theme_zip_file" accept=".zip" required>
+        </div>
+        <div class="progress-bar-container" style="display: none; margin-top: 10px;">
+            <div class="progress-bar"></div>
         </div>
         <button type="submit" class="btn btn-secondary">Upload & Install Theme</button>
     </form>
@@ -179,8 +134,6 @@ $active_theme = $settings['active_theme'] ?? 'default';
 
 <script>
 $(document).ready(function() {
-    console.log("Themes page JS loaded. Uploader script is isolated for debugging.");
-    /*
     // --- Delete Theme Logic ---
     $('.delete-theme-btn').on('click', function() {
         if (!confirm('Are you sure you want to delete this theme? This action cannot be undone.')) {
@@ -208,8 +161,57 @@ $(document).ready(function() {
             }
         });
     });
-    */
 
-    // Uploader logic moved to standard form submission
+    // --- Install Theme Logic ---
+    $('#upload-theme-form').on('submit', function(e) {
+        e.preventDefault();
+        var fileInput = $('#theme_zip_file')[0];
+        if (!fileInput.files || fileInput.files.length === 0) {
+            toastr.error("Please select a file to upload.");
+            return;
+        }
+        var formData = new FormData(this);
+        formData.append('action', 'install_theme');
+
+        var progressBarContainer = $('.progress-bar-container');
+        var progressBar = $('.progress-bar');
+
+        $.ajax({
+            url: 'ajax_handler.php',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            contentType: false,
+            cache: false,
+            processData: false,
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                progressBarContainer.show();
+                progressBar.width('0%').text('0%');
+                xhr.upload.addEventListener('progress', function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = parseInt((evt.loaded / evt.total) * 100);
+                        progressBar.width(percentComplete + '%');
+                        progressBar.text(percentComplete + '%');
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function(response) {
+                progressBarContainer.hide();
+                if (response.status === 'success') {
+                    toastr.success(response.message);
+                    setTimeout(function() { location.reload(); }, 2000);
+                } else {
+                    toastr.error(response.message || 'An error occurred during installation.');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                progressBarContainer.hide();
+                toastr.error('Upload failed. Check the developer console (F12) for more details.');
+                console.error("Install theme AJAX error:", textStatus, errorThrown, jqXHR.responseText);
+            }
+        });
+    });
 });
 </script>
