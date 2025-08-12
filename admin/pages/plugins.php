@@ -13,11 +13,71 @@ if (!user_has_permission('manage_plugins')) {
 $message = '';
 $message_type = '';
 
-// --- Handle POST actions from this page (e.g., activate/deactivate, edit) ---
+// --- Handle POST actions from this page ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
+    $action = $_POST['action'] ?? '';
+
+    // --- Handle Plugin Install ---
+    if ($action === 'install_plugin') {
+        if (isset($_FILES['plugin_zip_file']) && $_FILES['plugin_zip_file']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['plugin_zip_file'];
+
+            if (pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {
+                $message = 'Invalid file type. Only .zip files are allowed.';
+                $message_type = 'error';
+            } else {
+                $zip = new ZipArchive;
+                if ($zip->open($file['tmp_name']) === TRUE) {
+                    $manifest_json = $zip->getFromName('plugin.json');
+                    if ($manifest_json === false) {
+                        $message = 'Installation failed: plugin.json not found in the zip archive.';
+                        $message_type = 'error';
+                    } else {
+                        $manifest = json_decode($manifest_json, true);
+                        if (json_last_error() !== JSON_ERROR_NONE || empty($manifest['identifier']) || empty($manifest['name'])) {
+                            $message = 'Installation failed: plugin.json is invalid or missing required fields (identifier, name).';
+                            $message_type = 'error';
+                        } else {
+                            $plugin_identifier = $manifest['identifier'];
+                            $plugin_dir = __DIR__ . '/../../plugins/' . $plugin_identifier;
+
+                            if (is_dir($plugin_dir)) {
+                                $message = 'Installation failed: A plugin with this identifier already exists.';
+                                $message_type = 'error';
+                            } else {
+                                $zip->extractTo($plugin_dir);
+                                $zip->close();
+
+                                $install_sql_path = $plugin_dir . '/install.sql';
+                                if (file_exists($install_sql_path)) {
+                                    $db->multi_query(file_get_contents($install_sql_path));
+                                    while ($db->next_result()) {;} // Clear results
+                                }
+
+                                $stmt = $db->prepare("INSERT INTO plugins (identifier, name, version, is_active, custom_link) VALUES (?, ?, ?, 0, ?)");
+                                $stmt->bind_param('ssss', $plugin_identifier, $manifest['name'], $manifest['version'], $manifest['default_link']);
+                                $stmt->execute();
+
+                                $message = 'Plugin installed successfully!';
+                                $message_type = 'success';
+                            }
+                        }
+                    }
+                    if ($message_type !== 'success') $zip->close();
+                } else {
+                    $message = 'Failed to open zip archive.';
+                    $message_type = 'error';
+                }
+            }
+        } else {
+            $message = 'No plugin file was uploaded or an upload error occurred.';
+            $message_type = 'error';
+        }
+    }
+
     // Activate/Deactivate
-    if (isset($_POST['action']) && $_POST['action'] === 'toggle_active') {
+    if ($action === 'toggle_active') {
         $plugin_id = (int)$_POST['plugin_id'];
         $new_status = (int)$_POST['is_active'];
         $stmt = $db->prepare("UPDATE plugins SET is_active = ? WHERE id = ?");
@@ -55,14 +115,12 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 <div class="content-block">
     <h2>Install New Plugin</h2>
     <p>Upload a plugin in .zip format. The zip file must contain a <strong>plugin.json</strong> manifest file.</p>
-    <form id="upload-plugin-form" method="post" action="" enctype="multipart/form-data">
+    <form action="index.php?page=plugins" method="post" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+        <input type="hidden" name="action" value="install_plugin">
         <div class="form-group">
             <label for="plugin_zip_file">Plugin .zip file</label>
             <input type="file" id="plugin_zip_file" name="plugin_zip_file" accept=".zip" required>
-        </div>
-        <div class="progress-bar-container" style="display: none; margin-top: 10px;">
-            <div class="progress-bar"></div>
         </div>
         <button type="submit" class="btn btn-secondary">Upload & Install</button>
     </form>
@@ -218,63 +276,6 @@ $(document).ready(function() {
     });
     */
 
-    // --- Install Plugin Logic ---
-    $('#upload-plugin-form').on('submit', function(e) {
-        console.log("Upload form submitted.");
-        e.preventDefault();
-
-        var fileInput = $('#plugin_zip_file')[0];
-        if (!fileInput.files || fileInput.files.length === 0) {
-            toastr.error("Please select a file to upload.");
-            return;
-        }
-
-        var formData = new FormData(this);
-        formData.append('action', 'install_plugin');
-
-        var progressBarContainer = $('.progress-bar-container');
-        var progressBar = $('.progress-bar');
-
-        console.log("Sending AJAX request to install plugin...");
-        $.ajax({
-            url: 'ajax_handler.php',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            contentType: false,
-            cache: false,
-            processData: false,
-            xhr: function() {
-                var xhr = new window.XMLHttpRequest();
-                progressBarContainer.show();
-                progressBar.width('0%').text('0%');
-                xhr.upload.addEventListener('progress', function(evt) {
-                    if (evt.lengthComputable) {
-                        var percentComplete = parseInt((evt.loaded / evt.total) * 100);
-                        progressBar.width(percentComplete + '%');
-                        progressBar.text(percentComplete + '%');
-                    }
-                }, false);
-                return xhr;
-            },
-            success: function(response) {
-                console.log("Install plugin AJAX success:", response);
-                progressBarContainer.hide();
-                if (response.status === 'success') {
-                    toastr.success(response.message);
-                    setTimeout(function() {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    toastr.error(response.message || 'An error occurred during installation.');
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error("Install plugin AJAX error:", textStatus, errorThrown);
-                progressBarContainer.hide();
-                toastr.error('An unexpected error occurred during upload. Check console for details.');
-            }
-        });
-    });
+    // The uploader logic has been moved to a standard form submission.
 });
 </script>

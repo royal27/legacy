@@ -19,76 +19,6 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $response = ['status' => 'error', 'message' => 'Invalid action.'];
 
 switch ($action) {
-    case 'install_plugin':
-        validate_csrf_token();
-        if (isset($_FILES['plugin_zip_file'])) {
-            $file = $_FILES['plugin_zip_file'];
-
-            // Basic validation
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $response['message'] = 'File upload error. Code: ' . $file['error'];
-                break;
-            }
-            if (pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {
-                $response['message'] = 'Invalid file type. Only .zip files are allowed.';
-                break;
-            }
-
-            $zip = new ZipArchive;
-            if ($zip->open($file['tmp_name']) === TRUE) {
-                // Check for manifest file
-                $manifest_json = $zip->getFromName('plugin.json');
-                if ($manifest_json === false) {
-                    $response['message'] = 'Installation failed: plugin.json not found in the zip archive.';
-                    $zip->close();
-                    break;
-                }
-
-                $manifest = json_decode($manifest_json, true);
-                if (json_last_error() !== JSON_ERROR_NONE || empty($manifest['identifier']) || empty($manifest['name'])) {
-                    $response['message'] = 'Installation failed: plugin.json is invalid or missing required fields (identifier, name).';
-                    $zip->close();
-                    break;
-                }
-
-                $plugin_identifier = $manifest['identifier'];
-                $plugin_dir = __DIR__ . '/../plugins/' . $plugin_identifier;
-
-                if (is_dir($plugin_dir)) {
-                    $response['message'] = 'Installation failed: A plugin with this identifier already exists.';
-                    $zip->close();
-                    break;
-                }
-
-                // Looks good, let's install
-                $zip->extractTo($plugin_dir);
-                $zip->close();
-
-                // Run install.sql if it exists
-                $install_sql_path = $plugin_dir . '/install.sql';
-                if (file_exists($install_sql_path)) {
-                    $sql_content = file_get_contents($install_sql_path);
-                    $db->multi_query($sql_content);
-                    // Clear multi_query results
-                    while ($db->next_result()) {;}
-                }
-
-                // Add to database
-                $stmt = $db->prepare("INSERT INTO plugins (identifier, name, version, is_active, custom_link) VALUES (?, ?, ?, 0, ?)");
-                $stmt->bind_param('ssss', $plugin_identifier, $manifest['name'], $manifest['version'], $manifest['default_link']);
-                $stmt->execute();
-
-                $response['status'] = 'success';
-                $response['message'] = 'Plugin installed successfully! Reloading...';
-
-            } else {
-                $response['message'] = 'Failed to open zip archive.';
-            }
-        } else {
-            $response['message'] = 'No plugin file was uploaded.';
-        }
-        break;
-
     case 'moderate_user':
         $user_id = (int)($_POST['user_id'] ?? 0);
         $sub_action = $_POST['sub_action'] ?? '';
@@ -143,40 +73,6 @@ switch ($action) {
                 }
             } else {
                  $response = ['status' => 'error', 'message' => 'Invalid moderation action.'];
-            }
-        }
-        break;
-
-    case 'install_theme':
-        validate_csrf_token();
-        if (isset($_FILES['theme_zip_file'])) {
-            $file = $_FILES['theme_zip_file'];
-            if ($file['error'] !== UPLOAD_ERR_OK || pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {
-                $response['message'] = 'Invalid file or upload error.';
-                break;
-            }
-            $zip = new ZipArchive;
-            if ($zip->open($file['tmp_name']) === TRUE) {
-                $manifest_json = $zip->getFromName('theme.json');
-                if (!$manifest_json) {
-                    $response['message'] = 'theme.json not found.';
-                    break;
-                }
-                $manifest = json_decode($manifest_json, true);
-                if (empty($manifest['name'])) {
-                    $response['message'] = 'Invalid theme.json.';
-                    break;
-                }
-                $theme_folder = sanitize_folder_name($manifest['name']);
-                $theme_dir = __DIR__ . '/../../themes/' . $theme_folder;
-                if (is_dir($theme_dir)) {
-                    $response['message'] = 'A theme with this name already exists.';
-                    break;
-                }
-                $zip->extractTo($theme_dir);
-                $zip->close();
-                $response['status'] = 'success';
-                $response['message'] = 'Theme installed successfully! Reloading...';
             }
         }
         break;
