@@ -32,6 +32,15 @@ if (!defined('ADMIN_AREA')) {
             "showMethod": "fadeIn",
             "hideMethod": "fadeOut"
         }
+
+        <?php
+        // Display flash messages
+        if (isset($_SESSION['flash_message'])):
+            $flash = $_SESSION['flash_message'];
+            unset($_SESSION['flash_message']);
+            ?>
+            toastr.<?php echo $flash['type']; ?>('<?php echo addslashes($flash['message']); ?>');
+        <?php endif; ?>
     </script>
 </body>
 </html>

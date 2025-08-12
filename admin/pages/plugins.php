@@ -10,9 +10,6 @@ if (!user_has_permission('manage_plugins')) {
     return;
 }
 
-$message = '';
-$message_type = '';
-
 // --- Handle POST actions from this page (e.g., activate/deactivate, edit) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
@@ -26,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('ii', $new_status, $plugin_id);
         $stmt->execute();
         $stmt->close();
-        $message = 'Plugin status updated.';
-        $message_type = 'success';
+        $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Plugin status updated.'];
+        redirect(SITE_URL . '/admin/index.php?page=plugins');
     }
     // Edit Link/Name
     if(isset($_POST['action']) && $_POST['action'] === 'edit_plugin') {
@@ -39,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('sssi', $name, $link, $permission, $plugin_id);
         $stmt->execute();
         $stmt->close();
-        $message = 'Plugin details updated.';
-        $message_type = 'success';
+        $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Plugin details updated.'];
+        redirect(SITE_URL . '/admin/index.php?page=plugins');
     }
 }
 
@@ -49,10 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
 ?>
-
-<?php if ($message): ?>
-<div class="message-box <?php echo $message_type; ?>"><?php echo $message; ?></div>
-<?php endif; ?>
 
 <div class="content-block">
     <h2>Install New Plugin</h2>

@@ -1,5 +1,6 @@
 <?php
 // This is a dedicated AJAX handler for the chat plugin.
+define('APP_LOADED', true);
 
 // We need to bootstrap the main application to get access to DB and session
 // The path is relative to this file's location: plugins/simple_chat/
