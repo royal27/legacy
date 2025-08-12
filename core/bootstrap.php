@@ -1,0 +1,282 @@
+<?php
+// Prevent direct file access.
+// Although this file is meant to be included, this is a good habit.
+if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
+    http_response_code(403);
+    die('Forbidden');
+}
+
+// The main entry point (e.g., index.php) is responsible for checking
+// if the application is installed. This file assumes config.php exists.
+require_once __DIR__ . '/../config.php';
+
+// Start the session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Turn on error reporting for development
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// --- Database Connection ---
+// Create a new mysqli object and store it in a global variable for easy access.
+global $db;
+$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+// Check for connection errors
+if ($db->connect_error) {
+    // In a real application, you might want to log this error instead of dying.
+    die("Database connection failed: " . $db->connect_error);
+}
+
+// --- IP Ban Check (Refactored) ---
+// Now that we have a DB connection, we can check for banned IPs.
+$user_ip = $_SERVER['REMOTE_ADDR'];
+$stmt = $db->prepare("SELECT id FROM banned_ips WHERE ip_address = ?");
+$stmt->bind_param('s', $user_ip);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result && $result->num_rows > 0) {
+    http_response_code(403);
+    die('Your IP address has been banned.');
+}
+$stmt->close();
+
+// Set the character set to utf8mb4 for full Unicode support
+$db->set_charset("utf8mb4");
+
+// --- Global Settings ---
+// Load all settings from the database into a global array
+global $settings;
+$settings = [];
+$settings_res = $db->query("SELECT name, value FROM settings");
+if ($settings_res) {
+    while($row = $settings_res->fetch_assoc()) {
+        $settings[$row['name']] = $row['value'];
+    }
+}
+
+// --- Theme System ---
+// Define theme path and URL based on active theme setting
+$active_theme = $settings['active_theme'] ?? 'default';
+if ($active_theme !== 'default' && is_dir(__DIR__ . '/../themes/' . $active_theme)) {
+    $settings['theme_url'] = SITE_URL . '/themes/' . $active_theme;
+} else {
+    // Fallback to default theme assets
+    $settings['theme_url'] = SITE_URL . '/assets';
+}
+
+
+// --- Session & Auth Check ---
+if (is_logged_in()) {
+    $user_id_check = (int)$_SESSION['user_id'];
+    $stmt = $db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+    $stmt->bind_param('i', $user_id_check);
+    $stmt->execute();
+    $user_check_res = $stmt->get_result();
+
+    if ($user_check_res && $user_check_res->num_rows > 0) {
+        $user_check = $user_check_res->fetch_assoc();
+
+        // Check if user has been kicked
+        if ($user_check['force_logout'] == 1) {
+            $db->query("UPDATE users SET force_logout = 0 WHERE id = {$user_id_check}");
+            session_destroy();
+            redirect(SITE_URL . '/login?kicked=1');
+        }
+
+        $now = new DateTime();
+
+        // Check if user has been banned
+        $banned_until = $user_check['banned_until'] ? new DateTime($user_check['banned_until']) : null;
+        if ($user_check['is_banned'] == 1 || ($banned_until && $banned_until > $now)) {
+            session_destroy();
+            redirect(SITE_URL . '/login?banned=1');
+        }
+
+        // Check if user is suspended
+        $suspended_until = $user_check['suspended_until'] ? new DateTime($user_check['suspended_until']) : null;
+        if ($suspended_until && $suspended_until > $now) {
+            http_response_code(403);
+            die('Your account is currently suspended until ' . $suspended_until->format('Y-m-d H:i:s'));
+        }
+    }
+    $stmt->close();
+}
+
+
+// --- Language System ---
+// Load language functions and data
+require_once __DIR__ . '/language.php';
+load_language();
+
+// --- Plugin System ---
+// Load all active plugins
+$active_plugins_res = $db->query("SELECT * FROM plugins WHERE is_active = 1");
+if ($active_plugins_res) {
+    while($plugin = $active_plugins_res->fetch_assoc()) {
+        // Check for required permission before loading
+        if (!empty($plugin['permission_required']) && !user_has_permission($plugin['permission_required'])) {
+            continue; // Skip this plugin if user lacks permission
+        }
+
+        $plugin_dir = __DIR__ . '/../plugins/' . $plugin['identifier'];
+        $manifest_path = $plugin_dir . '/plugin.json';
+        if (file_exists($manifest_path)) {
+            $manifest = json_decode(file_get_contents($manifest_path), true);
+            if (!empty($manifest['main_file'])) {
+                $main_file_path = $plugin_dir . '/' . $manifest['main_file'];
+                if (file_exists($main_file_path)) {
+                    require_once $main_file_path;
+                }
+            }
+        }
+    }
+}
+
+
+// --- Helper Functions (can be expanded later) ---
+
+/**
+ * Checks if a user is logged in.
+ * @return bool
+ */
+function is_logged_in() {
+    return isset($_SESSION['user_id']);
+}
+
+/**
+ * Checks if the logged-in user is an admin.
+ * Assumes role_id 1 is for Admins.
+ * @return bool
+ */
+function is_admin() {
+    // An admin is someone who is logged in and has the 'admin_login' permission.
+    // Or, as a fallback, has role_id 1.
+    return is_logged_in() && (user_has_permission('admin_login') || (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1));
+}
+
+/**
+ * Loads all permissions for the current user's role into the session.
+ * @global mysqli $db
+ */
+function load_user_permissions() {
+    if (!is_logged_in() || isset($_SESSION['permissions'])) {
+        return;
+    }
+
+    global $db;
+    $role_id = (int)($_SESSION['role_id'] ?? 0);
+    $_SESSION['permissions'] = [];
+
+    if ($role_id > 0) {
+        $stmt = $db->prepare(
+            "SELECT p.name FROM permissions p
+             JOIN role_permissions rp ON p.id = rp.permission_id
+             WHERE rp.role_id = ?"
+        );
+        $stmt->bind_param('i', $role_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while($row = $result->fetch_assoc()) {
+            $_SESSION['permissions'][] = $row['name'];
+        }
+        $stmt->close();
+    }
+}
+
+/**
+ * Checks if the current user has a specific permission.
+ * @param string $permission_name The name of the permission to check.
+ * @return bool
+ */
+function user_has_permission(string $permission_name): bool {
+    // Super Admin (role_id 1) always has all permissions
+    if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
+        return true;
+    }
+    return is_logged_in() && in_array($permission_name, $_SESSION['permissions'] ?? []);
+}
+
+/**
+ * Redirects to a given URL.
+ * @param string $url
+ */
+function redirect($url) {
+    header("Location: " . $url);
+    exit;
+}
+
+/**
+ * Fetches menu items for a specific location.
+ * @global mysqli $db
+ * @param string $location The menu location identifier.
+ * @return array An array of menu items.
+ */
+function is_user_muted(array $user): bool {
+    if ($user['is_muted'] == 1) {
+        // Check if there's a timed mute
+        if ($user['muted_until']) {
+            $now = new DateTime();
+            $muted_until = new DateTime($user['muted_until']);
+            return $muted_until > $now;
+        }
+        // If no time limit, it's a permanent mute
+        return true;
+    }
+    return false;
+}
+
+function get_menu(string $location): array {
+    global $db;
+    $stmt = $db->prepare("SELECT * FROM menu_items WHERE menu_location = ? ORDER BY sort_order ASC");
+    if (!$stmt) {
+        // Optional: Log error, for now, we'll just return empty on failure
+        return [];
+    }
+    $stmt->bind_param('s', $location);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $menu_items = [];
+    if ($result) {
+        while ($item = $result->fetch_assoc()) {
+            // Check for required permission
+            if (!empty($item['permission_required'])) {
+                if (user_has_permission($item['permission_required'])) {
+                    $menu_items[] = $item;
+                }
+            } else {
+                // No permission required, public item
+                $menu_items[] = $item;
+            }
+        }
+    }
+    $stmt->close();
+    return $menu_items;
+}
+
+
+// --- CSRF Protection ---
+function generate_csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validate_csrf_token() {
+    if (!isset($_POST['_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['_token'])) {
+        // Token is invalid or missing
+        die('CSRF validation failed.');
+    }
+}
+
+// Generate a token for every GET request page load
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    generate_csrf_token();
+}
+
+?>
