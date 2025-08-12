@@ -62,7 +62,12 @@ switch ($action) {
                     break;
                 }
 
-                $zip->extractTo($plugin_dir);
+                if ($zip->extractTo($plugin_dir) === false) {
+                    $response['message'] = 'Installation failed: Could not extract plugin files. Check server permissions for the plugins directory.';
+                    $zip->close();
+                    break;
+                }
+
                 $zip->close();
 
                 $install_sql_path = $plugin_dir . '/install.sql';
@@ -71,8 +76,12 @@ switch ($action) {
                     while ($db->next_result()) {;}
                 }
 
-                $stmt = $db->prepare("INSERT INTO plugins (identifier, name, version, is_active, custom_link) VALUES (?, ?, ?, 0, ?)");
-                $stmt->bind_param('ssss', $plugin_identifier, $manifest['name'], $manifest['version'], $manifest['default_link']);
+                $version = $manifest['version'] ?? '1.0';
+                $default_link = $manifest['default_link'] ?? '';
+                $permission_required = $manifest['permission_required'] ?? null;
+
+                $stmt = $db->prepare("INSERT INTO plugins (identifier, name, version, is_active, custom_link, permission_required) VALUES (?, ?, ?, 0, ?, ?)");
+                $stmt->bind_param('sssss', $plugin_identifier, $manifest['name'], $version, $default_link, $permission_required);
                 $stmt->execute();
 
                 $response = ['status' => 'success', 'message' => 'Plugin installed successfully! Reloading...'];
@@ -266,6 +275,7 @@ switch ($action) {
         break;
 
     case 'delete_plugin':
+        validate_csrf_token();
         $plugin_id = (int)($_POST['id'] ?? 0);
 
         $stmt = $db->prepare("SELECT identifier FROM plugins WHERE id = ?");

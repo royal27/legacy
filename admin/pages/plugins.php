@@ -57,7 +57,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 <div class="content-block">
     <h2>Install New Plugin</h2>
     <p>Upload a plugin in .zip format. The zip file must contain a <strong>plugin.json</strong> manifest file.</p>
-    <form id="upload-plugin-form" method="post" action="" enctype="multipart/form-data">
+    <form id="upload-plugin-form" method="post" action="javascript:void(0);" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <div class="form-group">
             <label for="plugin_zip_file">Plugin .zip file</label>
@@ -256,7 +256,11 @@ jQuery(document).ready(function($) {
             url: 'ajax_handler.php',
             type: 'POST',
             dataType: 'json',
-            data: { action: 'delete_plugin', id: plugin_id },
+            data: {
+                action: 'delete_plugin',
+                id: plugin_id,
+                _token: '<?php echo $_SESSION['csrf_token']; ?>'
+            },
             success: function(response) {
                 if (response.status === 'success') {
                     toastr.success(response.message);
