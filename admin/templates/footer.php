@@ -11,10 +11,6 @@ if (!defined('ADMIN_AREA')) {
         </div> <!-- .admin-main-content -->
     </div> <!-- .admin-wrapper -->
 
-    <!-- jQuery (required by Toastr) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- jQuery UI (for sortable) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <!-- Toastr JS -->
     <script src="assets/js/toastr.min.js"></script>
     <script>

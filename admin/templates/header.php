@@ -10,6 +10,11 @@ if (!defined('ADMIN_AREA')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?> - Admin Panel</title>
+
+    <!-- jQuery & jQuery UI (must be loaded in the head) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
     <!-- We can reuse the main stylesheet and add admin-specific overrides -->
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="assets/css/admin-style.css">
