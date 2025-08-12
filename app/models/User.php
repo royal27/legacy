@@ -66,4 +66,54 @@ class User extends Model {
         }
         return false;
     }
+
+    /**
+     * Get all users with their role names
+     * @return array
+     */
+    public function getAllUsers() {
+        $prefix = $this->db->getPrefix();
+        $this->db->query("
+            SELECT u.id, u.username, u.email, r.name as role_name, u.created_at
+            FROM {$prefix}users u
+            JOIN {$prefix}roles r ON u.role_id = r.id
+            ORDER BY u.created_at DESC
+        ");
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Update a user's profile
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function updateUser($id, $data) {
+        $prefix = $this->db->getPrefix();
+
+        // Handle password update separately
+        if (!empty($data['password'])) {
+            $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
+            $this->db->query("UPDATE {$prefix}users SET username = ?, email = ?, role_id = ?, password = ? WHERE id = ?");
+            return $this->db->execute([$data['username'], $data['email'], $data['role_id'], $hashed_password, $id]);
+        } else {
+            $this->db->query("UPDATE {$prefix}users SET username = ?, email = ?, role_id = ? WHERE id = ?");
+            return $this->db->execute([$data['username'], $data['email'], $data['role_id'], $id]);
+        }
+    }
+
+    /**
+     * Delete a user
+     * @param int $id
+     * @return bool
+     */
+    public function deleteUser($id) {
+        // Prevent deleting the Founder account
+        if ($id == 1) {
+            return false;
+        }
+        $prefix = $this->db->getPrefix();
+        $this->db->query("DELETE FROM {$prefix}users WHERE id = ?");
+        return $this->db->execute([$id]);
+    }
 }

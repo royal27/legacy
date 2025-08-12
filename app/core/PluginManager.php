@@ -79,6 +79,37 @@ class PluginManager {
         return $all_headers;
     }
 
-    // Activate, Deactivate, and other management functions will be added here later.
-    // These will be called from the Admin Panel.
+    public static function get_active_plugins_from_db() {
+        $db = new Database();
+        $prefix = $db->getPrefix();
+        $db->query("SELECT folder_name FROM {$prefix}plugins WHERE is_active = 1");
+        $results = $db->resultSet();
+        return array_column($results, 'folder_name');
+    }
+
+    public static function activate_plugin($folder_name) {
+        $db = new Database();
+        $prefix = $db->getPrefix();
+
+        // Check if plugin is already in DB
+        $db->query("SELECT id FROM {$prefix}plugins WHERE folder_name = ?");
+        $plugin = $db->single([$folder_name]);
+
+        if ($plugin) {
+            // Update if exists
+            $db->query("UPDATE {$prefix}plugins SET is_active = 1 WHERE folder_name = ?");
+            return $db->execute([$folder_name]);
+        } else {
+            // Insert if not exists
+            $db->query("INSERT INTO {$prefix}plugins (folder_name, is_active) VALUES (?, 1)");
+            return $db->execute([$folder_name]);
+        }
+    }
+
+    public static function deactivate_plugin($folder_name) {
+        $db = new Database();
+        $prefix = $db->getPrefix();
+        $db->query("UPDATE {$prefix}plugins SET is_active = 0 WHERE folder_name = ?");
+        return $db->execute([$folder_name]);
+    }
 }

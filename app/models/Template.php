@@ -44,4 +44,34 @@ class Template extends Model {
         $this->db->query("UPDATE {$prefix}templates SET is_active = 1 WHERE id = ?");
         return $this->db->execute([$id]);
     }
+
+    /**
+     * Scan the templates directory and add new templates to the database.
+     */
+    public function sync_templates() {
+        $prefix = $this->db->getPrefix();
+        $templates_dir = __DIR__ . '/../../templates/';
+
+        // Get templates from filesystem
+        $fs_templates = array_filter(scandir($templates_dir), function ($item) use ($templates_dir) {
+            return is_dir($templates_dir . $item) && !in_array($item, ['.', '..']);
+        });
+
+        // Get templates from database
+        $this->db->query("SELECT folder_name FROM {$prefix}templates");
+        $db_templates_raw = $this->db->resultSet();
+        $db_templates = array_column($db_templates_raw, 'folder_name');
+
+        // Find new templates and add them
+        $new_templates = array_diff($fs_templates, $db_templates);
+
+        if (!empty($new_templates)) {
+            $this->db->query("INSERT INTO {$prefix}templates (name, folder_name, is_active) VALUES (?, ?, 0)");
+            foreach ($new_templates as $template_folder) {
+                // Use the folder name as the default name, capitalizing it for display
+                $template_name = ucwords(str_replace('-', ' ', $template_folder));
+                $this->db->execute([$template_name, $template_folder]);
+            }
+        }
+    }
 }
