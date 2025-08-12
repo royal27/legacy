@@ -21,7 +21,7 @@ $base_url = rtrim(SITE_URL, '/');
     <link rel="stylesheet" href="<?php echo $base_url; ?>/admin/assets/css/admin-style.css">
 
     <!-- Toastr CSS for notifications -->
-    <link rel="stylesheet" href="<?php echo $base_url; ?>/admin/assets/css/toastr.min.css">
+    <link rel="stylesheet" href="assets/css/toastr.min.css">
 </head>
 <body>
     <div class="admin-wrapper">
