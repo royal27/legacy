@@ -129,6 +129,11 @@ $active_theme = $settings['active_theme'] ?? 'default';
 </style>
 
 <script>
+    // Make the CSRF token available to all JS on this page
+    window.csrf_token = '<?php echo $_SESSION['csrf_token']; ?>';
+</script>
+
+<script>
 $(document).ready(function() {
     console.log("Themes page JS loaded.");
     // --- Delete Theme Logic ---
@@ -171,9 +176,8 @@ $(document).ready(function() {
         }
 
         var formData = new FormData(this);
-        var token = $('input[name="_token"]').first().val(); // Grab token from another form
         formData.append('action', 'install_theme');
-        formData.append('_token', token);
+        formData.append('_token', window.csrf_token);
 
         var progressBarContainer = $('.progress-bar-container');
         var progressBar = $('.progress-bar');
