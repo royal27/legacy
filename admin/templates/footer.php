@@ -12,7 +12,7 @@ if (!defined('ADMIN_AREA')) {
     </div> <!-- .admin-wrapper -->
 
     <!-- Toastr JS -->
-    <script src="assets/js/toastr.min.js"></script>
+    <script src="<?php echo SITE_URL; ?>/admin/assets/js/toastr.min.js"></script>
     <script>
         // Configure Toastr
         toastr.options = {

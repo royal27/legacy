@@ -57,7 +57,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 <div class="content-block">
     <h2>Install New Plugin</h2>
     <p>Upload a plugin in .zip format. The zip file must contain a <strong>plugin.json</strong> manifest file.</p>
-    <form id="upload-plugin-form" method="post" action="" enctype="multipart/form-data">
+    <form id="upload-plugin-form" method="post" action="javascript:void(0);" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <div class="form-group">
             <label for="plugin_zip_file">Plugin .zip file</label>
@@ -93,7 +93,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
                     <small style="display:block; color: #6c757d;">v<?php echo htmlspecialchars($plugin['version']); ?> | ID: <?php echo htmlspecialchars($plugin['identifier']); ?></small>
                 </td>
                 <td>
-                    <form action="index.php?page=plugins" method="post" class="toggle-form">
+                    <form action="<?php echo SITE_URL; ?>/admin/index.php?page=plugins" method="post" class="toggle-form">
                         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="action" value="toggle_active">
                         <input type="hidden" name="plugin_id" value="<?php echo $plugin['id']; ?>">
@@ -180,7 +180,7 @@ if (is_dir($plugins_dir)) {
     <div class="modal-content">
         <span class="close-btn">&times;</span>
         <h2>Edit Plugin</h2>
-        <form id="edit-plugin-form" action="index.php?page=plugins" method="post">
+        <form id="edit-plugin-form" action="<?php echo SITE_URL; ?>/admin/index.php?page=plugins" method="post">
             <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="action" value="edit_plugin">
             <input type="hidden" id="edit-plugin-id" name="plugin_id">
@@ -253,7 +253,7 @@ jQuery(document).ready(function($) {
         var plugin_id = button.data('id');
 
         $.ajax({
-            url: 'ajax_handler.php',
+            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -288,7 +288,7 @@ jQuery(document).ready(function($) {
         button.prop('disabled', true).text('Installing...');
 
         $.ajax({
-            url: 'ajax_handler.php',
+            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -329,7 +329,7 @@ jQuery(document).ready(function($) {
         var progressBar = $('.progress-bar');
 
         $.ajax({
-            url: 'ajax_handler.php',
+            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
             type: 'POST',
             data: formData,
             dataType: 'json',
