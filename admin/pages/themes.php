@@ -133,7 +133,7 @@ $active_theme = $settings['active_theme'] ?? 'default';
 </style>
 
 <script>
-$(document).ready(function() {
+jQuery(document).ready(function($) {
     // --- Delete Theme Logic ---
     $('.delete-theme-btn').on('click', function() {
         if (!confirm('Are you sure you want to delete this theme? This action cannot be undone.')) {

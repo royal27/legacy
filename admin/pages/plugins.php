@@ -157,7 +157,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
 </style>
 
 <script>
-$(document).ready(function() {
+jQuery(document).ready(function($) {
     // --- Modal Logic ---
     var modal = $('#edit-plugin-modal');
     $('.edit-plugin-btn').on('click', function() {
