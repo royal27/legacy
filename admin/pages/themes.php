@@ -20,7 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // --- Handle Theme Install ---
     if ($action === 'install_theme') {
-        if (isset($_FILES['theme_zip_file']) && $_FILES['theme_zip_file']['error'] === UPLOAD_ERR_OK) {
+        if (!class_exists('ZipArchive')) {
+            $message = 'Error: The ZipArchive class is not found. Please enable the Zip PHP extension on your server.';
+            $message_type = 'error';
+        } elseif (isset($_FILES['theme_zip_file']) && $_FILES['theme_zip_file']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['theme_zip_file'];
             if (pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {
                 $message = 'Invalid file type. Only .zip files are allowed.';
