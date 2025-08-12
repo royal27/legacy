@@ -16,7 +16,7 @@ if (!defined('ADMIN_AREA')) {
     <!-- jQuery UI (for sortable) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="assets/js/toastr.min.js"></script>
     <script>
         // Configure Toastr
         toastr.options = {

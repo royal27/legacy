@@ -15,7 +15,7 @@ if (!defined('ADMIN_AREA')) {
     <link rel="stylesheet" href="assets/css/admin-style.css">
 
     <!-- Toastr CSS for notifications -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="assets/css/toastr.min.css">
 </head>
 <body>
     <div class="admin-wrapper">
