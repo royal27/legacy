@@ -84,6 +84,64 @@ switch ($action) {
         }
         break;
 
+    case 'install_from_dir':
+        validate_csrf_token();
+
+        $identifier = basename($_POST['identifier'] ?? '');
+
+        if (empty($identifier)) {
+            $response['message'] = 'Invalid plugin identifier.';
+            break;
+        }
+
+        $plugin_dir = __DIR__ . '/../plugins/' . $identifier;
+        $manifest_path = $plugin_dir . '/plugin.json';
+
+        if (!is_dir($plugin_dir) || !file_exists($manifest_path)) {
+            $response['message'] = 'Plugin directory or manifest not found.';
+            break;
+        }
+
+        // Check if already installed
+        $stmt_check = $db->prepare("SELECT id FROM plugins WHERE identifier = ?");
+        $stmt_check->bind_param('s', $identifier);
+        $stmt_check->execute();
+        if ($stmt_check->get_result()->num_rows > 0) {
+            $response['message'] = 'This plugin is already installed.';
+            $stmt_check->close();
+            break;
+        }
+        $stmt_check->close();
+
+        $manifest_json = file_get_contents($manifest_path);
+        $manifest = json_decode($manifest_json, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || empty($manifest['name'])) {
+            $response['message'] = 'Installation failed: plugin.json is invalid or missing name.';
+            break;
+        }
+
+        $install_sql_path = $plugin_dir . '/install.sql';
+        if (file_exists($install_sql_path)) {
+            $db->multi_query(file_get_contents($install_sql_path));
+            while ($db->next_result()) {;} // Clear results
+        }
+
+        $version = $manifest['version'] ?? '1.0';
+        $default_link = $manifest['default_link'] ?? '';
+        $permission_required = $manifest['permission_required'] ?? null;
+
+        $stmt = $db->prepare("INSERT INTO plugins (identifier, name, version, is_active, custom_link, permission_required) VALUES (?, ?, ?, 0, ?, ?)");
+        $stmt->bind_param('sssss', $identifier, $manifest['name'], $version, $default_link, $permission_required);
+
+        if ($stmt->execute()) {
+             $response = ['status' => 'success', 'message' => 'Plugin installed successfully! Reloading...'];
+        } else {
+            $response['message'] = 'Failed to insert plugin into the database: ' . $stmt->error;
+        }
+        $stmt->close();
+        break;
+
     case 'install_theme':
         validate_csrf_token();
         if (!class_exists('ZipArchive')) {

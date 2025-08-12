@@ -119,6 +119,62 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
     </table>
 </div>
 
+<?php
+// --- Scan for available but not installed plugins ---
+$available_plugins = [];
+$installed_identifiers = array_column($plugins, 'identifier');
+$plugins_dir = __DIR__ . '/../../plugins/';
+
+if (is_dir($plugins_dir)) {
+    $plugin_folders = array_filter(scandir($plugins_dir), function($item) use ($plugins_dir) {
+        return is_dir($plugins_dir . $item) && !in_array($item, ['.', '..']);
+    });
+
+    foreach ($plugin_folders as $folder) {
+        if (!in_array($folder, $installed_identifiers)) {
+            $manifest_path = $plugins_dir . $folder . '/plugin.json';
+            if (file_exists($manifest_path)) {
+                $manifest = json_decode(file_get_contents($manifest_path), true);
+                if ($manifest && !empty($manifest['name'])) {
+                    $available_plugins[$folder] = $manifest;
+                }
+            }
+        }
+    }
+}
+?>
+
+<?php if (!empty($available_plugins)): ?>
+<div class="content-block">
+    <h2>Available Plugins</h2>
+    <p>These plugins are found on the server but are not yet installed.</p>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Plugin</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($available_plugins as $identifier => $manifest): ?>
+            <tr>
+                <td>
+                    <strong><?php echo htmlspecialchars($manifest['name']); ?></strong>
+                    <small style="display:block; color: #6c757d;">v<?php echo htmlspecialchars($manifest['version'] ?? 'N/A'); ?> | ID: <?php echo htmlspecialchars($identifier); ?></small>
+                </td>
+                <td><?php echo htmlspecialchars($manifest['description'] ?? 'No description provided.'); ?></td>
+                <td>
+                    <button class="btn btn-success btn-sm install-from-dir-btn" data-identifier="<?php echo htmlspecialchars($identifier); ?>">Install</button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?php endif; ?>
+
+
 <!-- Edit Plugin Modal -->
 <div id="edit-plugin-modal" class="modal" style="display:none;">
     <div class="modal-content">
@@ -217,6 +273,44 @@ jQuery(document).ready(function($) {
     });
 
     // --- Install Plugin Logic ---
+    $('.install-from-dir-btn').on('click', function() {
+        var button = $(this);
+        var identifier = button.data('identifier');
+
+        if (!confirm('Are you sure you want to install the "' + identifier + '" plugin?')) {
+            return;
+        }
+
+        button.prop('disabled', true).text('Installing...');
+
+        $.ajax({
+            url: 'ajax_handler.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'install_from_dir',
+                identifier: identifier,
+                _token: '<?php echo $_SESSION['csrf_token']; ?>'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message);
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error(response.message || 'An error occurred.');
+                    button.prop('disabled', false).text('Install');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                toastr.error('An unexpected error occurred. Check console.');
+                console.error("Install from dir AJAX error:", textStatus, errorThrown, jqXHR.responseText);
+                button.prop('disabled', false).text('Install');
+            }
+        });
+    });
+
     $('#upload-plugin-form').on('submit', function(e) {
         e.preventDefault();
         var fileInput = $('#plugin_zip_file')[0];
