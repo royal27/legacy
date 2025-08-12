@@ -8,7 +8,7 @@
  */
 
 // Prevent direct access
-if (!defined('APP_LOADED')) {
+if (!defined('APP_LOADED') && !defined('ADMIN_AREA')) {
     die('Forbidden');
 }
 
