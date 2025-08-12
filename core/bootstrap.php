@@ -258,6 +258,27 @@ function get_menu(string $location): array {
     return $menu_items;
 }
 
+/**
+ * Recursively removes a directory and its contents.
+ * @param string $dir The directory to remove.
+ */
+if (!function_exists('rrmdir')) {
+    function rrmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (is_dir($dir . DIRECTORY_SEPARATOR . $object) && !is_link($dir . DIRECTORY_SEPARATOR . $object))
+                        rrmdir($dir . DIRECTORY_SEPARATOR . $object);
+                    else
+                        unlink($dir . DIRECTORY_SEPARATOR . $object);
+                }
+            }
+            rmdir($dir);
+        }
+    }
+}
+
 
 // --- CSRF Protection ---
 function generate_csrf_token() {

@@ -10,6 +10,8 @@ if (!user_has_permission('manage_plugins')) {
     return;
 }
 
+$base_url = rtrim(SITE_URL, '/');
+
 // --- Handle POST actions from this page (e.g., activate/deactivate, edit) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
@@ -24,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
         $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Plugin status updated.'];
-        redirect(SITE_URL . '/admin/index.php?page=plugins');
+        redirect($base_url . '/admin/index.php?page=plugins');
     }
     // Edit Link/Name
     if(isset($_POST['action']) && $_POST['action'] === 'edit_plugin') {
@@ -37,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
         $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Plugin details updated.'];
-        redirect(SITE_URL . '/admin/index.php?page=plugins');
+        redirect($base_url . '/admin/index.php?page=plugins');
     }
 }
 
@@ -86,7 +88,7 @@ $plugins = $db->query("SELECT * FROM plugins ORDER BY name ASC")->fetch_all(MYSQ
                     <small style="display:block; color: #6c757d;">v<?php echo htmlspecialchars($plugin['version']); ?> | ID: <?php echo htmlspecialchars($plugin['identifier']); ?></small>
                 </td>
                 <td>
-                    <form action="<?php echo SITE_URL; ?>/admin/index.php?page=plugins" method="post" class="toggle-form">
+                    <form action="<?php echo $base_url; ?>/admin/index.php?page=plugins" method="post" class="toggle-form">
                         <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="action" value="toggle_active">
                         <input type="hidden" name="plugin_id" value="<?php echo $plugin['id']; ?>">
@@ -173,7 +175,7 @@ if (is_dir($plugins_dir)) {
     <div class="modal-content">
         <span class="close-btn">&times;</span>
         <h2>Edit Plugin</h2>
-        <form id="edit-plugin-form" action="<?php echo SITE_URL; ?>/admin/index.php?page=plugins" method="post">
+        <form id="edit-plugin-form" action="<?php echo $base_url; ?>/admin/index.php?page=plugins" method="post">
             <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="action" value="edit_plugin">
             <input type="hidden" id="edit-plugin-id" name="plugin_id">
@@ -207,6 +209,8 @@ if (is_dir($plugins_dir)) {
 
 <script>
 jQuery(document).ready(function($) {
+    const ajax_url = '<?php echo $base_url; ?>/admin/ajax_handler.php';
+
     // --- Modal Logic ---
     var modal = $('#edit-plugin-modal');
     $('.edit-plugin-btn').on('click', function() {
@@ -246,7 +250,7 @@ jQuery(document).ready(function($) {
         var plugin_id = button.data('id');
 
         $.ajax({
-            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
+            url: ajax_url,
             type: 'POST',
             dataType: 'json',
             data: {
@@ -281,7 +285,7 @@ jQuery(document).ready(function($) {
         button.prop('disabled', true).text('Installing...');
 
         $.ajax({
-            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
+            url: ajax_url,
             type: 'POST',
             dataType: 'json',
             data: {
@@ -322,7 +326,7 @@ jQuery(document).ready(function($) {
         var progressBar = $('.progress-bar');
 
         $.ajax({
-            url: '<?php echo SITE_URL; ?>/admin/ajax_handler.php',
+            url: ajax_url,
             type: 'POST',
             data: formData,
             dataType: 'json',

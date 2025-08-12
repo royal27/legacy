@@ -3,6 +3,7 @@ if (!defined('ADMIN_AREA')) {
     http_response_code(403);
     die('Forbidden');
 }
+$base_url = rtrim(SITE_URL, '/');
 ?>
             </main> <!-- .admin-page-content -->
             <footer class="admin-footer">
@@ -12,7 +13,7 @@ if (!defined('ADMIN_AREA')) {
     </div> <!-- .admin-wrapper -->
 
     <!-- Toastr JS -->
-    <script src="<?php echo SITE_URL; ?>/admin/assets/js/toastr.min.js"></script>
+    <script src="<?php echo $base_url; ?>/admin/assets/js/toastr.min.js"></script>
     <script>
         // Configure Toastr
         toastr.options = {

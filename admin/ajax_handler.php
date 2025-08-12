@@ -176,7 +176,7 @@ switch ($action) {
                     break;
                 }
                 $theme_folder = sanitize_folder_name($manifest['name']);
-                $theme_dir = __DIR__ . '/../../themes/' . $theme_folder;
+                $theme_dir = __DIR__ . '/../themes/' . $theme_folder; // Corrected path
                 if (is_dir($theme_dir)) {
                     $response['message'] = 'A theme with this name already exists.';
                     break;
@@ -248,26 +248,12 @@ switch ($action) {
         break;
 
     case 'delete_theme':
+        validate_csrf_token();
         $folder = basename($_POST['folder'] ?? '');
         if (!empty($folder)) {
-            $theme_dir = __DIR__ . '/../../themes/' . $folder;
-            // Recursive delete function from plugin handler
-            function rrmdir($dir) {
-                if (is_dir($dir)) {
-                    $objects = scandir($dir);
-                    foreach ($objects as $object) {
-                        if ($object != "." && $object != "..") {
-                            if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir. DIRECTORY_SEPARATOR .$object))
-                                rrmdir($dir. DIRECTORY_SEPARATOR .$object);
-                            else
-                                unlink($dir. DIRECTORY_SEPARATOR .$object);
-                        }
-                    }
-                    rmdir($dir);
-                }
-            }
+            $theme_dir = __DIR__ . '/../themes/' . $folder; // Corrected path
             if (is_dir($theme_dir)) {
-                rrmdir($theme_dir);
+                rrmdir($theme_dir); // Use the global helper function
                 $response['status'] = 'success';
                 $response['message'] = 'Theme deleted successfully!';
             }
@@ -295,25 +281,8 @@ switch ($action) {
                 while ($db->next_result()) {;}
             }
 
-            // Recursive delete function (ensure it's not declared elsewhere)
-            if (!function_exists('rrmdir')) {
-                function rrmdir($dir) {
-                    if (is_dir($dir)) {
-                        $objects = scandir($dir);
-                        foreach ($objects as $object) {
-                            if ($object != "." && $object != "..") {
-                                if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir. DIRECTORY_SEPARATOR .$object))
-                                    rrmdir($dir. DIRECTORY_SEPARATOR .$object);
-                                else
-                                    unlink($dir. DIRECTORY_SEPARATOR .$object);
-                            }
-                        }
-                        rmdir($dir);
-                    }
-                }
-            }
             if (is_dir($plugin_dir)) {
-                rrmdir($plugin_dir);
+                rrmdir($plugin_dir); // Use the global helper function
             }
 
             // Delete from database
