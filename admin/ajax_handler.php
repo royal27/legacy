@@ -20,6 +20,7 @@ $response = ['status' => 'error', 'message' => 'Invalid action.'];
 
 switch ($action) {
     case 'install_plugin':
+        validate_csrf_token();
         if (isset($_FILES['plugin_zip_file'])) {
             $file = $_FILES['plugin_zip_file'];
 
@@ -147,6 +148,7 @@ switch ($action) {
         break;
 
     case 'install_theme':
+        validate_csrf_token();
         if (isset($_FILES['theme_zip_file'])) {
             $file = $_FILES['theme_zip_file'];
             if ($file['error'] !== UPLOAD_ERR_OK || pathinfo($file['name'], PATHINFO_EXTENSION) !== 'zip') {

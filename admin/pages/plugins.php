@@ -227,7 +227,9 @@ $(document).ready(function() {
         }
 
         var formData = new FormData(this);
+        var token = $('input[name="_token"]').first().val(); // Grab token from another form on the page
         formData.append('action', 'install_plugin');
+        formData.append('_token', token);
 
         var progressBarContainer = $('.progress-bar-container');
         var progressBar = $('.progress-bar');
