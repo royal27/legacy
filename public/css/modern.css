@@ -1,0 +1,78 @@
+/* --- Modern Theme Base --- */
+/* This file inherits all structural and responsive styles from style.css. */
+@import url('style.css');
+
+/* --- Modern Theme Variable Overrides --- */
+:root {
+    /* New Palette: Violet, Green, Red, Blue */
+    --color-primary: #007bff; /* A more standard, vibrant blue */
+    --color-secondary: #8a2be2; /* Blue Violet */
+    --color-accent-green: #28a745; /* Vibrant Green */
+    --color-accent-red: #dc3545; /* Vibrant Red */
+
+    /* Clean and professional background/text colors */
+    --bg-main: #f8f9fa;
+    --bg-surface: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+
+    /* Buttons & Links with a more subtle gradient */
+    --btn-bg: linear-gradient(135deg, var(--color-primary), #0056b3);
+    --btn-text-color: #ffffff;
+    --link-color: var(--color-primary);
+}
+
+/* --- Modern Dark Theme --- */
+[data-theme="dark"] {
+    --bg-main: #1c1c1e;
+    --bg-surface: #2c2c2e;
+    --text-primary: #f8f9fa;
+    --text-secondary: #a0a0a0;
+    --border-color: #444;
+
+    --link-color: #58a6ff;
+}
+
+/* --- Modern Component Styling --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.main-header {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+[data-theme="dark"] .main-header {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.admin-card, .template-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    transition: box-shadow 0.2s ease;
+}
+.admin-card:hover, .template-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+input, select, textarea {
+    border-radius: 5px;
+}
+
+.gradient-text {
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-primary), var(--color-accent-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
