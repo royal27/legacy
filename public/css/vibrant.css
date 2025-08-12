@@ -1,0 +1,66 @@
+/* --- Vibrant Theme Base --- */
+/* This file inherits all styles from style.css and overrides the colors. */
+@import url('style.css');
+
+/* --- Vibrant Theme Variables --- */
+:root {
+    /* New Palette: Violet, Green, Red, Blue */
+    --color-primary: #228b22; /* Forest Green */
+    --color-secondary: #8a2be2; /* Blue Violet */
+    --color-accent: #dc143c; /* Crimson Red */
+    --color-extra: #4169e1; /* Royal Blue */
+
+    /* Backgrounds & Text */
+    --bg-main: #f0f2f5;
+    --bg-surface: #ffffff;
+    --text-primary: #1c1e21;
+    --text-secondary: #606770;
+    --border-color: #ced0d4;
+
+    /* Buttons & Links */
+    --btn-bg: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+    --btn-text-color: #ffffff;
+    --link-color: var(--color-primary);
+}
+
+/* --- Vibrant Dark Theme --- */
+[data-theme="dark"] {
+    /* Backgrounds & Text */
+    --bg-main: #18191a;
+    --bg-surface: #242526;
+    --text-primary: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --border-color: #3e4042;
+
+    /* Buttons & Links have a slightly different gradient for dark bg */
+    --btn-bg: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    --link-color: #66b066; /* A lighter green for better contrast */
+}
+
+/* The requested gradient text for this theme */
+.gradient-text {
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-primary), var(--color-extra), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+
+/* --- Custom Scrollbar --- */
+/* Works on Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 20px;
+  border: 3px solid var(--bg-main);
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-secondary);
+}

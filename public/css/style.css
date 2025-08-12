@@ -130,3 +130,58 @@ input:focus, select:focus, textarea:focus {
     background-clip: text;
     text-fill-color: transparent;
 }
+
+/* --- Navigation --- */
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.main-nav .nav-links {
+    display: flex;
+    align-items: center;
+}
+.main-nav a {
+    padding: 0 10px;
+}
+.nav-toggle {
+    display: none; /* Hidden on desktop */
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+.nav-toggle .line {
+    width: 25px;
+    height: 3px;
+    background-color: var(--text-primary);
+    margin: 5px 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .main-nav .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px; /* Adjust based on header height */
+        left: 0;
+        width: 100%;
+        background-color: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+    }
+    .main-nav .nav-links.active {
+        display: flex;
+    }
+    .main-nav .nav-links a {
+        padding: 10px 0;
+        width: 100%;
+        text-align: center;
+    }
+    .nav-toggle {
+        display: block;
+        z-index: 1001;
+    }
+}

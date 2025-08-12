@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars(Hooks::apply_filters('page_title', isset($data['title']) ? $data['title'] : 'My Website')); ?></title>
     <link rel="stylesheet" href="/public/css/toastr.min.css">
-    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="/public/css/vibrant.css">
     <?php Hooks::do_action('head_content'); ?>
 </head>
 <body>
