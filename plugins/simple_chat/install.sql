@@ -8,6 +8,10 @@ CREATE TABLE `chat_rooms` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Add a default public room
+INSERT INTO `chat_rooms` (`id`, `name`, `description`, `type`, `created_by`) VALUES
+(1, 'Public Lobby', 'The main public chat room for everyone.', 'public', NULL);
+
 CREATE TABLE `chat_messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) NOT NULL,
@@ -22,6 +26,7 @@ CREATE TABLE `chat_room_members` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `last_active` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `room_user` (`room_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
