@@ -60,7 +60,7 @@ $active_theme = $settings['active_theme'] ?? 'default';
 <div class="content-block">
     <h2>Install New Theme</h2>
     <p>Upload a theme in .zip format. The zip file must contain a <strong>theme.json</strong> manifest file.</p>
-    <form id="upload-theme-form" enctype="multipart/form-data">
+    <form id="upload-theme-form" method="post" action="" enctype="multipart/form-data">
         <div class="form-group">
             <label for="theme_zip_file">Theme .zip file</label>
             <input type="file" id="theme_zip_file" name="theme_zip_file" accept=".zip" required>
