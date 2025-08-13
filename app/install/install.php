@@ -44,8 +44,8 @@
         $config_content .= "define('DB_USER', '" . addslashes($db_user) . "');\n";
         $config_content .= "define('DB_PASS', '" . addslashes($db_pass) . "');\n\n";
         $config_content .= "// --- Site Settings ---\n";
-        $config_content .= "define('SITE_URL', (isset(\$_SERVER['HTTPS']) && \$_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . \$_SERVER['HTTP_HOST']);\n";
-        $config_content .= "define('BASE_PATH', __DIR__);\n";
+        $config_content .= "define('SITE_URL', rtrim((isset(\$_SERVER['HTTPS']) && \$_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . \$_SERVER['HTTP_HOST'] . str_replace('/app/install/install.php', '', $_SERVER['SCRIPT_NAME']), '/'));\n";
+        $config_content .= "define('BASE_PATH', __DIR__ . '/app');\n";
 
         // --- 3. Test Database Connection ---
         $mysqli = @new mysqli($db_host, $db_user, $db_pass, $db_name);
@@ -54,8 +54,9 @@
         }
 
         // --- 4. Write Config File ---
-        if (!@file_put_contents('../config.php', $config_content)) {
-            die('<p class="error">Error: Could not write to config.php. Please check file permissions.</p>');
+        // The config file should be in the root directory, which is two levels up from app/install/
+        if (!@file_put_contents(__DIR__ . '/../../config.php', $config_content)) {
+            die('<p class="error">Error: Could not write to config.php. Please check file permissions of the root directory.</p>');
         }
         echo '<p class="success">Successfully created config.php file.</p>';
 
@@ -240,7 +241,7 @@
         echo '<p><strong>Admin Username:</strong> ' . htmlspecialchars($admin_user) . '</p>';
         echo '<p><strong>Admin Password:</strong> The one you entered during installation.</p>';
         echo '<p class="error"><strong>IMPORTANT:</strong> For security reasons, please delete the "install" folder from your server immediately!</p>';
-        echo '<p><a href="../index.php">Go to your website</a></p>';
+        echo '<p><a href="../../index.php">Go to your website</a></p>';
 
         ?>
     </div>
