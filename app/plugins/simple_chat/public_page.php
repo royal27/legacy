@@ -11,7 +11,7 @@ if (!is_logged_in()) {
 }
 
 $page_title = 'Chat - Public Lobby';
-include_once BASE_PATH . '/templates/header.php';
+include_once APP_PATH . '/templates/header.php';
 ?>
 
 <style>
@@ -176,5 +176,5 @@ jQuery(document).ready(function($) {
 </script>
 
 <?php
-include_once BASE_PATH . '/templates/footer.php';
+include_once APP_PATH . '/templates/footer.php';
 ?>

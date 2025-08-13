@@ -44,8 +44,11 @@
         $config_content .= "define('DB_USER', '" . addslashes($db_user) . "');\n";
         $config_content .= "define('DB_PASS', '" . addslashes($db_pass) . "');\n\n";
         $config_content .= "// --- Site Settings ---\n";
-        $config_content .= "define('SITE_URL', rtrim((isset(\$_SERVER['HTTPS']) && \$_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . \$_SERVER['HTTP_HOST'] . str_replace('/app/install/install.php', '', $_SERVER['SCRIPT_NAME']), '/'));\n";
-        $config_content .= "define('BASE_PATH', __DIR__ . '/app');\n";
+        // Calculate the site URL dynamically and robustly
+        $site_url_value = rtrim((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . str_replace('/app/install/install.php', '', $_SERVER['SCRIPT_NAME']), '/');
+        $config_content .= "define('SITE_URL', '" . addslashes($site_url_value) . "');\n";
+        // Define the path to the 'app' directory for includes
+        $config_content .= "define('APP_PATH', __DIR__ . '/app');\n";
 
         // --- 3. Test Database Connection ---
         $mysqli = @new mysqli($db_host, $db_user, $db_pass, $db_name);
