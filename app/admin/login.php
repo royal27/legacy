@@ -1,22 +1,31 @@
 <?php
-// We are in the /admin folder, so the path to bootstrap is one level up.
-require_once __DIR__ . '/../core/bootstrap.php';
+// Prevent direct file access
+if (!defined('ADMIN_AREA')) {
+    http_response_code(403);
+    die('Forbidden');
+}
 
-// If user is already logged in as admin, redirect to dashboard
+// This file is included by admin/index.php when the user is not logged in.
+// If user is already logged in, the router in index.php should prevent this from being loaded.
 if (is_admin()) {
-    redirect('index.php');
+    redirect(rtrim(SITE_URL, '/') . '/admin/');
 }
 
 $error_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF token is validated in the main entry point (admin/index.php) now.
+    // Let's re-add it here for standalone safety, but the main router should handle it.
+    if (function_exists('validate_csrf_token')) {
+        validate_csrf_token();
+    }
+
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
         $error_message = 'Username and password are required.';
     } else {
-        // Prepare statement to prevent SQL injection
         $stmt = $db->prepare("SELECT id, password, role_id FROM users WHERE username = ? LIMIT 1");
         $stmt->bind_param('s', $username);
         $stmt->execute();
@@ -24,20 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            // Verify password and check if user is an admin (role_id = 1)
-            // Verify password
             if (password_verify($password, $user['password'])) {
-                // Password is correct, now set session variables
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $username;
                 $_SESSION['role_id'] = $user['role_id'];
-
-                // Load permissions into session
                 load_user_permissions();
 
-                // Check if user has permission to log into admin
                 if (is_admin()) {
-                    redirect('index.php');
+                    redirect(rtrim(SITE_URL, '/') . '/admin/');
                 } else {
                      $error_message = 'You do not have permission to access the admin panel.';
                 }
@@ -50,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
-$db->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,29 +60,26 @@ $db->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
-    <!-- We are in /admin, so asset paths need to be adjusted -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo rtrim(SITE_URL, '/'); ?>/app/assets/css/style.css">
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: var(--color-light-gray);
+            background-color: #f4f4f4;
         }
         .login-container {
             width: 100%;
             max-width: 400px;
             padding: 40px;
-            background-color: var(--color-white);
+            background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-top: 5px solid var(--color-primary);
         }
         .login-container h1 {
             text-align: center;
             margin-bottom: 20px;
-            color: var(--color-dark);
         }
         .error-message {
             background-color: #f8d7da;
@@ -99,7 +98,8 @@ $db->close();
         <?php if (!empty($error_message)): ?>
             <div class="error-message"><?php echo $error_message; ?></div>
         <?php endif; ?>
-        <form action="login.php" method="post">
+        <form action="<?php echo rtrim(SITE_URL, '/'); ?>/admin/login.php" method="post">
+            <input type="hidden" name="_token" value="<?php echo generate_csrf_token(); ?>">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>

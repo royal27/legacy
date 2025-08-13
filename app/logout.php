@@ -1,6 +1,15 @@
 <?php
-// Bootstrap the application to get access to session handling and redirect function
+define('APP_LOADED', true);
 require_once __DIR__ . '/core/bootstrap.php';
+
+// Ensure this is a POST request to prevent CSRF logout
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405); // Method Not Allowed
+    die('Invalid request method.');
+}
+
+// Validate the token
+validate_csrf_token();
 
 // Unset all of the session variables
 $_SESSION = [];
@@ -18,5 +27,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirect to the homepage
-redirect(SITE_URL);
+redirect(rtrim(SITE_URL, '/'));
 ?>

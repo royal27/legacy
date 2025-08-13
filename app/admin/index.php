@@ -1,11 +1,18 @@
 <?php
 define('ADMIN_AREA', true);
+// Bootstrap the application to get access to helpers and DB
 require_once __DIR__ . '/../core/bootstrap.php';
 
-// Must be logged in to access admin
+// If the user is not an admin, show the login page and stop execution.
+// The login.php file is now a self-contained page.
 if (!is_admin()) {
-    redirect(SITE_URL . '/admin/login.php');
+    // The login page handles its own logic and HTML
+    include __DIR__ . '/login.php';
+    exit();
 }
+
+
+// --- If we are here, the user is a logged-in admin ---
 
 // Simple router for admin pages
 $allowed_pages = ['dashboard', 'settings', 'users', 'edit_user', 'roles', 'permissions', 'languages', 'translations', 'plugins', 'points', 'security', 'menus', 'pages', 'edit_page', 'themes'];

@@ -1,10 +1,13 @@
 <?php
-define('APP_LOADED', true);
-require_once 'core/bootstrap.php';
+// Prevent direct file access
+if (!defined('APP_LOADED')) {
+    http_response_code(403);
+    die('Forbidden');
+}
 
 // If user is already logged in, redirect to their profile
 if (is_logged_in()) {
-    redirect(SITE_URL . '/profile/' . $_SESSION['user_id']);
+    redirect(rtrim(SITE_URL, '/') . '/profile/' . $_SESSION['user_id']);
 }
 
 $error_message = '';
@@ -15,6 +18,9 @@ if (isset($_GET['kicked'])) {
 }
 if (isset($_GET['banned'])) {
     $error_message = 'This account has been banned.';
+}
+if (isset($_GET['registered'])) {
+    $success_message = 'Registration successful! You can now log in.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,11 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif (password_verify($password, $user['password'])) {
                 // Login success! Check for daily points
                 $today = date('Y-m-d');
-                if ($user['last_login_points_awarded'] != $today) {
-                    $points_for_login = (int)($settings['points_on_login'] ?? 10);
-                    if ($points_for_login > 0) {
-                        $db->query("UPDATE users SET points = points + {$points_for_login}, last_login_points_awarded = '{$today}' WHERE id = {$user['id']}");
-                    }
+                $points_on_login = (int)($settings['points_on_login'] ?? 0);
+                if ($points_on_login > 0 && $user['last_login_points_awarded'] != $today) {
+                    $db->query("UPDATE users SET points = points + {$points_on_login}, last_login_points_awarded = '{$today}' WHERE id = {$user['id']}");
                 }
 
                 $_SESSION['user_id'] = $user['id'];
@@ -50,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['role_id'] = $user['role_id'];
                 load_user_permissions(); // Load permissions on login
 
-                redirect(SITE_URL . '/profile/' . $user['id']);
+                redirect(rtrim(SITE_URL, '/') . '/profile/' . $user['id']);
             } else {
                 $error_message = 'Invalid username or password.';
             }
@@ -62,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $page_title = "Login";
-include 'templates/header.php';
 ?>
 <div class="container">
     <div class="login-form-container">
@@ -70,7 +73,10 @@ include 'templates/header.php';
         <?php if (!empty($error_message)): ?>
             <div class="message-box error"><?php echo $error_message; ?></div>
         <?php endif; ?>
-        <form action="login.php" method="post">
+        <?php if (!empty($success_message)): ?>
+            <div class="message-box success"><?php echo $success_message; ?></div>
+        <?php endif; ?>
+        <form action="<?php echo rtrim(SITE_URL, '/'); ?>/login" method="post">
             <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -82,7 +88,7 @@ include 'templates/header.php';
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;">Login</button>
         </form>
-        <p class="text-center">Don't have an account? <a href="register.php">Register here</a>.</p>
+        <p class="text-center">Don't have an account? <a href="<?php echo rtrim(SITE_URL, '/'); ?>/register">Register here</a>.</p>
     </div>
 </div>
 
@@ -90,7 +96,3 @@ include 'templates/header.php';
 .login-form-container { max-width: 500px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
 .text-center { text-align: center; margin-top: 20px; }
 </style>
-
-<?php
-include 'templates/footer.php';
-?>

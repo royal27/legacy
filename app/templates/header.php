@@ -55,9 +55,14 @@ if (!defined('APP_LOADED')) {
                 <ul>
                     <?php include __DIR__ . '/partials/language_switcher.php'; ?>
                     <?php if (is_logged_in()): ?>
-                        <li><a href="<?php echo SITE_URL; ?>/profile/<?php echo $_SESSION['user_id']; ?>">My Profile</a></li>
-                        <li><a href="<?php echo SITE_URL; ?>/edit-profile">Edit Profile</a></li>
-                        <li><a href="<?php echo SITE_URL; ?>/logout" class="btn btn-secondary btn-sm">Logout</a></li>
+                        <li><a href="<?php echo rtrim(SITE_URL, '/'); ?>/profile/<?php echo $_SESSION['user_id']; ?>">My Profile</a></li>
+                        <li><a href="<?php echo rtrim(SITE_URL, '/'); ?>/edit-profile">Edit Profile</a></li>
+                        <li>
+                            <form action="<?php echo rtrim(SITE_URL, '/'); ?>/logout" method="post" style="display:inline; margin:0; padding:0;">
+                                <input type="hidden" name="_token" value="<?php echo generate_csrf_token(); ?>">
+                                <button type="submit" class="btn-link-style">Logout</button>
+                            </form>
+                        </li>
                     <?php else: ?>
                         <li><a href="<?php echo SITE_URL; ?>/login">Login</a></li>
                         <li><a href="<?php echo SITE_URL; ?>/register" class="btn btn-primary btn-sm">Register</a></li>

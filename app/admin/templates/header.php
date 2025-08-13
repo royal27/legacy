@@ -169,7 +169,10 @@ d (max-width:768px){#toast-container>div{padding:15px 15px 15px 50px;width:25em}
                     Welcome, <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>!
                 </div>
                 <div class="header-actions">
-                    <a href="<?php echo $base_url; ?>/admin/logout.php" class="btn btn-accent">Logout</a>
+                    <form action="<?php echo $base_url; ?>/admin/logout.php" method="post" style="display:inline;">
+                        <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        <button type="submit" class="btn btn-accent">Logout</button>
+                    </form>
                 </div>
             </header>
             <main class="admin-page-content">

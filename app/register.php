@@ -1,13 +1,18 @@
 <?php
-define('APP_LOADED', true);
-require_once 'core/bootstrap.php';
+// Prevent direct file access
+if (!defined('APP_LOADED')) {
+    http_response_code(403);
+    die('Forbidden');
+}
 
 // If user is already logged in, redirect to their profile
 if (is_logged_in()) {
-    redirect(SITE_URL . '/profile/' . $_SESSION['user_id']);
+    redirect(rtrim(SITE_URL, '/') . '/profile/' . $_SESSION['user_id']);
 }
 
 $errors = [];
+$username = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validate_csrf_token();
@@ -43,19 +48,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $initial_points = (int)($settings['points_on_register'] ?? 50);
+        $default_role_id = (int)($settings['default_role_id'] ?? 2);
 
-        $stmt = $db->prepare("INSERT INTO users (username, email, password, points, role_id) VALUES (?, ?, ?, ?, 2)");
-        $stmt->bind_param('sssi', $username, $email, $hashed_password, $initial_points);
+
+        $stmt = $db->prepare("INSERT INTO users (username, email, password, points, role_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param('sssid', $username, $email, $hashed_password, $initial_points, $default_role_id);
 
         if ($stmt->execute()) {
             // Registration success, log the user in
             $new_user_id = $stmt->insert_id;
             $_SESSION['user_id'] = $new_user_id;
             $_SESSION['username'] = $username;
-            $_SESSION['role_id'] = 2;
+            $_SESSION['role_id'] = $default_role_id;
             load_user_permissions();
 
-            redirect(SITE_URL . '/profile/' . $new_user_id);
+            // Redirect to login page with a success message
+            redirect(rtrim(SITE_URL, '/') . '/login?registered=1');
         } else {
             $errors[] = 'An error occurred during registration. Please try again.';
         }
@@ -64,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $page_title = "Register";
-include 'templates/header.php';
 ?>
 <div class="container">
     <div class="login-form-container">
@@ -78,7 +85,7 @@ include 'templates/header.php';
                 </ul>
             </div>
         <?php endif; ?>
-        <form action="register.php" method="post">
+        <form action="<?php echo rtrim(SITE_URL, '/'); ?>/register" method="post">
             <input type="hidden" name="_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -98,7 +105,7 @@ include 'templates/header.php';
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;">Register</button>
         </form>
-        <p class="text-center">Already have an account? <a href="login.php">Login here</a>.</p>
+        <p class="text-center">Already have an account? <a href="<?php echo rtrim(SITE_URL, '/'); ?>/login">Login here</a>.</p>
     </div>
 </div>
 
@@ -107,7 +114,3 @@ include 'templates/header.php';
 .text-center { text-align: center; margin-top: 20px; }
 .message-box ul { padding-left: 20px; text-align: left; }
 </style>
-
-<?php
-include 'templates/footer.php';
-?>
