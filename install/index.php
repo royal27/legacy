@@ -207,9 +207,7 @@ $lang = $lang_data[$lang_key];
                             echo '<h2>' . $lang['install_complete'] . '</h2>';
                             echo '<p>' . $lang['install_complete_desc'] . '</p>';
 
-                            $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]";
-                            $path = rtrim(str_replace('/install', '', dirname($_SERVER['PHP_SELF'])), '/');
-                            $site_url = $base_url . $path;
+                            $site_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]" . rtrim(dirname(dirname($_SERVER['PHP_SELF'])), '/\\') . '/public';
                             echo '<a href="' . $site_url . '" class="btn">' . $lang['goto_site'] . '</a>';
 
                             // Clean up session

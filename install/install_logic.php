@@ -10,10 +10,7 @@ function create_config_file($db_details) {
     $config_content .= "define('DB_PREFIX', '" . addslashes($db_details['db_prefix']) . "');\n\n";
 
     $config_content .= "/* --- Site Settings --- */\n";
-    $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]";
-    $path = rtrim(str_replace('/install', '', dirname($_SERVER['PHP_SELF'])), '/');
-    $site_url = $base_url . $path;
-    $config_content .= "define('SITE_URL', '" . $site_url . "');\n";
+    $config_content .= "define('SITE_URL', '" . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]' . rtrim(dirname(dirname($_SERVER['PHP_SELF'])), '/\\') . '/public');\n";
     $config_content .= "define('INSTALLED', true);\n";
 
     $config_path = dirname(__DIR__) . '/config/config.php';

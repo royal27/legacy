@@ -44,7 +44,7 @@ function live_alerts_register_routes() {
         echo '      <button id="live-alert-close">Close</button>';
         echo '  </div>';
         echo '</div>';
-        echo '<script src="/public/plugins/live_alerts/assets/js/alerts.js"></script>';
+        echo '<script src="/plugins/live_alerts/assets/js/alerts.js"></script>';
     }
 });
 
