@@ -209,8 +209,8 @@ $lang = $lang_data[$lang_key];
 
                             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
                             $host = $_SERVER['HTTP_HOST'];
-                            $path = rtrim(dirname(dirname($_SERVER['PHP_SELF'])), '/\\');
-                            $site_url = "{$protocol}://{$host}{$path}/public";
+                            $path = rtrim(str_replace('/install', '', dirname($_SERVER['PHP_SELF'])), '/');
+                            $site_url = "{$protocol}://{$host}{$path}";
                             echo '<a href="' . $site_url . '" class="btn">' . $lang['goto_site'] . '</a>';
 
                             // Clean up session

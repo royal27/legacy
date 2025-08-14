@@ -12,8 +12,8 @@ function create_config_file($db_details) {
     $config_content .= "/* --- Site Settings --- */\n";
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
     $host = $_SERVER['HTTP_HOST'];
-    $path = rtrim(dirname(dirname($_SERVER['PHP_SELF'])), '/\\');
-    $site_url = "{$protocol}://{$host}{$path}/public";
+    $path = rtrim(str_replace('/install', '', dirname($_SERVER['PHP_SELF'])), '/');
+    $site_url = "{$protocol}://{$host}{$path}";
     $config_content .= "define('SITE_URL', '" . addslashes($site_url) . "');\n";
     $config_content .= "define('INSTALLED', true);\n";
 

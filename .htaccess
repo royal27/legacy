@@ -5,7 +5,7 @@
     RewriteBase /
 
     # Block access to sensitive directories
-    RewriteRule ^(src|config|plugins|templates) - [F,L]
+    RewriteRule ^(src|config|install|plugins|templates) - [F,L]
 
     # If a directory or a file exists, use it directly
     RewriteCond %{REQUEST_FILENAME} !-f
