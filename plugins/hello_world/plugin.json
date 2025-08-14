@@ -1,0 +1,6 @@
+{
+    "name": "Hello World",
+    "version": "1.0",
+    "author": "Jules",
+    "description": "A simple example plugin to demonstrate the plugin system."
+}
