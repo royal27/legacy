@@ -1,6 +1,10 @@
 <?php
+/**
+ * Front Controller
+ */
+
 // Define root path for includes
-define('ROOT_PATH', dirname(__DIR__));
+define('ROOT_PATH', __DIR__);
 
 // Check if the config file exists
 $config_file = ROOT_PATH . '/config/config.php';
@@ -8,14 +12,11 @@ $config_file = ROOT_PATH . '/config/config.php';
 if (!file_exists($config_file)) {
     // If not installed, redirect to installer
     if (is_dir(ROOT_PATH . '/install')) {
-        // Installer exists, redirect to it.
-        // We build the URL manually to ensure it's correct before the app is fully configured.
         $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]";
-        $install_path = str_replace('/public', '/install', dirname($_SERVER['PHP_SELF']));
+        $install_path = rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/install/';
         header('Location: ' . $base_url . $install_path);
         exit;
     } else {
-        // Not installed and no installer found.
         die('ERROR: Application is not installed and the installer directory is missing.');
     }
 }
@@ -28,16 +29,10 @@ if (defined('INSTALLED') && INSTALLED === true && is_dir(ROOT_PATH . '/install')
     die('<b>Security Warning!</b><br>Please delete the "install" directory immediately.');
 }
 
-<?php
-
-/**
- * Front Controller
- */
-
 // Autoloader for App\ namespace
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
-    $base_dir = dirname(__DIR__) . '/src/';
+    $base_dir = __DIR__ . '/src/';
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
         return;
