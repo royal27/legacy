@@ -3,10 +3,10 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-// use App\Core\View;
-// use App\Core\Session;
-// use App\Core\Database;
-// use App\Core\Auth;
+use App\Core\View;
+use App\Core\Session;
+use App\Core\Database;
+use App\Core\Auth;
 
 class AuthController extends Controller
 {
@@ -17,10 +17,9 @@ class AuthController extends Controller
      */
     public function login()
     {
-        // View::render('Auth/login.php', [
-        //     'title' => 'Login'
-        // ]);
-        echo "DEBUG: AuthController login() method reached!";
+        View::render('Auth/login.php', [
+            'title' => 'Login'
+        ]);
     }
 
     /**

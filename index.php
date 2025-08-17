@@ -67,7 +67,7 @@ $router = new App\Core\Router();
 
 // Core Application Routes
 $router->add('', ['controller' => 'Home', 'action' => 'index']);
-$router->add('login', ['controller' => 'Auth', 'action' => 'login']);
+$router->add('login', ['controller' => 'Auth', 'action' => 'login', 'method' => 'GET']);
 $router->add('login', ['controller' => 'Auth', 'action' => 'postLogin', 'method' => 'POST']);
 $router->add('logout', ['controller' => 'Auth', 'action' => 'logout']);
 
@@ -118,13 +118,6 @@ function dispatch() {
         } else {
             $controller = 'App\\Controllers\\' . $controller_name . 'Controller'; // It's a core controller
         }
-
-        // --- DEBUGGING START ---
-        $file_path = __DIR__ . '/src/' . str_replace('\\', '/', substr($controller, 4)) . '.php';
-        if (!file_exists($file_path)) {
-            die("DEBUG: Controller file not found at path: " . $file_path);
-        }
-        // --- DEBUGGING END ---
 
         if (class_exists($controller)) {
             $controller_object = new $controller($params);
