@@ -104,9 +104,9 @@ function dispatch() {
 
         $controller_name = $params['controller'];
         if (strpos($controller_name, 'Plugins\\') === 0) {
-            $controller = $controller_name; // It's a fully namespaced plugin controller
+            $controller = $controller_name . 'Controller';
         } else {
-            $controller = 'App\\Controllers\\' . $controller_name; // It's a core controller
+            $controller = 'App\\Controllers\\' . $controller_name . 'Controller';
         }
 
         if (class_exists($controller)) {

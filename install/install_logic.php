@@ -25,7 +25,7 @@ function create_config_file($db_details) {
     return false;
 }
 
-function create_database_tables($db_details, $founder_details) {
+function create_database_tables($db_details, $founder_details, $activate_plugins = []) {
     $mysqli = new mysqli($db_details['db_host'], $db_details['db_user'], $db_details['db_pass'], $db_details['db_name']);
     if ($mysqli->connect_error) {
         return "Database connection failed: " . $mysqli->connect_error;
@@ -309,6 +309,16 @@ function create_database_tables($db_details, $founder_details) {
         $stmt->execute();
     }
     $stmt->close();
+
+    // Activate selected plugins
+    if (!empty($activate_plugins)) {
+        $stmt = $mysqli->prepare("INSERT INTO `{$prefix}plugins` (directory_name, is_active) VALUES (?, 1) ON DUPLICATE KEY UPDATE is_active = 1");
+        foreach ($activate_plugins as $plugin_dir) {
+            $stmt->bind_param('s', $plugin_dir);
+            $stmt->execute();
+        }
+        $stmt->close();
+    }
 
     $mysqli->close();
     return true;

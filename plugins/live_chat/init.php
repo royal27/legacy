@@ -12,14 +12,14 @@ function live_chat_register_routes() {
     $router = \App\Core\Router::getInstance();
 
     // Frontend routes
-    $router->add('chat', ['controller' => 'Plugins\\LiveChat\\Controllers\\ChatController', 'action' => 'index']);
+    $router->add('chat', ['controller' => 'Plugins\\LiveChat\\Controllers\\Chat', 'action' => 'index']);
 
     // API routes for fetching messages, etc.
-    $router->add('api/chat/messages/{room_id:\d+}', ['controller' => 'Plugins\\LiveChat\\Controllers\\ApiController', 'action' => 'getMessages']);
-    $router->add('api/chat/send', ['controller' => 'Plugins\\LiveChat\\Controllers\\ApiController', 'action' => 'sendMessage', 'method' => 'POST']);
+    $router->add('api/chat/messages/{room_id:\d+}', ['controller' => 'Plugins\\LiveChat\\Controllers\\Api', 'action' => 'getMessages']);
+    $router->add('api/chat/send', ['controller' => 'Plugins\\LiveChat\\Controllers\\Api', 'action' => 'sendMessage', 'method' => 'POST']);
 
     // Admin routes
-    $router->add('admin/chat', ['controller' => 'Plugins\\LiveChat\\Controllers\\Admin\\ChatController', 'action' => 'index']);
+    $router->add('admin/chat', ['controller' => 'Plugins\\LiveChat\\Controllers\\Admin\\Chat', 'action' => 'index']);
 }
 \App\Core\Hooks::listen('register_routes', 'live_chat_register_routes');
 

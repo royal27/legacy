@@ -12,16 +12,16 @@ function support_tickets_register_routes() {
     $router = \App\Core\Router::getInstance();
 
     // Frontend routes
-    $router->add('tickets', ['controller' => 'Plugins\\SupportTickets\\Controllers\\TicketController', 'action' => 'index']);
-    $router->add('tickets/new', ['controller' => 'Plugins\\SupportTickets\\Controllers\\TicketController', 'action' => 'new']);
-    $router->add('tickets/create', ['controller' => 'Plugins\\SupportTickets\\Controllers\\TicketController', 'action' => 'create', 'method' => 'POST']);
-    $router->add('tickets/{id:\d+}', ['controller' => 'Plugins\\SupportTickets\\Controllers\\TicketController', 'action' => 'show']);
-    $router->add('tickets/{id:\d+}/reply', ['controller' => 'Plugins\\SupportTickets\\Controllers\\TicketController', 'action' => 'reply', 'method' => 'POST']);
+    $router->add('tickets', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Ticket', 'action' => 'index']);
+    $router->add('tickets/new', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Ticket', 'action' => 'new']);
+    $router->add('tickets/create', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Ticket', 'action' => 'create', 'method' => 'POST']);
+    $router->add('tickets/{id:\d+}', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Ticket', 'action' => 'show']);
+    $router->add('tickets/{id:\d+}/reply', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Ticket', 'action' => 'reply', 'method' => 'POST']);
 
     // Admin routes
-    $router->add('admin/tickets', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\TicketController', 'action' => 'index']);
-    $router->add('admin/tickets/{id:\d+}', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\TicketController', 'action' => 'show']);
-    $router->add('admin/tickets/{id:\d+}/update', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\TicketController', 'action' => 'update', 'method' => 'POST']);
+    $router->add('admin/tickets', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\Ticket', 'action' => 'index']);
+    $router->add('admin/tickets/{id:\d+}', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\Ticket', 'action' => 'show']);
+    $router->add('admin/tickets/{id:\d+}/update', ['controller' => 'Plugins\\SupportTickets\\Controllers\\Admin\\Ticket', 'action' => 'update', 'method' => 'POST']);
 }
 \App\Core\Hooks::listen('register_routes', 'support_tickets_register_routes');
 
