@@ -119,6 +119,13 @@ function dispatch() {
             $controller = 'App\\Controllers\\' . $controller_name . 'Controller'; // It's a core controller
         }
 
+        // --- DEBUGGING START ---
+        $file_path = __DIR__ . '/src/' . str_replace('\\', '/', substr($controller, 4)) . '.php';
+        if (!file_exists($file_path)) {
+            die("DEBUG: Controller file not found at path: " . $file_path);
+        }
+        // --- DEBUGGING END ---
+
         if (class_exists($controller)) {
             $controller_object = new $controller($params);
 
