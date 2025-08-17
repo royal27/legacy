@@ -12,11 +12,11 @@ function live_alerts_register_routes() {
     $router = \App\Core\Router::getInstance();
 
     // API routes for checking and marking alerts as read
-    $router->add('api/alerts/check', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\ApiController', 'action' => 'check']);
-    $router->add('api/alerts/mark_read/{id:\d+}', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\ApiController', 'action' => 'markAsRead', 'method' => 'POST']);
+    $router->add('api/alerts/check', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\Api', 'action' => 'check']);
+    $router->add('api/alerts/mark_read/{id:\d+}', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\Api', 'action' => 'markAsRead', 'method' => 'POST']);
 
     // Admin routes
-    $router->add('admin/alerts/send', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\Admin\\AlertController', 'action' => 'send', 'method' => 'POST']);
+    $router->add('admin/alerts/send', ['controller' => 'Plugins\\LiveAlerts\\Controllers\\Admin\\Alert', 'action' => 'send', 'method' => 'POST']);
 }
 \App\Core\Hooks::listen('register_routes', 'live_alerts_register_routes');
 

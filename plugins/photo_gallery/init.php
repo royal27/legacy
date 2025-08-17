@@ -12,14 +12,14 @@ function photo_gallery_register_routes() {
     $router = \App\Core\Router::getInstance();
 
     // Frontend routes
-    $router->add('gallery', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\GalleryController', 'action' => 'index']);
-    $router->add('gallery/album/{id:\d+}', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\GalleryController', 'action' => 'album']);
-    $router->add('gallery/photo/{id:\d+}', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\GalleryController', 'action' => 'photo']);
+    $router->add('gallery', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\Gallery', 'action' => 'index']);
+    $router->add('gallery/album/{id:\d+}', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\Gallery', 'action' => 'album']);
+    $router->add('gallery/photo/{id:\d+}', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\Gallery', 'action' => 'photo']);
     // We'll need routes for users to manage their own albums and photos too.
-    $router->add('my-gallery/upload', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\UserGalleryController', 'action' => 'upload']);
+    $router->add('my-gallery/upload', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\UserGallery', 'action' => 'upload']);
 
     // Admin routes
-    $router->add('admin/gallery', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\Admin\\GalleryController', 'action' => 'index']);
+    $router->add('admin/gallery', ['controller' => 'Plugins\\PhotoGallery\\Controllers\\Admin\\Gallery', 'action' => 'index']);
 }
 \App\Core\Hooks::listen('register_routes', 'photo_gallery_register_routes');
 

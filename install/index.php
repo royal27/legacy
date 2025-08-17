@@ -52,6 +52,8 @@ $lang_data = [
         'username' => 'Nume utilizator',
         'email' => 'Adresă de email',
         'password' => 'Parolă',
+        'plugins_title' => '4. Activare Plugin-uri',
+        'plugins_desc' => 'Selectați plugin-urile pe care doriți să le activați inițial.',
         'install_now' => 'Instalează Acum',
         'error_notice' => 'A apărut o eroare',
         'success_notice' => 'Succes',
@@ -97,9 +99,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email' => $_POST['email'],
                 'password' => $_POST['password']
             ];
-            header('Location: index.php?step=finish');
+            header('Location: index.php?step=4'); // Go to new plugin step
             exit;
         }
+    } elseif ($step === '4' && isset($_POST['install'])) {
+        $_SESSION['activate_plugins'] = $_POST['plugins'] ?? [];
+        header('Location: index.php?step=finish');
+        exit;
     }
 }
 
@@ -185,7 +191,31 @@ $lang = $lang_data[$lang_key];
                         <label for="password"><?= $lang['password'] ?></label>
                         <input type="password" name="password" id="password" required>
                     </div>
-                    <button type="submit" class="btn"><?= $lang['install_now'] ?></button>
+                    <button type="submit" class="btn"><?= $lang['continue'] ?></button>
+                </form>
+
+            <?php elseif ($step === '4'): ?>
+                <h2><?= $lang['step'] ?> 4: <?= $lang['plugins_title'] ?></h2>
+                <p><?= $lang['plugins_desc'] ?></p>
+                <form action="index.php?step=4" method="POST">
+                    <div class="form-group">
+                        <?php
+                            $plugins_dir = dirname(__DIR__) . '/plugins';
+                            $plugin_dirs = array_filter(scandir($plugins_dir), function ($item) use ($plugins_dir) {
+                                return !in_array($item, ['.', '..']) && is_dir($plugins_dir . '/' . $item);
+                            });
+                            foreach ($plugin_dirs as $dir):
+                                $manifest_path = $plugins_dir . '/' . $dir . '/plugin.json';
+                                if (file_exists($manifest_path)):
+                                    $manifest = json_decode(file_get_contents($manifest_path), true);
+                        ?>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="plugins[]" value="<?= htmlspecialchars($dir) ?>" checked>
+                                <?= htmlspecialchars($manifest['name'] ?? $dir) ?>
+                            </label>
+                        <?php endif; endforeach; ?>
+                    </div>
+                    <button type="submit" name="install" class="btn"><?= $lang['install_now'] ?></button>
                 </form>
 
             <?php elseif ($step === 'finish'): ?>
@@ -197,7 +227,7 @@ $lang = $lang_data[$lang_key];
                     } else {
                         echo '<div class="notice success">Configuration file created successfully.</div>';
 
-                        $db_creation_result = create_database_tables($_SESSION['db_details'], $_SESSION['founder_details']);
+                        $db_creation_result = create_database_tables($_SESSION['db_details'], $_SESSION['founder_details'], $_SESSION['activate_plugins'] ?? []);
 
                         if ($db_creation_result !== true) {
                             echo '<div class="notice error">' . htmlspecialchars($db_creation_result) . '</div>';
