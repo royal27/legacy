@@ -60,6 +60,8 @@ $router->add('', ['controller' => 'Home', 'action' => 'index']);
 $router->add('login', ['controller' => 'Auth', 'action' => 'login', 'method' => 'GET']);
 $router->add('login', ['controller' => 'Auth', 'action' => 'postLogin', 'method' => 'POST']);
 $router->add('logout', ['controller' => 'Auth', 'action' => 'logout']);
+$router->add('forgot-password', ['controller' => 'ForgotPassword', 'action' => 'index', 'method' => 'GET']);
+$router->add('forgot-password', ['controller' => 'ForgotPassword', 'action' => 'sendResetLink', 'method' => 'POST']);
 
 // Admin Routes
 $router->add('admin', ['controller' => 'Admin\\Dashboard', 'action' => 'index']);
