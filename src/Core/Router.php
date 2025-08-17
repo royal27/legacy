@@ -55,7 +55,7 @@ class Router {
         // Add start and end delimiters, and case-insensitive flag
         $route = '/^' . $route . '$/i';
 
-        $this->routes[] = ['pattern' => $route, 'params' => $params];
+        $this->routes[$route] = $params;
     }
 
     /**
@@ -76,11 +76,9 @@ class Router {
      * @return boolean true if a match found, false otherwise
      */
     public function match($url) {
-        foreach ($this->routes as $route_item) {
-            $route = $route_item['pattern'];
-            $params = $route_item['params'];
-
+        foreach ($this->routes as $route => $params) {
             if (preg_match($route, $url, $matches)) {
+
                 // Check for a method match if specified in the route params
                 if (isset($params['method'])) {
                     if ($params['method'] !== $_SERVER['REQUEST_METHOD']) {
