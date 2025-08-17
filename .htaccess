@@ -1,11 +1,17 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
 
-    # Don't apply to files that exist
+    # Prevent direct access to certain directories
+    RewriteRule ^(core|plugins|themes)/ - [F,L]
+
+    # Allow access to the install folder only if config.php does not exist
+    RewriteCond %{REQUEST_URI} !^/install/.*$
+    RewriteCond %{DOCUMENT_ROOT}/config.php -f
+    RewriteRule ^install/ - [F,L]
+
+    # Main routing rule
     RewriteCond %{REQUEST_FILENAME} !-f
-    # Don't apply to directories that exist
     RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Rewrite all other requests to index.php
     RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
 </IfModule>

@@ -8,7 +8,7 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
 
 // The main entry point (e.g., index.php) is responsible for checking
 // if the application is installed. This file assumes config.php exists.
-require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../config.php';
 
 // Start the session
 if (session_status() === PHP_SESSION_NONE) {
@@ -62,10 +62,10 @@ if ($settings_res) {
 // Define theme path and URL based on active theme setting
 $active_theme = $settings['active_theme'] ?? 'default';
 if ($active_theme !== 'default' && is_dir(__DIR__ . '/../themes/' . $active_theme)) {
-    $settings['theme_url'] = rtrim(SITE_URL, '/') . '/app/themes/' . $active_theme;
+    $settings['theme_url'] = rtrim(SITE_URL, '/') . '/themes/' . $active_theme;
 } else {
     // Fallback to default theme assets
-    $settings['theme_url'] = rtrim(SITE_URL, '/') . '/app/assets';
+    $settings['theme_url'] = rtrim(SITE_URL, '/') . '/assets';
 }
 
 

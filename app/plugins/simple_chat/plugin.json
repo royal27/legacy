@@ -1,8 +1,0 @@
-{
-    "name": "Simple Ajax Chat",
-    "identifier": "simple_chat",
-    "version": "1.0.0",
-    "author": "Jules",
-    "main_file": "main.php",
-    "default_link": "/chat"
-}
