@@ -67,7 +67,7 @@ $router = new App\Core\Router();
 
 // Core Application Routes
 $router->add('', ['controller' => 'Home', 'action' => 'index']);
-$router->add('login', ['controller' => 'Auth', 'action' => 'login', 'method' => 'GET']);
+$router->add('login', ['controller' => 'Auth', 'action' => 'login']);
 $router->add('login', ['controller' => 'Auth', 'action' => 'postLogin', 'method' => 'POST']);
 $router->add('logout', ['controller' => 'Auth', 'action' => 'logout']);
 
