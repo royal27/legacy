@@ -32,20 +32,10 @@ if (defined('INSTALLED') && INSTALLED === true && is_dir(ROOT_PATH . '/install')
 // Load helpers
 require_once ROOT_PATH . '/src/Core/helpers.php';
 
-// Autoloader for App\ namespace
-spl_autoload_register(function ($class) {
-    $prefix = 'App\\';
-    $base_dir = __DIR__ . '/src/';
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
-    $relative_class = substr($class, $len);
-    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
-    if (file_exists($file)) {
-        require $file;
-    }
-});
+// Autoloader
+require_once ROOT_PATH . '/src/Core/Autoloader.php';
+App\Core\Autoloader::register();
+App\Core\Autoloader::addNamespace('App', ROOT_PATH . '/src');
 
 // Error and Exception handling
 error_reporting(E_ALL);
