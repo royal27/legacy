@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Rule to handle CSS and JS files
+    RewriteRule ^(public)/(css|js)/(.*)$ $1/$2/$3 [L]
+
+    # Rule to handle other existing files and folders
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Rule to redirect all other requests to index.php
+    RewriteRule ^(.*)$ index.php?route=$1 [L,QSA]
+</IfModule>
