@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Core\View;
 use App\Core\Session;
 use App\Core\Database;
+use App\Core\Auth;
 
 class AuthController extends Controller
 {
@@ -49,8 +50,6 @@ class AuthController extends Controller
 
         if ($user && password_verify($password, $user['password'])) {
             // Password is correct, user is authenticated
-use App\Core\Auth;
-
             Session::set('user_id', $user['id']);
             Session::set('username', $user['username']);
             Session::set('role_id', $user['role_id']);
