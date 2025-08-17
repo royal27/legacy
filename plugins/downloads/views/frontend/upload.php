@@ -2,7 +2,7 @@
     <h1>Upload a New File</h1>
     <p>Select a file to upload. It will be reviewed by an administrator before it becomes public.</p>
 
-    <form action="/downloads/save" method="POST" enctype="multipart/form-data">
+    <form action="<?= url('downloads/save') ?>" method="POST" enctype="multipart/form-data">
         <div class="form-group">
             <label for="title">File Title</label>
             <input type="text" name="title" id="title" required>
@@ -28,7 +28,7 @@
         </div>
 
         <button type="submit" class="btn">Upload File</button>
-        <a href="/downloads" class="btn-link">Cancel</a>
+        <a href="<?= url('downloads') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

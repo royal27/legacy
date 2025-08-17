@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>Manage Forums</h1>
-        <a href="/admin/forum/new" class="btn">Add New Category/Forum</a>
+        <a href="<?= url('admin/forum/new') ?>" class="btn">Add New Category/Forum</a>
     </div>
     <p>Here you can create, edit, and delete forum categories and forums.</p>
 
@@ -14,8 +14,8 @@
                         <p><?= htmlspecialchars($category['description']) ?></p>
                     </div>
                     <div class="item-actions">
-                        <a href="/admin/forum/edit/<?= $category['id'] ?>" class="btn-action edit">Edit</a>
-                        <a href="/admin/forum/delete/<?= $category['id'] ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
+                        <a href="<?= url('admin/forum/edit/' . $category['id']) ?>" class="btn-action edit">Edit</a>
+                        <a href="<?= url('admin/forum/delete/' . $category['id']) ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
                     </div>
                 </div>
                 <?php if (!empty($category['subforums'])): ?>
@@ -27,8 +27,8 @@
                                     <p><?= htmlspecialchars($forum['description']) ?></p>
                                 </div>
                                 <div class="item-actions">
-                                    <a href="/admin/forum/edit/<?= $forum['id'] ?>" class="btn-action edit">Edit</a>
-                                    <a href="/admin/forum/delete/<?= $forum['id'] ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
+                                    <a href="<?= url('admin/forum/edit/' . $forum['id']) ?>" class="btn-action edit">Edit</a>
+                                    <a href="<?= url('admin/forum/delete/' . $forum['id']) ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
                                 </div>
                             </div>
                         <?php endforeach; ?>

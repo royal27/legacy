@@ -33,7 +33,7 @@ class AuthController extends Controller
 
         if (empty($username) || empty($password)) {
             Session::flash('error', 'Username and password are required.');
-            header('Location: /login');
+            header('Location: ' . url('login'));
             exit;
         }
 
@@ -59,12 +59,12 @@ use App\Core\Auth;
             Auth::loadPermissions($user['role_id']);
 
             // Redirect to a protected page, e.g., admin dashboard
-            header('Location: /admin');
+            header('Location: ' . url('admin'));
             exit;
         } else {
             // Invalid credentials
             Session::flash('error', 'Invalid username or password.');
-            header('Location: /login');
+            header('Location: ' . url('login'));
             exit;
         }
     }
@@ -77,7 +77,7 @@ use App\Core\Auth;
     public function logout()
     {
         Session::destroy();
-        header('Location: /');
+        header('Location: ' . url(''));
         exit;
     }
 }

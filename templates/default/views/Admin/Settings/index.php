@@ -4,12 +4,7 @@
     </div>
     <p>Manage general site settings and features.</p>
 
-    <?php $success = \App\Core\Session::getFlash('success'); ?>
-    <?php if ($success): ?>
-        <div class="notice success"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
-
-    <form action="/admin/settings/update" method="POST">
+    <form action="<?= url('admin/settings/update') ?>" method="POST">
         <fieldset>
             <legend>Points System</legend>
             <div class="form-group">

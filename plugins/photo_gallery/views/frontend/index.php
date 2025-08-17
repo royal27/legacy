@@ -1,14 +1,14 @@
 <div class="card">
     <div class="page-header">
         <h1>Photo Gallery</h1>
-        <a href="/my-gallery/upload" class="btn">Upload Photo</a>
+        <a href="<?= url('my-gallery/upload') ?>" class="btn">Upload Photo</a>
     </div>
     <p>Browse public photo albums.</p>
 
     <div class="album-grid">
         <?php if (!empty($albums)): ?>
             <?php foreach ($albums as $album): ?>
-                <a href="/gallery/album/<?= $album['id'] ?>" class="album-item">
+                <a href="<?= url('gallery/album/' . $album['id']) ?>" class="album-item">
                     <div class="album-thumbnail">
                         <!-- A placeholder thumbnail -->
                         <div class="thumbnail-placeholder"></div>

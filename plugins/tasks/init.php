@@ -40,6 +40,6 @@ function tasks_register_routes() {
 // --- Hook Registration ---
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     // if (\App\Core\Auth::hasPermission('tasks.manage')) {
-        echo '<a href="/admin/tasks">Tasks</a>';
+        echo '<a href="' . url('admin/tasks') . '">Tasks</a>';
     // }
 });

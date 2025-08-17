@@ -15,7 +15,7 @@ class RolesController extends Controller
         parent::__construct($route_params);
         if (!Auth::hasPermission('roles.view')) {
             Session::flash('error', 'You do not have permission to manage roles.');
-            header('Location: /admin');
+            header('Location: ' . url('admin'));
             exit;
         }
     }
@@ -58,7 +58,7 @@ class RolesController extends Controller
 
         if (empty($name)) {
             Session::flash('error', 'Role name is required.');
-            header('Location: /admin/roles/new');
+            header('Location: ' . url('admin/roles/new'));
             exit;
         }
 
@@ -68,7 +68,7 @@ class RolesController extends Controller
             Session::flash('error', 'Failed to create role.');
         }
 
-        header('Location: /admin/roles');
+        header('Location: ' . url('admin/roles'));
         exit;
     }
 
@@ -115,7 +115,7 @@ class RolesController extends Controller
             Session::flash('error', 'Failed to update role permissions.');
         }
 
-        header('Location: /admin/roles');
+        header('Location: ' . url('admin/roles'));
         exit;
     }
 
@@ -135,7 +135,7 @@ class RolesController extends Controller
             Session::flash('error', 'Failed to delete role. Core roles cannot be deleted.');
         }
 
-        header('Location: /admin/roles');
+        header('Location: ' . url('admin/roles'));
         exit;
     }
 
@@ -145,7 +145,7 @@ class RolesController extends Controller
     private function forbidden()
     {
         Session::flash('error', 'You do not have permission to perform this action.');
-        header('Location: /admin/roles');
+        header('Location: ' . url('admin/roles'));
         exit;
     }
 }

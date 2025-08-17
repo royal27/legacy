@@ -1,4 +1,4 @@
-<a href="/tickets"> &laquo; Back to My Tickets</a>
+<a href="<?= url('tickets') ?>"> &laquo; Back to My Tickets</a>
 <h1><?= htmlspecialchars($title) ?></h1>
 
 <div class="ticket-meta">
@@ -24,7 +24,7 @@
 
 <div class="reply-form">
     <h3>Post a Reply</h3>
-    <form action="/tickets/<?= $ticket['id'] ?>/reply" method="POST">
+    <form action="<?= url('tickets/' . $ticket['id'] . '/reply') ?>" method="POST">
         <textarea name="content" rows="8" required></textarea>
         <button type="submit" class="btn">Submit Reply</button>
     </form>

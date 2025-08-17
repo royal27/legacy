@@ -16,7 +16,7 @@ class TicketController extends Controller
         parent::__construct($route_params);
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to view this page.');
-            header('Location: /login');
+            header('Location: ' . url('login'));
             exit;
         }
     }
@@ -44,7 +44,7 @@ class TicketController extends Controller
         // Security check: ensure the user owns this ticket or is an admin
         if ($ticket['user_id'] != Auth::id() && !Auth::hasPermission('tickets.manage')) {
              Session::flash('error', 'You do not have permission to view this ticket.');
-             header('Location: /tickets');
+             header('Location: ' . url('tickets'));
              exit;
         }
 
@@ -83,11 +83,11 @@ class TicketController extends Controller
         $new_ticket_id = Ticket::create($ticket_data, $reply_data);
         if ($new_ticket_id) {
             Session::flash('success', 'Ticket created successfully.');
-            header('Location: /tickets/' . $new_ticket_id);
+            header('Location: ' . url('tickets/' . $new_ticket_id));
             exit;
         } else {
             Session::flash('error', 'Failed to create ticket.');
-            header('Location: /tickets/new');
+            header('Location: ' . url('tickets/new'));
             exit;
         }
     }
@@ -102,7 +102,7 @@ class TicketController extends Controller
 
         if ($ticket['user_id'] != Auth::id() && !Auth::hasPermission('tickets.manage')) {
              Session::flash('error', 'You do not have permission to reply to this ticket.');
-             header('Location: /tickets');
+             header('Location: ' . url('tickets'));
              exit;
         }
 
@@ -114,7 +114,7 @@ class TicketController extends Controller
 
         TicketReply::create($data);
         Session::flash('success', 'Reply sent.');
-        header('Location: /tickets/' . $ticket_id);
+        header('Location: ' . url('tickets/' . $ticket_id));
         exit;
     }
 }

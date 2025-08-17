@@ -37,7 +37,9 @@ function live_alerts_register_routes() {
 // Add the alert container and JS to the site footer
 \App\Core\Hooks::listen('site_footer', function() {
     if (\App\Core\Auth::check()) {
-        echo '<div id="live-alert-overlay" style="display: none;">';
+        $check_url = url('api/alerts/check');
+        $mark_read_url_base = url('api/alerts/mark_read'); // JS will add the ID
+        echo '<div id="live-alert-overlay" style="display: none;" data-check-url="' . $check_url . '" data-mark-read-url-base="' . $mark_read_url_base . '">';
         echo '  <div id="live-alert-box">';
         echo '      <h2 id="live-alert-title">Alert</h2>';
         echo '      <div id="live-alert-content"></div>';
@@ -51,5 +53,5 @@ function live_alerts_register_routes() {
 // Add a "Send Alert" button to the user management list
 \App\Core\Hooks::listen('admin_user_actions', function($user) {
     // A new hook we will need to create in the user list view
-    echo '<a href="#" class="btn-action send-alert" data-user-id="' . $user['id'] . '">Send Alert</a>';
+    echo '<a href="#" class="btn-action send-alert" data-user-id="' . $user['id'] . '" data-send-url="' . url('admin/alerts/send') . '">Send Alert</a>';
 });

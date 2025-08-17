@@ -1,7 +1,7 @@
 <div class="card">
     <h1>Edit User: <?= htmlspecialchars($user['username']) ?></h1>
 
-    <form action="/admin/users/update/<?= $user['id'] ?>" method="POST">
+    <form action="<?= url('admin/users/update/' . $user['id']) ?>" method="POST">
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" name="username" id="username" value="<?= htmlspecialchars($user['username']) ?>" required>
@@ -32,7 +32,7 @@
         </div>
 
         <button type="submit" class="btn">Save Changes</button>
-        <a href="/admin/users" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/users') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

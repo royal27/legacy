@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentAlertId = null;
 
     function checkForAlert() {
-        fetch('/api/alerts/check')
+        if (!overlay || !overlay.dataset.checkUrl) return;
+
+        fetch(overlay.dataset.checkUrl)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.alert) {
@@ -21,9 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function closeAlert() {
-        if (!currentAlertId) return;
+        if (!currentAlertId || !overlay.dataset.markReadUrlBase) return;
+        const url = overlay.dataset.markReadUrlBase + '/' + currentAlertId;
 
-        fetch(`/api/alerts/mark_read/${currentAlertId}`, { method: 'POST' })
+        fetch(url, { method: 'POST' })
             .then(() => {
                 overlay.style.display = 'none';
                 currentAlertId = null;
@@ -40,14 +43,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.classList.contains('send-alert')) {
             e.preventDefault();
             const userId = e.target.dataset.userId;
+            const sendUrl = e.target.dataset.sendUrl;
             const content = prompt('Enter the alert message:');
 
-            if (content) {
+            if (content && sendUrl) {
                 const formData = new FormData();
                 formData.append('user_id', userId);
                 formData.append('content', content);
 
-                fetch('/admin/alerts/send', {
+                fetch(sendUrl, {
                     method: 'POST',
                     body: formData
                 })

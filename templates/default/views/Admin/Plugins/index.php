@@ -33,9 +33,9 @@
                         <td><?= htmlspecialchars($manifest['description']) ?></td>
                         <td>
                             <?php if ($is_active): ?>
-                                <a href="/admin/plugins/deactivate/<?= $dir ?>" class="btn-action deactivate">Deactivate</a>
+                                <a href="<?= url('admin/plugins/deactivate/' . $dir) ?>" class="btn-action deactivate">Deactivate</a>
                             <?php else: ?>
-                                <a href="/admin/plugins/activate/<?= $dir ?>" class="btn-action activate">Activate</a>
+                                <a href="<?= url('admin/plugins/activate/' . $dir) ?>" class="btn-action activate">Activate</a>
                             <?php endif; ?>
                         </td>
                     </tr>

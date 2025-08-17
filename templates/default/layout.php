@@ -17,30 +17,30 @@
             <aside class="admin-sidebar">
                 <h3>Admin Menu</h3>
                 <nav>
-                    <a href="/admin/dashboard">Dashboard</a>
-                    <a href="/admin/users">Users</a>
-                    <a href="/admin/roles">Roles</a>
-                    <a href="/admin/plugins">Plugins</a>
+                    <a href="<?= url('admin/dashboard') ?>">Dashboard</a>
+                    <a href="<?= url('admin/users') ?>">Users</a>
+                    <a href="<?= url('admin/roles') ?>">Roles</a>
+                    <a href="<?= url('admin/plugins') ?>">Plugins</a>
                     <?php \App\Core\Hooks::trigger('admin_sidebar_links'); ?>
                     <hr>
-                    <a href="/admin/settings">Site Settings</a>
+                    <a href="<?= url('admin/settings') ?>">Site Settings</a>
                 </nav>
                 <hr>
-                <a href="/">View Site</a>
+                <a href="<?= url('') ?>">View Site</a>
             </aside>
         <?php endif; ?>
 
         <div class="main-content">
             <header>
                 <!-- Main navigation will go here -->
-                <a href="/">Home</a>
-                <a href="/forum">Forum</a>
+                <a href="<?= url('') ?>">Home</a>
+                <a href="<?= url('forum') ?>">Forum</a>
                 <?php \App\Core\Hooks::trigger('main_nav_links'); ?>
                 <?php if (\App\Core\Auth::check()): ?>
-                    <a href="/admin">Admin</a>
-                    <a href="/logout">Logout</a>
+                    <a href="<?= url('admin') ?>">Admin</a>
+                    <a href="<?= url('logout') ?>">Logout</a>
                 <?php else: ?>
-                    <a href="/login">Login</a>
+                    <a href="<?= url('login') ?>">Login</a>
                 <?php endif; ?>
             </header>
 

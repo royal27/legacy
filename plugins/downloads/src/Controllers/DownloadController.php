@@ -44,7 +44,7 @@ class DownloadController extends Controller
     {
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to upload files.');
-            header('Location: /downloads');
+            header('Location: ' . url('downloads'));
             exit;
         }
         $categories = DownloadCategory::findAll();
@@ -61,7 +61,7 @@ class DownloadController extends Controller
     {
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to upload files.');
-            header('Location: /downloads');
+            header('Location: ' . url('downloads'));
             exit;
         }
 
@@ -87,11 +87,11 @@ class DownloadController extends Controller
             ];
             DownloadFile::create($data);
             Session::flash('success', 'File uploaded successfully. It will be visible after admin approval.');
-            header('Location: /downloads');
+            header('Location: ' . url('downloads'));
             exit;
         } else {
             Session::flash('error', 'Failed to upload file.');
-            header('Location: /downloads/upload');
+            header('Location: ' . url('downloads/upload'));
             exit;
         }
     }

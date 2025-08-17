@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>User Management</h1>
-        <a href="/admin/users/new" class="btn">Add New User</a>
+        <a href="<?= url('admin/users/new') ?>" class="btn">Add New User</a>
     </div>
     <p>Here you can view and manage all registered users.</p>
 
@@ -26,8 +26,8 @@
                         <td><span class="role-badge"><?= htmlspecialchars($user['role_name']) ?></span></td>
                         <td><?= date('Y-m-d', strtotime($user['created_at'])) ?></td>
                         <td>
-                            <a href="/admin/users/edit/<?= $user['id'] ?>" class="btn-action edit">Edit</a>
-                            <a href="/admin/users/delete/<?= $user['id'] ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
+                            <a href="<?= url('admin/users/edit/' . $user['id']) ?>" class="btn-action edit">Edit</a>
+                            <a href="<?= url('admin/users/delete/' . $user['id']) ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
                             <?php \App\Core\Hooks::trigger('admin_user_actions', $user); ?>
                         </td>
                     </tr>

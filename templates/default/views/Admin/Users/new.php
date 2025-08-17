@@ -1,7 +1,7 @@
 <div class="card">
     <h1>Add New User</h1>
 
-    <form action="/admin/users/create" method="POST">
+    <form action="<?= url('admin/users/create') ?>" method="POST">
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" name="username" id="username" required>
@@ -29,7 +29,7 @@
         </div>
 
         <button type="submit" class="btn">Create User</button>
-        <a href="/admin/users" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/users') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

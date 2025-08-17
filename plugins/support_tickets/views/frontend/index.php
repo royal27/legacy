@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>My Support Tickets</h1>
-        <a href="/tickets/new" class="btn">New Ticket</a>
+        <a href="<?= url('tickets/new') ?>" class="btn">New Ticket</a>
     </div>
     <p>Here you can view and manage your support tickets.</p>
 
@@ -31,7 +31,7 @@
                         <td><?= htmlspecialchars($ticket['priority']) ?></td>
                         <td><?= date('Y-m-d H:i', strtotime($ticket['last_updated_at'])) ?></td>
                         <td>
-                            <a href="/tickets/<?= $ticket['id'] ?>" class="btn-action view">View</a>
+                            <a href="<?= url('tickets/' . $ticket['id']) ?>" class="btn-action view">View</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

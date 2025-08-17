@@ -42,7 +42,7 @@ use App\Core\Session;
 
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to reply.');
-            header("Location: /topic/$topic_id");
+            header("Location: " . url("topic/$topic_id"));
             exit;
         }
 
@@ -54,7 +54,7 @@ use App\Core\Session;
 
         if (empty($data['content'])) {
             Session::flash('error', 'Your reply cannot be empty.');
-            header("Location: /topic/$topic_id");
+            header("Location: " . url("topic/$topic_id"));
             exit;
         }
 
@@ -65,7 +65,7 @@ use App\Core\Session;
             Session::flash('error', 'Failed to post reply.');
         }
 
-        header("Location: /topic/$topic_id");
+        header("Location: " . url("topic/$topic_id"));
         exit;
     }
 }

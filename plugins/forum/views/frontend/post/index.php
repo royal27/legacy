@@ -1,4 +1,4 @@
-<a href="/forum/<?= $topic['forum_id'] ?>"> &laquo; Back to Topic List</a>
+<a href="<?= url('forum/' . $topic['forum_id']) ?>"> &laquo; Back to Topic List</a>
 <h1><?= htmlspecialchars($topic['title']) ?></h1>
 
 <div class="post-list">
@@ -28,7 +28,7 @@
 
 <div class="reply-form">
     <h3>Post a Reply</h3>
-    <form action="/topic/<?= $topic['id'] ?>/reply" method="POST">
+    <form action="<?= url('topic/' . $topic['id'] . '/reply') ?>" method="POST">
         <div class="bbcode-toolbar">
             <!-- This could be made dynamic later -->
             <button type="button" class="bbcode-btn" title="Bold">[b]</button>

@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>Task Management</h1>
-        <a href="/admin/tasks/new" class="btn">Add New Task</a>
+        <a href="<?= url('admin/tasks/new') ?>" class="btn">Add New Task</a>
     </div>
     <p>Assign and manage tasks for your team.</p>
 
@@ -26,8 +26,8 @@
                         <td><span class="status-badge status-<?= strtolower(str_replace(' ', '-', $task['status'])) ?>"><?= htmlspecialchars($task['status']) ?></span></td>
                         <td><?= $task['due_date'] ? date('Y-m-d', strtotime($task['due_date'])) : 'N/A' ?></td>
                         <td>
-                            <a href="/admin/tasks/edit/<?= $task['id'] ?>" class="btn-action edit">Edit</a>
-                            <a href="/admin/tasks/delete/<?= $task['id'] ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
+                            <a href="<?= url('admin/tasks/edit/' . $task['id']) ?>" class="btn-action edit">Edit</a>
+                            <a href="<?= url('admin/tasks/delete/' . $task['id']) ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

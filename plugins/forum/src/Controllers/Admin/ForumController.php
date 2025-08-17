@@ -42,7 +42,7 @@ class ForumController extends Controller
         ];
         Forum::create($data);
         Session::flash('success', 'Forum created successfully.');
-        header('Location: /admin/forum');
+        header('Location: ' . url('admin/forum'));
         exit;
     }
 
@@ -69,7 +69,7 @@ class ForumController extends Controller
         ];
         Forum::update($id, $data);
         Session::flash('success', 'Forum updated successfully.');
-        header('Location: /admin/forum');
+        header('Location: ' . url('admin/forum'));
         exit;
     }
 
@@ -78,7 +78,7 @@ class ForumController extends Controller
         $id = $this->route_params['id'];
         Forum::delete($id);
         Session::flash('success', 'Forum deleted successfully.');
-        header('Location: /admin/forum');
+        header('Location: ' . url('admin/forum'));
         exit;
     }
 }

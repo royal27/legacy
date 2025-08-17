@@ -1,4 +1,4 @@
-<a href="/downloads"> &laquo; Back to Categories</a>
+<a href="<?= url('downloads') ?>"> &laquo; Back to Categories</a>
 <h1><?= htmlspecialchars($title) ?></h1>
 
 <table class="data-table">
@@ -23,7 +23,7 @@
                     <td><?= $file['download_count'] ?></td>
                     <td><?= date('Y-m-d', strtotime($file['created_at'])) ?></td>
                     <td>
-                        <a href="/downloads/go/<?= $file['id'] ?>" class="btn-action view">Download</a>
+                        <a href="<?= url('downloads/go/' . $file['id']) ?>" class="btn-action view">Download</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

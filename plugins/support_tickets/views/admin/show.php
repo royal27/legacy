@@ -1,4 +1,4 @@
-<a href="/admin/tickets"> &laquo; Back to All Tickets</a>
+<a href="<?= url('admin/tickets') ?>"> &laquo; Back to All Tickets</a>
 <h1><?= htmlspecialchars($title) ?></h1>
 
 <div class="ticket-meta">
@@ -23,7 +23,7 @@
 <hr>
 
 <div class="admin-ticket-actions">
-    <form action="/admin/tickets/<?= $ticket['id'] ?>/update" method="POST">
+    <form action="<?= url('admin/tickets/' . $ticket['id'] . '/update') ?>" method="POST">
         <h3>Staff Reply & Actions</h3>
         <div class="form-group">
             <label for="content">Add a Reply</label>

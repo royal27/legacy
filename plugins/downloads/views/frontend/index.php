@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>Downloads</h1>
-        <a href="/downloads/upload" class="btn">Upload File</a>
+        <a href="<?= url('downloads/upload') ?>" class="btn">Upload File</a>
     </div>
     <p>Browse through our download categories.</p>
 
@@ -13,7 +13,7 @@
     <div class="category-list">
         <?php if (!empty($categories)): ?>
             <?php foreach ($categories as $category): ?>
-                <a href="/downloads/category/<?= $category['id'] ?>" class="category-item">
+                <a href="<?= url('downloads/category/' . $category['id']) ?>" class="category-item">
                     <h3><?= htmlspecialchars($category['name']) ?></h3>
                     <p><?= htmlspecialchars($category['description']) ?></p>
                 </a>

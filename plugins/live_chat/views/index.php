@@ -58,7 +58,7 @@ $(document).ready(function() {
         if (!currentRoomId) return;
 
         $.ajax({
-            url: `/api/chat/messages/${currentRoomId}`,
+            url: "<?= url('api/chat/messages') ?>/" + currentRoomId,
             method: 'GET',
             success: function(response) {
                 if (response.success) {
@@ -89,7 +89,7 @@ $(document).ready(function() {
         if (!message.trim()) return;
 
         $.ajax({
-            url: '/api/chat/send',
+            url: "<?= url('api/chat/send') ?>",
             method: 'POST',
             data: {
                 room_id: currentRoomId,

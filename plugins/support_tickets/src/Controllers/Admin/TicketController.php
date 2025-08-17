@@ -17,7 +17,7 @@ class TicketController extends Controller
         // We need a 'tickets.manage' permission
         // if (!Auth::hasPermission('tickets.manage')) {
         //     Session::flash('error', 'You do not have permission to manage tickets.');
-        //     header('Location: /admin');
+        //     header('Location: ' . url('admin'));
         //     exit;
         // }
     }
@@ -73,7 +73,7 @@ class TicketController extends Controller
         }
 
         Session::flash('success', 'Ticket updated.');
-        header('Location: /admin/tickets/' . $ticket_id);
+        header('Location: ' . url('admin/tickets/' . $ticket_id));
         exit;
     }
 }

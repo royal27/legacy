@@ -16,7 +16,7 @@ class PluginsController extends Controller
         // We might want a specific 'plugins.manage' permission later
         if (!Auth::hasPermission('settings.edit')) {
             Session::flash('error', 'You do not have permission to manage plugins.');
-            header('Location: /admin');
+            header('Location: ' . url('admin'));
             exit;
         }
     }
@@ -48,7 +48,7 @@ class PluginsController extends Controller
         } else {
             Session::flash('error', "Failed to activate plugin '$plugin_dir'.");
         }
-        header('Location: /admin/plugins');
+        header('Location: ' . url('admin/plugins'));
         exit;
     }
 
@@ -63,7 +63,7 @@ class PluginsController extends Controller
         } else {
             Session::flash('error', "Failed to deactivate plugin '$plugin_dir'.");
         }
-        header('Location: /admin/plugins');
+        header('Location: ' . url('admin/plugins'));
         exit;
     }
 }

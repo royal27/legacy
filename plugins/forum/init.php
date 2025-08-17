@@ -49,7 +49,7 @@ function forum_register_routes() {
 // Add a link to the admin sidebar
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     if (\App\Core\Auth::hasPermission('roles.view')) { // A real permission check
-        echo '<a href="/admin/forum">Manage Forum</a>';
+        echo '<a href="' . url('admin/forum') . '">Manage Forum</a>';
     }
 });
 

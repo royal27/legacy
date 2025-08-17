@@ -50,7 +50,7 @@ class TaskController extends Controller
         ];
         Task::create($data);
         Session::flash('success', 'Task created successfully.');
-        header('Location: /admin/tasks');
+        header('Location: ' . url('admin/tasks'));
         exit;
     }
 
@@ -84,7 +84,7 @@ class TaskController extends Controller
         ];
         Task::update($id, $data);
         Session::flash('success', 'Task updated successfully.');
-        header('Location: /admin/tasks');
+        header('Location: ' . url('admin/tasks'));
         exit;
     }
 
@@ -96,7 +96,7 @@ class TaskController extends Controller
         $id = $this->route_params['id'];
         Task::delete($id);
         Session::flash('success', 'Task deleted successfully.');
-        header('Location: /admin/tasks');
+        header('Location: ' . url('admin/tasks'));
         exit;
     }
 }

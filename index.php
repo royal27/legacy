@@ -29,6 +29,9 @@ if (defined('INSTALLED') && INSTALLED === true && is_dir(ROOT_PATH . '/install')
     die('<b>Security Warning!</b><br>Please delete the "install" directory immediately.');
 }
 
+// Load helpers
+require_once ROOT_PATH . '/src/Core/helpers.php';
+
 // Autoloader for App\ namespace
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
@@ -104,7 +107,7 @@ $router->add('{controller}/{action}');
 // Dispatch the route
 function dispatch() {
     $router = App\Core\Router::getInstance();
-    $url = rtrim($_SERVER['QUERY_STRING'], '/');
+    $url = $_GET['route'] ?? '';
 
     if ($router->match($url)) {
         $params = $router->getParams();

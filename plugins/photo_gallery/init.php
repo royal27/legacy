@@ -43,10 +43,10 @@ function photo_gallery_register_routes() {
 // --- Hook Registration ---
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     // if (\App\Core\Auth::hasPermission('gallery.manage')) {
-        echo '<a href="/admin/gallery">Photo Gallery</a>';
+        echo '<a href="' . url('admin/gallery') . '">Photo Gallery</a>';
     // }
 });
 
 \App\Core\Hooks::listen('main_nav_links', function() {
-    echo '<a href="/gallery">Gallery</a>';
+    echo '<a href="' . url('gallery') . '">Gallery</a>';
 });

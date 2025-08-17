@@ -15,7 +15,7 @@ class UsersController extends Controller
         parent::__construct($route_params);
         if (!Auth::hasPermission('users.view')) {
             Session::flash('error', 'You do not have permission to manage users.');
-            header('Location: /admin');
+            header('Location: ' . url('admin'));
             exit;
         }
     }
@@ -83,7 +83,7 @@ class UsersController extends Controller
 
         if (empty($data['username']) || empty($data['email']) || empty($data['role_id'])) {
             Session::flash('error', 'Username, email, and role are required.');
-            header("Location: /admin/users/edit/$user_id");
+            header("Location: " . url("admin/users/edit/$user_id"));
             exit;
         }
 
@@ -93,7 +93,7 @@ class UsersController extends Controller
             Session::flash('error', 'Failed to update user.');
         }
 
-        header('Location: /admin/users');
+        header('Location: ' . url('admin/users'));
         exit;
     }
 
@@ -112,7 +112,7 @@ class UsersController extends Controller
 
         if ($user_id == Session::get('user_id')) {
             Session::flash('error', 'You cannot delete your own account.');
-            header('Location: /admin/users');
+            header('Location: ' . url('admin/users'));
             exit;
         }
 
@@ -122,7 +122,7 @@ class UsersController extends Controller
             Session::flash('error', 'Failed to delete user.');
         }
 
-        header('Location: /admin/users');
+        header('Location: ' . url('admin/users'));
         exit;
     }
 
@@ -164,7 +164,7 @@ class UsersController extends Controller
 
         if (empty($data['username']) || empty($data['email']) || empty($data['password']) || empty($data['role_id'])) {
             Session::flash('error', 'All fields are required.');
-            header("Location: /admin/users/new");
+            header("Location: " . url('admin/users/new'));
             exit;
         }
 
@@ -174,7 +174,7 @@ class UsersController extends Controller
             Session::flash('error', 'Failed to create user. The username or email may already be taken.');
         }
 
-        header('Location: /admin/users');
+        header('Location: ' . url('admin/users'));
         exit;
     }
 
@@ -184,7 +184,7 @@ class UsersController extends Controller
     private function forbidden()
     {
         Session::flash('error', 'You do not have permission to perform this action.');
-        header('Location: /admin/users');
+        header('Location: ' . url('admin/users'));
         exit;
     }
 }

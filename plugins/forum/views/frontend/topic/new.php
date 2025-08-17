@@ -1,8 +1,8 @@
-<a href="/forum/<?= $forum['id'] ?>"> &laquo; Back to Topic List</a>
+<a href="<?= url('forum/' . $forum['id']) ?>"> &laquo; Back to Topic List</a>
 <h1>New Topic in <?= htmlspecialchars($forum['name']) ?></h1>
 
 <div class="new-topic-form">
-    <form action="/forum/topic/create" method="POST">
+    <form action="<?= url('forum/topic/create') ?>" method="POST">
         <input type="hidden" name="forum_id" value="<?= $forum['id'] ?>">
 
         <div class="form-group">

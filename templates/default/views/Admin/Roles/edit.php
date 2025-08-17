@@ -2,7 +2,7 @@
     <h1>Edit Role: <?= htmlspecialchars($role['name']) ?></h1>
     <p>Assign permissions to this role.</p>
 
-    <form action="/admin/roles/update/<?= $role['id'] ?>" method="POST">
+    <form action="<?= url('admin/roles/update/' . $role['id']) ?>" method="POST">
         <fieldset>
             <legend>Permissions</legend>
             <div class="permissions-grid">
@@ -29,7 +29,7 @@
         <?php else: ?>
             <button type="submit" class="btn">Save Permissions</button>
         <?php endif; ?>
-        <a href="/admin/roles" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/roles') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

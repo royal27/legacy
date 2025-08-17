@@ -1,14 +1,14 @@
 <div class="card">
     <h1>Add New Role</h1>
 
-    <form action="/admin/roles/create" method="POST">
+    <form action="<?= url('admin/roles/create') ?>" method="POST">
         <div class="form-group">
             <label for="name">Role Name</label>
             <input type="text" name="name" id="name" required>
         </div>
 
         <button type="submit" class="btn">Create Role</button>
-        <a href="/admin/roles" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/roles') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

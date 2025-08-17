@@ -35,7 +35,7 @@ class DownloadController extends Controller
         $id = $this->route_params['id'];
         DownloadFile::validate($id);
         Session::flash('success', 'File has been validated and is now public.');
-        header('Location: /admin/downloads/files');
+        header('Location: ' . url('admin/downloads/files'));
         exit;
     }
 
@@ -44,7 +44,7 @@ class DownloadController extends Controller
         $id = $this->route_params['id'];
         DownloadFile::delete($id);
         Session::flash('success', 'File has been deleted.');
-        header('Location: /admin/downloads/files');
+        header('Location: ' . url('admin/downloads/files'));
         exit;
     }
 
@@ -68,7 +68,7 @@ class DownloadController extends Controller
     {
         DownloadCategory::create($_POST['name'], $_POST['description']);
         Session::flash('success', 'Category created successfully.');
-        header('Location: /admin/downloads/categories');
+        header('Location: ' . url('admin/downloads/categories'));
         exit;
     }
 
@@ -87,7 +87,7 @@ class DownloadController extends Controller
         $id = $this->route_params['id'];
         DownloadCategory::update($id, $_POST['name'], $_POST['description']);
         Session::flash('success', 'Category updated successfully.');
-        header('Location: /admin/downloads/categories');
+        header('Location: ' . url('admin/downloads/categories'));
         exit;
     }
 
@@ -96,7 +96,7 @@ class DownloadController extends Controller
         $id = $this->route_params['id'];
         DownloadCategory::delete($id);
         Session::flash('success', 'Category deleted successfully.');
-        header('Location: /admin/downloads/categories');
+        header('Location: ' . url('admin/downloads/categories'));
         exit;
     }
 }

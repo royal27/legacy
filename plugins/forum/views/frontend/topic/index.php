@@ -1,9 +1,9 @@
-<a href="/forum"> &laquo; Back to Forum Index</a>
+<a href="<?= url('forum') ?>"> &laquo; Back to Forum Index</a>
 <h1><?= htmlspecialchars($forum['name']) ?></h1>
 <p><?= htmlspecialchars($forum['description']) ?></p>
 
 <div class="topic-actions">
-    <a href="/forum/topic/new/<?= $forum['id'] ?>" class="btn">New Topic</a>
+    <a href="<?= url('forum/topic/new/' . $forum['id']) ?>" class="btn">New Topic</a>
 </div>
 
 <table class="data-table">
@@ -21,7 +21,7 @@
                 <tr>
                     <td>
                         <?php if ($topic['is_sticky']): ?><strong>Sticky:</strong><?php endif; ?>
-                        <a href="/topic/<?= $topic['id'] ?>"><?= htmlspecialchars($topic['title']) ?></a>
+                        <a href="<?= url('topic/' . $topic['id']) ?>"><?= htmlspecialchars($topic['title']) ?></a>
                     </td>
                     <td><?= htmlspecialchars($topic['author_name']) ?></td>
                     <td>0</td> <!-- Placeholder -->

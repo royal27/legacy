@@ -1,11 +1,11 @@
-<a href="/gallery"> &laquo; Back to Gallery</a>
+<a href="<?= url('gallery') ?>"> &laquo; Back to Gallery</a>
 <h1><?= htmlspecialchars($title) ?></h1>
 <!-- <p><?= htmlspecialchars($album['description']) ?></p> -->
 
 <div class="photo-grid">
     <?php if (!empty($photos)): ?>
         <?php foreach ($photos as $photo): ?>
-            <a href="/gallery/photo/<?= $photo['id'] ?>" class="photo-item">
+            <a href="<?= url('gallery/photo/' . $photo['id']) ?>" class="photo-item">
                 <img src="<?= htmlspecialchars($photo['filepath']) ?>" alt="<?= htmlspecialchars($photo['title']) ?>">
             </a>
         <?php endforeach; ?>

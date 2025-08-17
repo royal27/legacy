@@ -1,7 +1,7 @@
 <div class="card">
     <div class="page-header">
         <h1>Role Management</h1>
-        <a href="/admin/roles/new" class="btn">Add New Role</a>
+        <a href="<?= url('admin/roles/new') ?>" class="btn">Add New Role</a>
     </div>
     <p>Here you can manage user roles and their permissions.</p>
 
@@ -20,9 +20,9 @@
                         <td><?= htmlspecialchars($role['id']) ?></td>
                         <td><?= htmlspecialchars($role['name']) ?></td>
                         <td>
-                            <a href="/admin/roles/edit/<?= $role['id'] ?>" class="btn-action edit">Edit Permissions</a>
+                            <a href="<?= url('admin/roles/edit/' . $role['id']) ?>" class="btn-action edit">Edit Permissions</a>
                             <?php if ($role['id'] > 2): // Prevent deleting Founder/User roles ?>
-                                <a href="/admin/roles/delete/<?= $role['id'] ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
+                                <a href="<?= url('admin/roles/delete/' . $role['id']) ?>" class="btn-action delete" onclick="return confirm('Are you sure?')">Delete</a>
                             <?php endif; ?>
                         </td>
                     </tr>

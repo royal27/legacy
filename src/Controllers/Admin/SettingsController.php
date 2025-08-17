@@ -14,7 +14,7 @@ class SettingsController extends Controller
         parent::__construct($route_params);
         if (!Auth::hasPermission('settings.edit')) {
             Session::flash('error', 'You do not have permission to manage settings.');
-            header('Location: /admin');
+            header('Location: ' . url('admin'));
             exit;
         }
     }
@@ -40,7 +40,7 @@ class SettingsController extends Controller
         // A more robust solution would validate and sanitize this.
         Setting::updateBatch($_POST);
         Session::flash('success', 'Settings updated successfully.');
-        header('Location: /admin/settings');
+        header('Location: ' . url('admin/settings'));
         exit;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 // Determine if we are editing or creating
 $is_edit = isset($forum);
-$action_url = $is_edit ? "/admin/forum/update/{$forum['id']}" : "/admin/forum/create";
+$action_url = $is_edit ? url("admin/forum/update/{$forum['id']}") : url("admin/forum/create");
 ?>
 <div class="card">
     <h1><?= htmlspecialchars($title) ?></h1>
@@ -37,7 +37,7 @@ $action_url = $is_edit ? "/admin/forum/update/{$forum['id']}" : "/admin/forum/cr
         </div>
 
         <button type="submit" class="btn"><?= $is_edit ? 'Save Changes' : 'Create Forum' ?></button>
-        <a href="/admin/forum" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/forum') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

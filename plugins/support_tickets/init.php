@@ -41,12 +41,12 @@ function support_tickets_register_routes() {
 // --- Hook Registration ---
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     // if (\App\Core\Auth::hasPermission('tickets.manage')) {
-        echo '<a href="/admin/tickets">Support Tickets</a>';
+        echo '<a href="' . url('admin/tickets') . '">Support Tickets</a>';
     // }
 });
 
 \App\Core\Hooks::listen('main_nav_links', function() {
     if (\App\Core\Auth::check()) {
-        echo '<a href="/tickets">My Tickets</a>';
+        echo '<a href="' . url('tickets') . '">My Tickets</a>';
     }
 });

@@ -1,6 +1,6 @@
 <?php
 $is_edit = isset($task);
-$action_url = $is_edit ? "/admin/tasks/update/{$task['id']}" : "/admin/tasks/create";
+$action_url = $is_edit ? url("admin/tasks/update/{$task['id']}") : url("admin/tasks/create");
 ?>
 <div class="card">
     <h1><?= htmlspecialchars($title) ?></h1>
@@ -42,7 +42,7 @@ $action_url = $is_edit ? "/admin/tasks/update/{$task['id']}" : "/admin/tasks/cre
         </div>
 
         <button type="submit" class="btn"><?= $is_edit ? 'Save Changes' : 'Create Task' ?></button>
-        <a href="/admin/tasks" class="btn-link">Cancel</a>
+        <a href="<?= url('admin/tasks') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

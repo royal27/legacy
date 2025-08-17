@@ -27,7 +27,7 @@
                         <td><?= htmlspecialchars($ticket['priority']) ?></td>
                         <td><?= date('Y-m-d H:i', strtotime($ticket['last_updated_at'])) ?></td>
                         <td>
-                            <a href="/admin/tickets/<?= $ticket['id'] ?>" class="btn-action view">View</a>
+                            <a href="<?= url('admin/tickets/' . $ticket['id']) ?>" class="btn-action view">View</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

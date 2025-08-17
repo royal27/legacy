@@ -22,7 +22,7 @@ class TopicController extends Controller
 
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to create a topic.');
-            header("Location: /forum/$forum_id");
+            header("Location: " . url("forum/$forum_id"));
             exit;
         }
 
@@ -41,7 +41,7 @@ class TopicController extends Controller
 
         if (!Auth::check()) {
             Session::flash('error', 'You must be logged in to create a topic.');
-            header("Location: /forum/$forum_id");
+            header("Location: " . url("forum/$forum_id"));
             exit;
         }
 
@@ -58,7 +58,7 @@ class TopicController extends Controller
 
         if (empty($topic_data['title']) || empty($post_data['content'])) {
             Session::flash('error', 'Title and content are required.');
-            header("Location: /forum/topic/new/$forum_id");
+            header("Location: " . url("forum/topic/new/$forum_id"));
             exit;
         }
 
@@ -66,11 +66,11 @@ class TopicController extends Controller
 
         if ($new_topic_id) {
             Session::flash('success', 'Topic created successfully.');
-            header("Location: /topic/$new_topic_id");
+            header("Location: " . url("topic/$new_topic_id"));
             exit;
         } else {
             Session::flash('error', 'Failed to create topic.');
-            header("Location: /forum/$forum_id");
+            header("Location: " . url("forum/$forum_id"));
             exit;
         }
     }

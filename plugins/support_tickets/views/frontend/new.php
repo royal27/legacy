@@ -2,7 +2,7 @@
     <h1>Create New Support Ticket</h1>
     <p>Please describe your issue in detail. Our team will get back to you as soon as possible.</p>
 
-    <form action="/tickets/create" method="POST">
+    <form action="<?= url('tickets/create') ?>" method="POST">
         <div class="form-group">
             <label for="title">Subject</label>
             <input type="text" name="title" id="title" required>
@@ -23,7 +23,7 @@
         </div>
 
         <button type="submit" class="btn">Submit Ticket</button>
-        <a href="/tickets" class="btn-link">Cancel</a>
+        <a href="<?= url('tickets') ?>" class="btn-link">Cancel</a>
     </form>
 </div>
 

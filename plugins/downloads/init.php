@@ -51,10 +51,10 @@ function downloads_register_routes() {
 // --- Hook Registration ---
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     // if (\App\Core\Auth::hasPermission('downloads.manage')) {
-        echo '<a href="/admin/downloads">Downloads</a>';
+        echo '<a href="' . url('admin/downloads') . '">Downloads</a>';
     // }
 });
 
 \App\Core\Hooks::listen('main_nav_links', function() {
-    echo '<a href="/downloads">Downloads</a>';
+    echo '<a href="' . url('downloads') . '">Downloads</a>';
 });

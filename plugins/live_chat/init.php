@@ -41,11 +41,11 @@ function live_chat_register_routes() {
 \App\Core\Hooks::listen('admin_sidebar_links', function() {
     // We need a specific permission for chat
     // if (\App\Core\Auth::hasPermission('chat.manage')) {
-        echo '<a href="/admin/chat">Manage Chat</a>';
+        echo '<a href="' . url('admin/chat') . '">Manage Chat</a>';
     // }
 });
 
 // Add a link to the main navigation
 \App\Core\Hooks::listen('main_nav_links', function() {
-    echo '<a href="/chat">Chat</a>';
+    echo '<a href="' . url('chat') . '">Chat</a>';
 });

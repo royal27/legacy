@@ -12,7 +12,7 @@
                     <?php foreach ($category['subforums'] as $forum): ?>
                         <div class="forum-item">
                             <div class="forum-info">
-                                <h3><a href="/forum/<?= $forum['id'] ?>"><?= htmlspecialchars($forum['name']) ?></a></h3>
+                                <h3><a href="<?= url('forum/' . $forum['id']) ?>"><?= htmlspecialchars($forum['name']) ?></a></h3>
                                 <p><?= htmlspecialchars($forum['description']) ?></p>
                             </div>
                             <div class="forum-stats">
