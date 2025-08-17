@@ -27,7 +27,7 @@ abstract class Controller extends \App\Core\Controller
 
         if (!Session::has('user_id')) {
             Session::flash('error', 'You must be logged in to view that page.');
-            header('Location: /login');
+            header('Location: ' . url('login'));
             exit;
         }
 
