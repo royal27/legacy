@@ -1,0 +1,7 @@
+{
+    "name": "My First Plugin",
+    "version": "1.0",
+    "author": "Jules",
+    "description": "A simple demonstration plugin that shows how the plugin system works.",
+    "entry_file": "my_first_plugin.php"
+}
