@@ -1,5 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Allow direct access to the /install directory
+    RewriteRule ^install/ - [L]
+
+    # Redirect all other requests to the public directory
     RewriteRule ^$ public/ [L]
     RewriteRule (.*) public/$1 [L]
 </IfModule>
