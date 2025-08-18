@@ -8,47 +8,43 @@ $conn = db_connect();
 // --- FORM SUBMISSION LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     // --- Add Permission ---
     if (isset($_POST['add_permission'])) {
         $permission_name = trim($_POST['permission_name']);
         $description = trim($_POST['description']);
 
         if (empty($permission_name)) {
-            $_SESSION['errors'] = ['Permission name is required.'];
+            $response['errors'][] = 'Permission name is required.';
         } elseif (!preg_match('/^[a-z0-9_]+$/', $permission_name)) {
-            $_SESSION['errors'] = ['Permission name can only contain lowercase letters, numbers, and underscores.'];
+            $response['errors'][] = 'Permission name can only contain lowercase letters, numbers, and underscores.';
         } else {
-            // Check if permission already exists
             $stmt = $conn->prepare("SELECT id FROM permissions WHERE permission_name = ?");
             $stmt->bind_param("s", $permission_name);
             $stmt->execute();
-            $stmt->store_result();
-            if ($stmt->num_rows > 0) {
-                $_SESSION['errors'] = ['This permission name already exists.'];
+            if ($stmt->get_result()->num_rows > 0) {
+                $response['errors'][] = 'This permission name already exists.';
             } else {
                 $insert_stmt = $conn->prepare("INSERT INTO permissions (permission_name, description) VALUES (?, ?)");
                 $insert_stmt->bind_param("ss", $permission_name, $description);
                 if ($insert_stmt->execute()) {
-                    $_SESSION['success_message'] = 'Permission added successfully!';
+                    $response = ['status' => 'success', 'message' => 'Permission added successfully!'];
                 } else {
-                    $_SESSION['errors'] = ['Failed to add permission.'];
+                    $response['errors'][] = 'Failed to add permission.';
                 }
                 $insert_stmt->close();
             }
             $stmt->close();
         }
-        header("Location: permissions.php");
-        exit();
     }
 
     // --- Delete Permission ---
     if (isset($_POST['delete_permission'])) {
         $permission_id = (int)$_POST['permission_id'];
-
-        // Use a transaction to ensure atomicity
         $conn->begin_transaction();
         try {
-            // Delete from pivot tables first
             $stmt1 = $conn->prepare("DELETE FROM role_permissions WHERE permission_id = ?");
             $stmt1->bind_param("i", $permission_id);
             $stmt1->execute();
@@ -59,22 +55,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt2->execute();
             $stmt2->close();
 
-            // Delete the permission itself
             $stmt3 = $conn->prepare("DELETE FROM permissions WHERE id = ?");
             $stmt3->bind_param("i", $permission_id);
             $stmt3->execute();
             $stmt3->close();
 
             $conn->commit();
-            $_SESSION['success_message'] = 'Permission deleted successfully!';
+            $response = ['status' => 'success', 'message' => 'Permission deleted successfully!'];
         } catch (mysqli_sql_exception $exception) {
             $conn->rollback();
-            $_SESSION['errors'] = ['Failed to delete permission.'];
+            $response['errors'][] = 'Failed to delete permission.';
         }
-
-        header("Location: permissions.php");
-        exit();
     }
+
+    echo json_encode($response);
+    exit();
 }
 
 // --- DATA FETCHING for display ---
@@ -92,7 +87,7 @@ csrf_generate_token();
 <div class="content-box">
     <h2>Add New Permission</h2>
     <p>Permissions are specific rights that can be assigned to roles (e.g., 'manage_users', 'edit_posts').</p>
-    <form action="permissions.php" method="POST" class="admin-form" style="max-width: 100%;">
+    <form action="permissions.php" method="POST" class="admin-form ajax-form" style="max-width: 100%;">
         <?php echo csrf_input(); ?>
         <?php
         // Display messages
@@ -142,7 +137,7 @@ csrf_generate_token();
                         <td><?php echo htmlspecialchars($permission['description']); ?></td>
                         <td>
                             <!-- Delete form -->
-                            <form action="permissions.php" method="POST" style="display:inline;">
+                            <form action="permissions.php" method="POST" style="display:inline;" class="ajax-form">
                                 <?php echo csrf_input(); ?>
                                 <input type="hidden" name="permission_id" value="<?php echo $permission['id']; ?>">
                                 <button type="submit" name="delete_permission" class="btn btn-danger" onclick="return confirm('Are you sure? This will remove the permission from all roles.')">Delete</button>

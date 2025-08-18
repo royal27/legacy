@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/models/setting.php';
 
@@ -7,76 +8,72 @@ $conn = db_connect();
 
 // --- FORM PROCESSING ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // --- Update General Settings ---
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     if (isset($_POST['update_general_settings'])) {
         update_setting($conn, 'site_name', $_POST['site_name'] ?? '');
         update_setting($conn, 'default_font', $_POST['default_font'] ?? 'cursive');
         update_setting($conn, 'footer_text', $_POST['footer_text'] ?? '');
-        $_SESSION['success_message'] = 'General settings updated successfully.';
+        $response = ['status' => 'success', 'message' => 'General settings updated.'];
     }
 
-    // --- Upload Logo ---
     if (isset($_POST['upload_logo'])) {
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['logo'];
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
-            if (in_array($file['type'], $allowed_types) && $file['size'] < 2000000) { // 2MB limit
-                // Delete old logo if it exists
+            if (in_array($file['type'], $allowed_types) && $file['size'] < 2000000) {
                 $old_logo_path = get_all_settings($conn)['site_logo_path'] ?? '';
                 if (!empty($old_logo_path) && file_exists(__DIR__ . '/../uploads/' . $old_logo_path)) {
                     unlink(__DIR__ . '/../uploads/' . $old_logo_path);
                 }
-
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
                 $new_filename = 'logo_' . time() . '.' . $extension;
                 $upload_path = __DIR__ . '/../uploads/' . $new_filename;
-
                 if (move_uploaded_file($file['tmp_name'], $upload_path)) {
                     update_setting($conn, 'site_logo_path', $new_filename);
-                    $_SESSION['success_message'] = 'Logo uploaded successfully.';
+                    $response = ['status' => 'success', 'message' => 'Logo uploaded.'];
                 } else {
-                    $_SESSION['errors'][] = 'Failed to move uploaded file.';
+                    $response['errors'][] = 'Failed to move uploaded file.';
                 }
             } else {
-                $_SESSION['errors'][] = 'Invalid file type or size too large.';
+                $response['errors'][] = 'Invalid file type or size too large.';
             }
         } else {
-            $_SESSION['errors'][] = 'An error occurred during file upload.';
+            $response['errors'][] = 'An error occurred during file upload.';
         }
     }
 
-    // --- Delete Logo ---
     if (isset($_POST['delete_logo'])) {
         $logo_path = get_all_settings($conn)['site_logo_path'] ?? '';
         if (!empty($logo_path) && file_exists(__DIR__ . '/../uploads/' . $logo_path)) {
             unlink(__DIR__ . '/../uploads/' . $logo_path);
         }
         update_setting($conn, 'site_logo_path', '');
-        $_SESSION['success_message'] = 'Logo deleted successfully.';
+        $response = ['status' => 'success', 'message' => 'Logo deleted.'];
     }
 
-    // --- Update Footer Links ---
     if (isset($_POST['update_footer_links'])) {
         $footer_links = $_POST['footer_links'] ?? [];
         $sanitized_links = [];
         foreach ($footer_links as $link) {
             if (!empty($link['text']) && !empty($link['url'])) {
-                $sanitized_links[] = [
-                    'text' => htmlspecialchars($link['text']),
-                    'url' => filter_var($link['url'], FILTER_SANITIZE_URL)
-                ];
+                $sanitized_links[] = ['text' => htmlspecialchars($link['text']), 'url' => filter_var($link['url'], FILTER_SANITIZE_URL)];
             }
         }
         update_setting($conn, 'footer_links', json_encode($sanitized_links));
-        $_SESSION['success_message'] = 'Footer links updated successfully.';
+        $response = ['status' => 'success', 'message' => 'Footer links updated.'];
     }
 
-    header("Location: settings.php");
+    echo json_encode($response);
     exit();
 }
 
 $settings = get_all_settings($conn);
 $conn->close();
+
+csrf_generate_token();
 ?>
 
 <?php require_once __DIR__ . '/../../templates/admin/header.php'; ?>
@@ -97,7 +94,8 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box">
     <h2>General Settings</h2>
-    <form action="settings.php" method="POST" class="admin-form" style="max-width:100%">
+    <form action="settings.php" method="POST" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <div class="form-group">
             <label for="site_name">Site Name</label>
             <input type="text" id="site_name" name="site_name" class="form-control" value="<?php echo htmlspecialchars($settings['site_name'] ?? ''); ?>">
@@ -117,7 +115,8 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box" style="margin-top: 2rem;">
     <h2>Logo Management</h2>
-    <form action="settings.php" method="POST" enctype="multipart/form-data" class="admin-form" style="max-width:100%">
+    <form action="settings.php" method="POST" enctype="multipart/form-data" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <div class="current-logo">
             <?php if (!empty($settings['site_logo_path'])): ?>
                 <p><strong>Current Logo:</strong></p>
@@ -140,7 +139,8 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box" style="margin-top: 2rem;">
     <h2>Footer Links</h2>
-    <form action="settings.php" method="POST" id="footer-links-form" class="admin-form" style="max-width:100%">
+    <form action="settings.php" method="POST" id="footer-links-form" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <div id="footer-links-container">
             <?php
             $footer_links = $settings['footer_links'] ?? [];

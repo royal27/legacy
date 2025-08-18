@@ -10,34 +10,34 @@ $user_id = $_SESSION['user_id'];
 // --- FORM PROCESSING ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validate_token();
-    // --- Update Profile Details (Username, Email, etc.) ---
+    $response = ['status' => 'error', 'errors' => []];
+
+    // --- Update Profile Details ---
     if (isset($_POST['update_profile'])) {
         $username = trim($_POST['username']);
         $email = trim($_POST['email']);
         $full_name = trim($_POST['full_name']);
         $bio = trim($_POST['bio']);
 
-        // Fetch current user data to check for changes
         $user_stmt = $conn->prepare("SELECT username, email FROM users WHERE id = ?");
         $user_stmt->bind_param("i", $user_id);
         $user_stmt->execute();
         $current_user = $user_stmt->get_result()->fetch_assoc();
         $user_stmt->close();
 
-        // Check if username or email is being changed and if the new one is already taken
         $check_stmt = $conn->prepare("SELECT id FROM users WHERE (username = ? AND username != ?) OR (email = ? AND email != ?)");
         $check_stmt->bind_param("ssss", $username, $current_user['username'], $email, $current_user['email']);
         $check_stmt->execute();
         if ($check_stmt->get_result()->num_rows > 0) {
-            $_SESSION['errors'] = ['Username or email is already taken by another account.'];
+            $response['errors'][] = 'Username or email is already taken.';
         } else {
             $update_stmt = $conn->prepare("UPDATE users SET username = ?, email = ?, full_name = ?, bio = ? WHERE id = ?");
             $update_stmt->bind_param("ssssi", $username, $email, $full_name, $bio, $user_id);
             if ($update_stmt->execute()) {
-                $_SESSION['username'] = $username; // Update session username
-                $_SESSION['success_message'] = 'Profile updated successfully.';
+                $_SESSION['username'] = $username;
+                $response = ['status' => 'success', 'message' => 'Profile updated successfully.'];
             } else {
-                $_SESSION['errors'] = ['Failed to update profile.'];
+                $response['errors'][] = 'Failed to update profile.';
             }
             $update_stmt->close();
         }
@@ -61,16 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $update_pass_stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
                 $update_pass_stmt->bind_param("si", $hashed_password, $user_id);
                 $update_pass_stmt->execute();
-                $_SESSION['success_message'] = 'Password changed successfully.';
+                $response = ['status' => 'success', 'message' => 'Password changed successfully.'];
             } else {
-                $_SESSION['errors'] = ['New password must be at least 8 characters long and match the confirmation.'];
+                $response['errors'][] = 'New password must be at least 8 characters and match confirmation.';
             }
         } else {
-            $_SESSION['errors'] = ['Incorrect current password.'];
+            $response['errors'][] = 'Incorrect current password.';
         }
     }
 
-    header("Location: user_settings.php");
+    // Regenerate a new token for the next request
+    csrf_generate_token();
+    $response['new_csrf_token'] = $_SESSION['csrf_token'];
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
     exit();
 }
 
@@ -103,7 +108,7 @@ if (isset($_SESSION['errors'])) {
 
 <div class="form-container" style="background:rgba(0,0,0,0.2);">
     <h3>Profile Information</h3>
-    <form action="user_settings.php" method="POST">
+    <form id="profile-form" action="user_settings.php" method="POST">
         <?php echo csrf_input(); ?>
         <div class="form-group">
             <label for="username">Username</label>
@@ -127,7 +132,7 @@ if (isset($_SESSION['errors'])) {
 
 <div class="form-container" style="margin-top:2rem; background:rgba(0,0,0,0.2);">
     <h3>Change Password</h3>
-    <form action="user_settings.php" method="POST">
+    <form id="password-form" action="user_settings.php" method="POST">
         <?php echo csrf_input(); ?>
         <div class="form-group">
             <label for="current_password">Current Password</label>

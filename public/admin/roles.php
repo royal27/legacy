@@ -8,45 +8,46 @@ $conn = db_connect();
 // --- FORM SUBMISSION LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     // Add Role
     if (isset($_POST['add_role'])) {
         $role_name = trim($_POST['role_name']);
         $description = trim($_POST['description']);
-        if (!empty($role_name)) {
+        if (empty($role_name)) {
+            $response['errors'][] = 'Role name is required.';
+        } else {
             $stmt = $conn->prepare("INSERT INTO roles (role_name, description) VALUES (?, ?)");
             $stmt->bind_param("ss", $role_name, $description);
             if ($stmt->execute()) {
-                $_SESSION['success_message'] = 'Role added successfully.';
+                $response = ['status' => 'success', 'message' => 'Role added successfully.'];
             } else {
-                $_SESSION['errors'] = ['Failed to add role. It might already exist.'];
+                $response['errors'][] = 'Failed to add role. It might already exist.';
             }
             $stmt->close();
-        } else {
-            $_SESSION['errors'] = ['Role name is required.'];
         }
-        header("Location: roles.php");
-        exit();
     }
 
     // Delete Role
     if (isset($_POST['delete_role'])) {
         $role_id = (int)$_POST['role_id'];
-        // Prevent deletion of core roles 'Admin' and 'User' by ID
         if ($role_id > 2) {
             $stmt = $conn->prepare("DELETE FROM roles WHERE id = ?");
             $stmt->bind_param("i", $role_id);
             if ($stmt->execute()) {
-                $_SESSION['success_message'] = 'Role deleted successfully.';
+                $response = ['status' => 'success', 'message' => 'Role deleted successfully.'];
             } else {
-                $_SESSION['errors'] = ['Failed to delete role.'];
+                $response['errors'][] = 'Failed to delete role.';
             }
             $stmt->close();
         } else {
-            $_SESSION['errors'] = ['Cannot delete core system roles.'];
+            $response['errors'][] = 'Cannot delete core system roles.';
         }
-        header("Location: roles.php");
-        exit();
     }
+
+    echo json_encode($response);
+    exit();
 }
 
 // --- DATA FETCHING ---

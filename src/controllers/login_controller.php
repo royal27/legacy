@@ -30,16 +30,16 @@ $_SESSION['old_input'] = ['username' => $username];
 
 // --- 1. Validation ---
 if (empty($username) || empty($password)) {
-    $_SESSION['errors'] = ['Both username/email and password are required.'];
-    header('Location: /login.php');
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Both username/email and password are required.']);
     exit();
 }
 
 // --- 2. Database Operations ---
 $conn = db_connect();
 if (!$conn) {
-    $_SESSION['errors'] = ['Database connection error.'];
-    header('Location: /login.php');
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Database connection error.']);
     exit();
 }
 
@@ -55,26 +55,27 @@ if ($result->num_rows === 1) {
     // --- 3. Verify Password ---
     if (password_verify($password, $user['password'])) {
         // Password is correct, start the session
-        session_regenerate_id(true); // Prevent session fixation attacks
-
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
-
-        // Unset old input data on successful login
         unset($_SESSION['old_input']);
 
-        // Redirect to the dashboard
-        header('Location: /dashboard.php');
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Login successful! Redirecting...',
+            'redirect_url' => '/dashboard.php'
+        ]);
         $stmt->close();
         $conn->close();
         exit();
     }
 }
 
-// If we reach here, login failed (user not found or password incorrect)
-$_SESSION['errors'] = ['Invalid username/email or password.'];
+// If we reach here, login failed
+header('Content-Type: application/json');
+echo json_encode(['status' => 'error', 'message' => 'Invalid username/email or password.']);
 $stmt->close();
 $conn->close();
-header('Location: /login.php');
 exit();
 ?>

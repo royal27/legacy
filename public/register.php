@@ -31,7 +31,7 @@ csrf_generate_token();
     }
     ?>
 
-    <form action="/src/controllers/register_controller.php" method="POST">
+    <form id="register-form" action="/src/controllers/register_controller.php" method="POST">
         <?php echo csrf_input(); ?>
         <div class="form-group">
             <label for="username">Username</label>

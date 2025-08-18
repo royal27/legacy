@@ -31,9 +31,12 @@ require_once __DIR__ . '/../../src/includes/plugin_handler.php';
         $font_query = urlencode($font_family);
     ?>
     <link href="https://fonts.googleapis.com/css2?family=<?php echo $font_query; ?>:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <style>
         body {
             font-family: '<?php echo $font_family; ?>', cursive;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
         }
     </style>
 </head>

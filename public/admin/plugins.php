@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // --- Logic to scan for plugins ---
@@ -42,64 +43,67 @@ function delete_plugin_dir($dir_path) {
 
 // --- FORM PROCESSING ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     $plugin_folder = basename($_POST['plugin_folder'] ?? '');
 
-    // --- Activate Plugin ---
     if (isset($_POST['activate_plugin'])) {
         $plugin_json_path = __DIR__ . '/../../plugins/' . $plugin_folder . '/plugin.json';
         if (file_exists($plugin_json_path)) {
             $plugin_data = json_decode(file_get_contents($plugin_json_path), true);
             $stmt = $conn->prepare("INSERT INTO plugins (name, plugin_folder, description, version, is_active) VALUES (?, ?, ?, ?, 1) ON DUPLICATE KEY UPDATE is_active = 1");
             $stmt->bind_param("ssss", $plugin_data['name'], $plugin_folder, $plugin_data['description'], $plugin_data['version']);
-            $stmt->execute();
-            $_SESSION['success_message'] = "Plugin '{$plugin_data['name']}' activated.";
+            if($stmt->execute()){
+                $response = ['status' => 'success', 'message' => "Plugin '{$plugin_data['name']}' activated."];
+            } else {
+                $response['errors'][] = 'Failed to activate plugin.';
+            }
+        } else {
+            $response['errors'][] = 'Plugin data file (plugin.json) not found.';
         }
     }
 
-    // --- Deactivate Plugin ---
     if (isset($_POST['deactivate_plugin'])) {
         $stmt = $conn->prepare("UPDATE plugins SET is_active = 0 WHERE plugin_folder = ?");
         $stmt->bind_param("s", $plugin_folder);
-        $stmt->execute();
-        $_SESSION['success_message'] = "Plugin '{$plugin_folder}' deactivated.";
+        if($stmt->execute()){
+            $response = ['status' => 'success', 'message' => "Plugin '{$plugin_folder}' deactivated."];
+        } else {
+            $response['errors'][] = 'Failed to deactivate plugin.';
+        }
     }
 
-    // --- Delete Plugin ---
     if (isset($_POST['delete_plugin'])) {
-        // First, delete from DB
         $stmt = $conn->prepare("DELETE FROM plugins WHERE plugin_folder = ?");
         $stmt->bind_param("s", $plugin_folder);
         $stmt->execute();
-        // Then, delete files
         $plugin_path = __DIR__ . '/../../plugins/' . $plugin_folder;
         if (is_dir($plugin_path)) {
             delete_plugin_dir($plugin_path);
         }
-        $_SESSION['success_message'] = "Plugin '{$plugin_folder}' deleted.";
+        $response = ['status' => 'success', 'message' => "Plugin '{$plugin_folder}' has been deleted."];
     }
 
-    // --- Upload Plugin ---
     if (isset($_POST['upload_plugin'])) {
         if (isset($_FILES['plugin_zip']) && $_FILES['plugin_zip']['error'] === UPLOAD_ERR_OK) {
-            $zip_file = $_FILES['plugin_zip']['tmp_name'];
             $zip = new ZipArchive;
-            if ($zip->open($zip_file) === TRUE) {
+            if ($zip->open($_FILES['plugin_zip']['tmp_name']) === TRUE) {
                 $plugin_name = str_replace('.zip', '', basename($_FILES['plugin_zip']['name']));
                 $install_path = __DIR__ . '/../../plugins/' . $plugin_name;
-
                 if (!is_dir($install_path) && $zip->locateName('plugin.json') !== false) {
                     $zip->extractTo($install_path);
-                    $zip->close();
-                    $_SESSION['success_message'] = "Plugin '{$plugin_name}' uploaded successfully.";
+                    $response = ['status' => 'success', 'message' => "Plugin '{$plugin_name}' uploaded successfully."];
                 } else {
-                    $zip->close();
-                    $_SESSION['errors'][] = 'Plugin already exists or the zip is invalid (missing plugin.json).';
+                    $response['errors'][] = 'Plugin already exists or the zip file is invalid (missing plugin.json).';
                 }
-            } else { $_SESSION['errors'][] = 'Failed to open zip file.'; }
-        } else { $_SESSION['errors'][] = 'Error during file upload.'; }
+                $zip->close();
+            } else { $response['errors'][] = 'Failed to open zip file.'; }
+        } else { $response['errors'][] = 'An error occurred during file upload.'; }
     }
 
-    header("Location: plugins.php");
+    echo json_encode($response);
     exit();
 }
 
@@ -108,22 +112,12 @@ $active_plugins_result = $conn->query("SELECT plugin_folder FROM plugins WHERE i
 $active_plugins = array_column($active_plugins_result->fetch_all(MYSQLI_ASSOC), 'plugin_folder');
 $conn->close();
 
+csrf_generate_token();
 ?>
 <?php require_once __DIR__ . '/../../templates/admin/header.php'; ?>
 
 <h1>Plugin Manager</h1>
 <p>Activate, deactivate, or delete plugins. Active plugins will be loaded on every page.</p>
-
-<?php
-if (isset($_SESSION['success_message'])) {
-    echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success_message']) . '</div>';
-    unset($_SESSION['success_message']);
-}
-if (isset($_SESSION['errors'])) {
-    echo '<div class="alert alert-danger">' . htmlspecialchars(implode(', ', $_SESSION['errors'])) . '</div>';
-    unset($_SESSION['errors']);
-}
-?>
 
 <div class="content-box">
     <h3>Installed Plugins</h3>
@@ -152,19 +146,22 @@ if (isset($_SESSION['errors'])) {
                         <td><?php echo htmlspecialchars($plugin['description']); ?></td>
                         <td>
                             <?php if ($is_active): ?>
-                                <form action="plugins.php" method="POST" style="display:inline;">
+                                <form action="plugins.php" method="POST" style="display:inline;" class="ajax-form">
+                                    <?php echo csrf_input(); ?>
                                     <input type="hidden" name="plugin_folder" value="<?php echo htmlspecialchars($id); ?>">
                                     <button type="submit" name="deactivate_plugin" class="btn" style="background-color:#f39c12;">Deactivate</button>
                                 </form>
                             <?php else: ?>
-                                 <form action="plugins.php" method="POST" style="display:inline;">
+                                 <form action="plugins.php" method="POST" style="display:inline;" class="ajax-form">
+                                    <?php echo csrf_input(); ?>
                                     <input type="hidden" name="plugin_folder" value="<?php echo htmlspecialchars($id); ?>">
                                     <button type="submit" name="activate_plugin" class="btn btn-primary">Activate</button>
                                 </form>
                             <?php endif; ?>
 
                             <?php if (!$is_active): // Can only delete inactive plugins ?>
-                            <form action="plugins.php" method="POST" style="display:inline;">
+                            <form action="plugins.php" method="POST" style="display:inline;" class="ajax-form">
+                                <?php echo csrf_input(); ?>
                                 <input type="hidden" name="plugin_folder" value="<?php echo htmlspecialchars($id); ?>">
                                 <button type="submit" name="delete_plugin" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this plugin? This will delete its files.')">Delete</button>
                             </form>
@@ -179,7 +176,8 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box" style="margin-top: 2rem;">
     <h2>Upload New Plugin</h2>
-    <form action="plugins.php" method="POST" enctype="multipart/form-data" class="admin-form" style="max-width:100%">
+    <form action="plugins.php" method="POST" enctype="multipart/form-data" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <div class="form-group">
             <label for="plugin_zip">Plugin .zip file</label>
             <input type="file" name="plugin_zip" id="plugin_zip" class="form-control" accept=".zip" required>

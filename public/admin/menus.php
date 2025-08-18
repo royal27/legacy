@@ -1,12 +1,16 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 
 $conn = db_connect();
 
 // --- ACTION & FORM HANDLING ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // --- Add or Edit Menu Item ---
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     if (isset($_POST['save_menu_item'])) {
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name']);
@@ -18,21 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conn->begin_transaction();
         try {
-            if ($id > 0) { // Update existing item
+            if ($id > 0) {
                 $stmt = $conn->prepare("UPDATE menus SET name=?, link=?, parent_id=?, menu_type=?, display_order=? WHERE id=?");
                 $stmt->bind_param("ssisii", $name, $link, $parent_id, $menu_type, $display_order, $id);
                 $stmt->execute();
-                $stmt->close();
                 $menu_id = $id;
-            } else { // Insert new item
+            } else {
                 $stmt = $conn->prepare("INSERT INTO menus (name, link, parent_id, menu_type, display_order) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("ssisi", $name, $link, $parent_id, $menu_type, $display_order);
                 $stmt->execute();
                 $menu_id = $conn->insert_id;
-                $stmt->close();
             }
+            $stmt->close();
 
-            // Sync permissions
             $delete_perms_stmt = $conn->prepare("DELETE FROM menu_permissions WHERE menu_id = ?");
             $delete_perms_stmt->bind_param("i", $menu_id);
             $delete_perms_stmt->execute();
@@ -48,34 +50,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $conn->commit();
-            $_SESSION['success_message'] = 'Menu item saved successfully.';
+            $response = ['status' => 'success', 'message' => 'Menu item saved successfully.'];
         } catch (mysqli_sql_exception $e) {
             $conn->rollback();
-            $_SESSION['errors'][] = 'Failed to save menu item. Error: ' . $e->getMessage();
+            $response['errors'][] = 'Failed to save menu item.';
         }
-
-        header("Location: menus.php");
-        exit();
     }
 
-    // --- Delete Menu Item ---
     if (isset($_POST['delete_menu_item'])) {
         $id = (int)$_POST['id'];
-        // Note: This still doesn't handle re-parenting children.
-        // It will result in orphaned menu items if a parent is deleted.
         $stmt = $conn->prepare("DELETE FROM menus WHERE id = ?");
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        if($stmt->execute()){
+            $response = ['status' => 'success', 'message' => 'Menu item deleted.'];
+        } else {
+            $response['errors'][] = 'Failed to delete menu item.';
+        }
         $stmt->close();
-        $_SESSION['success_message'] = 'Menu item deleted.';
-        header("Location: menus.php");
-        exit();
     }
+
+    echo json_encode($response);
+    exit();
 }
 
 // --- DATA FETCHING ---
 $all_menus_flat = $conn->query("SELECT * FROM menus ORDER BY menu_type, display_order ASC, name ASC")->fetch_all(MYSQLI_ASSOC);
 $permissions = $conn->query("SELECT * FROM permissions ORDER BY permission_name ASC")->fetch_all(MYSQLI_ASSOC);
+csrf_generate_token();
 
 // Fetch permissions for each menu item
 $menu_permissions_map = [];
@@ -125,7 +126,8 @@ function display_admin_menu_list(array $menu_items) {
         echo '<div class="menu-item-actions">';
         echo '<button type="button" class="btn copy-link-btn" data-link="' . htmlspecialchars($item['link']) . '">Copy</button>';
         echo '<button type="button" class="btn btn-primary edit-menu-btn" ' . $data_attributes . '>Edit</button>';
-        echo '<form action="menus.php" method="POST" style="display:inline; margin-left: 5px;">';
+        echo '<form action="menus.php" method="POST" class="ajax-form" style="display:inline; margin-left: 5px;">';
+        echo csrf_input();
         echo '<input type="hidden" name="id" value="' . $item['id'] . '">';
         echo '<button type="submit" name="delete_menu_item" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>';
         echo '</form>';
@@ -165,7 +167,8 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box">
     <h3 id="menu-form-title">Add New Menu Item</h3>
-    <form id="menu-item-form" action="menus.php" method="POST" class="admin-form" style="max-width:100%">
+    <form id="menu-item-form" action="menus.php" method="POST" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <input type="hidden" name="id" id="menu-id" value="0">
         <div class="form-group">
             <label for="name">Name / Label</label>

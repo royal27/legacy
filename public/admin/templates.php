@@ -1,99 +1,14 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/models/setting.php';
 
-$conn = db_connect();
-
-// --- ACTION HANDLING ---
-if (isset($_GET['action'])) {
-    $action = $_GET['action'];
-    $theme = $_GET['theme'] ?? '';
-    $themes_dir = __DIR__ . '/../../themes';
-
-    // --- Activate Theme ---
-    if ($action === 'activate' && !empty($theme)) {
-        if (is_dir($themes_dir . '/' . $theme)) {
-            update_setting($conn, 'active_theme', $theme);
-            $_SESSION['success_message'] = "Theme '" . htmlspecialchars($theme) . "' activated.";
-        } else {
-            $_SESSION['errors'][] = "Theme directory not found.";
-        }
-        header("Location: templates.php");
-        exit();
-    }
-
-    // --- Delete Theme ---
-    if ($action === 'delete' && !empty($theme)) {
-        $active_theme_setting = get_all_settings($conn)['active_theme'] ?? 'default';
-        if ($theme === 'default' || $theme === $active_theme_setting) {
-            $_SESSION['errors'][] = 'Cannot delete the default or active theme.';
-        } else {
-            $theme_path = $themes_dir . '/' . $theme;
-            if (is_dir($theme_path)) {
-                // Simple recursive delete function
-                function delete_dir($dir) {
-                    if (!is_dir($dir)) return;
-                    $files = array_diff(scandir($dir), ['.','..']);
-                    foreach ($files as $file) {
-                        (is_dir("$dir/$file")) ? delete_dir("$dir/$file") : unlink("$dir/$file");
-                    }
-                    rmdir($dir);
-                }
-                delete_dir($theme_path);
-                $_SESSION['success_message'] = "Theme '" . htmlspecialchars($theme) . "' has been deleted.";
-            } else {
-                $_SESSION['errors'][] = "Theme directory not found.";
-            }
-        }
-        header("Location: templates.php");
-        exit();
-    }
-}
-
-// --- Upload Theme ---
-if (isset($_POST['upload_theme'])) {
-    if (isset($_FILES['theme_zip']) && $_FILES['theme_zip']['error'] === UPLOAD_ERR_OK) {
-        $file = $_FILES['theme_zip'];
-        if ($file['type'] === 'application/zip') {
-            $zip = new ZipArchive;
-            if ($zip->open($file['tmp_name']) === TRUE) {
-                // Check for theme.json in the root of the zip
-                if ($zip->locateName('theme.json') !== false) {
-                    $zip->extractTo(__DIR__ . '/../../themes/');
-                    $zip->close();
-                    $_SESSION['success_message'] = 'Theme uploaded and installed successfully.';
-                } else {
-                     $_SESSION['errors'][] = 'Uploaded zip file is not a valid theme (missing theme.json).';
-                }
-            } else {
-                $_SESSION['errors'][] = 'Failed to open the zip file.';
-            }
-        } else {
-            $_SESSION['errors'][] = 'Invalid file type. Please upload a .zip file.';
-        }
-    } else {
-        $_SESSION['errors'][] = 'An error occurred during file upload.';
-    }
-    header("Location: templates.php");
-    exit();
-}
-
-
-// --- DATA FETCHING ---
-$settings = get_all_settings($conn);
-$settings = get_all_settings($conn);
-$active_theme = $settings['active_theme'] ?? 'default';
-$conn->close();
-
-// --- THEME SCANNING ---
 function scan_themes() {
     $themes_dir = __DIR__ . '/../../themes';
     $themes = [];
     if (!is_dir($themes_dir)) return [];
-
     $subdirectories = glob($themes_dir . '/*', GLOB_ONLYDIR);
-
     foreach ($subdirectories as $dir) {
         $theme_json_path = $dir . '/theme.json';
         if (file_exists($theme_json_path)) {
@@ -101,11 +16,9 @@ function scan_themes() {
             if ($theme_data) {
                 $theme_id = basename($dir);
                 $themes[$theme_id] = $theme_data;
-                // Check for a screenshot
                 if (file_exists($dir . '/screenshot.png')) {
                     $themes[$theme_id]['screenshot'] = '/themes/' . $theme_id . '/screenshot.png';
                 } else {
-                    // A placeholder image for themes without a screenshot
                     $themes[$theme_id]['screenshot'] = 'https://via.placeholder.com/400x300.png?text=No+Preview';
                 }
             }
@@ -114,7 +27,73 @@ function scan_themes() {
     return $themes;
 }
 
+function delete_theme_dir($dir_path) {
+    if (!is_dir($dir_path)) return;
+    $it = new RecursiveDirectoryIterator($dir_path, RecursiveDirectoryIterator::SKIP_DOTS);
+    $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($files as $file) {
+        if ($file->isDir()) { rmdir($file->getRealPath()); } else { unlink($file->getRealPath()); }
+    }
+    rmdir($dir_path);
+}
+
+$conn = db_connect();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
+    if (isset($_POST['activate_theme'])) {
+        $theme_id = basename($_POST['theme_id']);
+        if (is_dir(__DIR__ . '/../../themes/' . $theme_id)) {
+            update_setting($conn, 'active_theme', $theme_id);
+            $response = ['status' => 'success', 'message' => "Theme '{$theme_id}' activated."];
+        } else {
+            $response['errors'][] = 'Theme not found.';
+        }
+    }
+
+    if (isset($_POST['delete_theme'])) {
+        $theme_id = basename($_POST['theme_id']);
+        $active_theme_setting = get_all_settings($conn)['active_theme'] ?? 'default';
+        if ($theme_id !== 'default' && $theme_id !== $active_theme_setting) {
+            $theme_path = __DIR__ . '/../../themes/' . $theme_id;
+            if (is_dir($theme_path)) {
+                delete_theme_dir($theme_path);
+                $response = ['status' => 'success', 'message' => "Theme '{$theme_id}' deleted."];
+            }
+        } else {
+            $response['errors'][] = 'Cannot delete the active or default theme.';
+        }
+    }
+
+    if (isset($_POST['upload_theme'])) {
+        if (isset($_FILES['theme_zip']) && $_FILES['theme_zip']['error'] === UPLOAD_ERR_OK) {
+            $zip = new ZipArchive;
+            if ($zip->open($_FILES['theme_zip']['tmp_name']) === TRUE) {
+                $theme_name = str_replace('.zip', '', basename($_FILES['theme_zip']['name']));
+                $install_path = __DIR__ . '/../../themes/' . $theme_name;
+                if (!is_dir($install_path) && $zip->locateName('theme.json') !== false) {
+                    $zip->extractTo($install_path);
+                    $response = ['status' => 'success', 'message' => "Theme '{$theme_name}' uploaded."];
+                } else {
+                    $response['errors'][] = 'Theme already exists or zip is invalid.';
+                }
+                $zip->close();
+            } else { $response['errors'][] = 'Failed to open zip.'; }
+        } else { $response['errors'][] = 'File upload error.'; }
+    }
+
+    echo json_encode($response);
+    exit();
+}
+
+$settings = get_all_settings($conn);
+$active_theme = $settings['active_theme'] ?? 'default';
 $available_themes = scan_themes();
+$conn->close();
+csrf_generate_token();
 ?>
 
 <?php require_once __DIR__ . '/../../templates/admin/header.php'; ?>
@@ -149,11 +128,17 @@ if (isset($_SESSION['errors'])) {
                 <p class="theme-description"><?php echo htmlspecialchars($theme['description']); ?></p>
                 <div class="theme-actions">
                     <?php if ($id !== $active_theme): ?>
-                        <a href="templates.php?action=activate&theme=<?php echo urlencode($id); ?>" class="btn btn-primary">Activate</a>
+                        <form action="templates.php" method="POST" class="ajax-form" style="display:inline;">
+                            <input type="hidden" name="theme_id" value="<?php echo htmlspecialchars($id); ?>">
+                            <button type="submit" name="activate_theme" class="btn btn-primary">Activate</button>
+                        </form>
                     <?php endif; ?>
 
-                    <?php if ($id !== 'default'): ?>
-                        <a href="templates.php?action=delete&theme=<?php echo urlencode($id); ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this theme? This action cannot be undone.')">Delete</a>
+                    <?php if ($id !== 'default' && $id !== $active_theme): ?>
+                         <form action="templates.php" method="POST" class="ajax-form" style="display:inline;">
+                            <input type="hidden" name="theme_id" value="<?php echo htmlspecialchars($id); ?>">
+                            <button type="submit" name="delete_theme" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
                     <?php endif; ?>
                 </div>
             </div>
@@ -163,7 +148,7 @@ if (isset($_SESSION['errors'])) {
 
 <div class="content-box" style="margin-top: 2rem;">
     <h2>Upload New Theme</h2>
-    <form action="templates.php" method="POST" enctype="multipart/form-data" class="admin-form" style="max-width:100%">
+    <form action="templates.php" method="POST" enctype="multipart/form-data" class="admin-form ajax-form" style="max-width:100%">
         <div class="form-group">
             <label for="theme_zip">Theme .zip file</label>
             <input type="file" id="theme_zip" name="theme_zip" class="form-control" accept=".zip" required>

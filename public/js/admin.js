@@ -3,7 +3,50 @@ document.addEventListener('DOMContentLoaded', function() {
     handleFooterLinks();
     handleMenuEditor();
     handleMenuCopy();
+    handleAdminAjaxForms();
 });
+
+function handleAdminAjaxForms() {
+    $(document).on('submit', 'form.ajax-form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var submitButton = form.find('button[type="submit"]');
+        var originalButtonText = submitButton.text();
+
+        submitButton.prop('disabled', true).text('Saving...');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message || 'Action completed successfully.');
+                    // Reload the page after a short delay to see changes
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    if (response.errors && Array.isArray(response.errors)) {
+                        response.errors.forEach(function(error) {
+                            toastr.error(error);
+                        });
+                    } else {
+                        toastr.error(response.message || 'An unknown error occurred.');
+                    }
+                    submitButton.prop('disabled', false).text(originalButtonText);
+                }
+            },
+            error: function() {
+                toastr.error('A server communication error occurred.');
+                submitButton.prop('disabled', false).text(originalButtonText);
+            }
+        });
+    });
+}
 
 function handleMenuCopy() {
     const adminContent = document.querySelector('.admin-main-content');

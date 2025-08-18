@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 
 $conn = db_connect();
@@ -13,11 +14,14 @@ if (!$role_id) {
 
 // --- FORM SUBMISSION LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
+
     $role_name = trim($_POST['role_name']);
     $description = trim($_POST['description']);
     $assigned_permissions = $_POST['permissions'] ?? [];
 
-    // Prevent editing of core role names
     if ($role_id <= 2) {
         $core_role_stmt = $conn->prepare("SELECT role_name FROM roles WHERE id = ?");
         $core_role_stmt->bind_param("i", $role_id);
@@ -25,28 +29,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
         $original_role_name = $core_role_stmt->get_result()->fetch_assoc()['role_name'];
         $core_role_stmt->close();
         if ($role_name !== $original_role_name) {
-            $_SESSION['errors'] = ["Cannot change the name of core roles."];
-            header("Location: edit_role.php?id=" . $role_id);
+            $response['errors'][] = 'Cannot change the name of core roles.';
+            echo json_encode($response);
             exit();
         }
     }
 
-    // Update role details
-    $stmt = $conn->prepare("UPDATE roles SET role_name = ?, description = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $role_name, $description, $role_id);
-    $stmt->execute();
-    $stmt->close();
-
-    // Sync permissions using a transaction
     $conn->begin_transaction();
     try {
-        // Delete old permissions for this role
+        $stmt = $conn->prepare("UPDATE roles SET role_name = ?, description = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $role_name, $description, $role_id);
+        $stmt->execute();
+        $stmt->close();
+
         $delete_stmt = $conn->prepare("DELETE FROM role_permissions WHERE role_id = ?");
         $delete_stmt->bind_param("i", $role_id);
         $delete_stmt->execute();
         $delete_stmt->close();
 
-        // Insert new permissions if any were selected
         if (!empty($assigned_permissions)) {
             $insert_stmt = $conn->prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)");
             foreach ($assigned_permissions as $permission_id) {
@@ -57,38 +57,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
             $insert_stmt->close();
         }
         $conn->commit();
-        $_SESSION['success_message'] = 'Role updated successfully!';
+        $response = ['status' => 'success', 'message' => 'Role updated successfully!'];
     } catch (mysqli_sql_exception $e) {
         $conn->rollback();
-        $_SESSION['errors'] = ['Failed to update permissions. Error: ' . $e->getMessage()];
+        $response['errors'][] = 'Failed to update permissions.';
     }
 
-    header("Location: edit_role.php?id=" . $role_id);
+    echo json_encode($response);
     exit();
 }
 
 // --- DATA FETCHING ---
-// Fetch role details
 $role_stmt = $conn->prepare("SELECT * FROM roles WHERE id = ?");
 $role_stmt->bind_param("i", $role_id);
 $role_stmt->execute();
 $role = $role_stmt->get_result()->fetch_assoc();
 $role_stmt->close();
 
-// Redirect if role doesn't exist
 if (!$role) {
     header("Location: roles.php");
     exit();
 }
 
-// Fetch all available permissions
 $all_permissions = $conn->query("SELECT * FROM permissions ORDER BY permission_name")->fetch_all(MYSQLI_ASSOC);
-
-// Fetch permission IDs currently assigned to this role
 $role_permissions_result = $conn->query("SELECT permission_id FROM role_permissions WHERE role_id = $role_id");
 $assigned_permission_ids = array_column($role_permissions_result->fetch_all(MYSQLI_ASSOC), 'permission_id');
-
 $conn->close();
+
+csrf_generate_token();
 ?>
 
 <?php require_once __DIR__ . '/../../templates/admin/header.php'; ?>
@@ -97,7 +93,8 @@ $conn->close();
 <a href="roles.php" class="btn" style="margin-bottom: 1rem; background-color: #7f8c8d;">&larr; Back to Roles List</a>
 
 <div class="content-box">
-    <form action="edit_role.php?id=<?php echo $role['id']; ?>" method="POST" class="admin-form" style="max-width:100%">
+    <form action="edit_role.php?id=<?php echo $role['id']; ?>" method="POST" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <?php
         if (isset($_SESSION['success_message'])) {
             echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success_message']) . '</div>';

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/includes/admin_check.php';
+require_once __DIR__ . '/../../src/includes/csrf.php';
 require_once __DIR__ . '/../../config/database.php';
 
 $conn = db_connect();
@@ -12,23 +13,23 @@ if (!$user_id_to_edit) {
 
 // --- FORM SUBMISSION LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user_roles'])) {
-    $assigned_roles = $_POST['roles'] ?? [];
+    csrf_validate_token();
+    $response = ['status' => 'error', 'errors' => []];
+    header('Content-Type: application/json');
 
-    // --- Security Check: Prevent admin from removing their own Admin role ---
+    $assigned_roles = $_POST['roles'] ?? [];
     $current_user_id = $_SESSION['user_id'];
+
     if ($user_id_to_edit == $current_user_id) {
         $admin_role_id_query = $conn->query("SELECT id FROM roles WHERE role_name = 'Admin' LIMIT 1");
         $admin_role_id = $admin_role_id_query->fetch_assoc()['id'];
-
-        // If the 'Admin' role checkbox was not submitted for the current admin, add it back.
         if (!in_array($admin_role_id, $assigned_roles)) {
-            $_SESSION['errors'] = ["You cannot remove your own Administrator role."];
-            header("Location: edit_user.php?id=" . $user_id_to_edit);
+            $response['errors'][] = 'You cannot remove your own Administrator role.';
+            echo json_encode($response);
             exit();
         }
     }
 
-    // Sync roles (delete all then re-insert)
     $conn->begin_transaction();
     try {
         $delete_stmt = $conn->prepare("DELETE FROM user_roles WHERE user_id = ?");
@@ -46,19 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user_roles']))
             $insert_stmt->close();
         }
         $conn->commit();
-        $_SESSION['success_message'] = 'User roles updated successfully!';
+        $response = ['status' => 'success', 'message' => 'User roles updated successfully! Page will reload.'];
     } catch (mysqli_sql_exception $e) {
         $conn->rollback();
-        $_SESSION['errors'] = ['Failed to update roles.'];
+        $response['errors'][] = 'Failed to update roles.';
     }
 
-    header("Location: users.php");
+    echo json_encode($response);
     exit();
 }
 
 
 // --- DATA FETCHING ---
-// Fetch user details
 $user_stmt = $conn->prepare("SELECT id, username, email FROM users WHERE id = ?");
 $user_stmt->bind_param("i", $user_id_to_edit);
 $user_stmt->execute();
@@ -70,14 +70,12 @@ if (!$user) {
     exit();
 }
 
-// Fetch all available roles
 $all_roles = $conn->query("SELECT * FROM roles ORDER BY role_name")->fetch_all(MYSQLI_ASSOC);
-
-// Fetch roles currently assigned to this user
 $user_roles_result = $conn->query("SELECT role_id FROM user_roles WHERE user_id = $user_id_to_edit");
 $assigned_role_ids = array_column($user_roles_result->fetch_all(MYSQLI_ASSOC), 'role_id');
-
 $conn->close();
+
+csrf_generate_token();
 ?>
 
 <?php require_once __DIR__ . '/../../templates/admin/header.php'; ?>
@@ -86,7 +84,8 @@ $conn->close();
 <a href="users.php" class="btn" style="margin-bottom: 1rem; background-color: #7f8c8d;">&larr; Back to Users List</a>
 
 <div class="content-box">
-    <form action="edit_user.php?id=<?php echo $user['id']; ?>" method="POST" class="admin-form" style="max-width:100%">
+    <form action="edit_user.php?id=<?php echo $user['id']; ?>" method="POST" class="admin-form ajax-form" style="max-width:100%">
+        <?php echo csrf_input(); ?>
         <?php
         if (isset($_SESSION['errors'])) {
             echo '<div class="alert alert-danger">' . htmlspecialchars(implode(', ', $_SESSION['errors'])) . '</div>';
