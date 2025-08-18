@@ -1,0 +1,13 @@
+/* Dark mode template - negru, violet, albastru */
+body {
+    background: linear-gradient(135deg, #000000, #7C4DFF, #2196F3);
+    color: #e0e0e0;
+}
+.button, input, select, textarea {
+    background: linear-gradient(90deg, #000000, #7C4DFF, #2196F3);
+    border: 2px solid #2196F3;
+    color: #e0e0e0;
+}
+.navbar, .sidebar {
+    background: rgba(20, 20, 40, 0.98);
+}

@@ -1,0 +1,13 @@
+/* Gradient template - violet, albastru, rosu */
+body {
+    background: linear-gradient(135deg, #7C4DFF, #2196F3, #E53935);
+    color: #fff;
+}
+.button, input, select, textarea {
+    background: linear-gradient(90deg, #7C4DFF, #2196F3, #E53935);
+    border: 2px solid #7C4DFF;
+    color: #fff;
+}
+.navbar, .sidebar {
+    background: rgba(60, 30, 80, 0.95);
+}
